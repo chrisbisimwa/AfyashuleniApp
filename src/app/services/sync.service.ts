@@ -27,7 +27,52 @@ export class SyncService {
       const schools = await lastValueFrom(schoolsObservable);
       this.dataService.set('schools', schools);
 
+      const problemsPromise = this.apiService.getProblems(); // Stockez la Promise
+      const problemsObservable = await problemsPromise; // Récupérez l'Observable
+      const problems = await lastValueFrom(problemsObservable);
+      this.dataService.set('problems', problems);
 
+
+
+      const schs = await this.dataService.get('schools');
+
+      if(schs.data.length > 0) {
+        let clas = [];
+        for (const school of schs.data) {
+          const classesPromise = this.apiService.getClasses(school.id); // Stockez la Promise
+          const classesObservable = await classesPromise; // Récupérez l'Observable
+          const classes: any = await lastValueFrom(classesObservable);
+          for (const c of classes.data) {
+            clas.push(c);
+          }
+          
+        }
+
+        this.dataService.set(`classes`, clas);
+      }
+
+      const schYr = await this.dataService.get('schoolYears');
+      if(schYr.data.length > 0) {
+        let ht = [];
+        for (const schoolYear of schYr.data) {
+          const studentHistoryPromise = this.apiService.getStudentHistory(schoolYear.id); // Stockez la Promise
+          const studentHistoryObservable = await studentHistoryPromise; // Récupérez l'Observable
+          const studentHistory: any = await lastValueFrom(studentHistoryObservable);
+          for (const h of studentHistory.data) {
+            ht.push(h);
+          }
+          
+        }
+
+        this.dataService.set(`student-history`, ht);
+      }
+
+      const studentsPromise = this.apiService.getStudents(); // Stockez la Promise
+      const studentsObservable = await studentsPromise; // Récupérez l'Observable
+      const students = await lastValueFrom(studentsObservable);
+      this.dataService.set('students', students);
+      
+     
       // Synchronisation des autres ressources...
     }
   }

@@ -1,0 +1,49 @@
+<ion-header class="ion-no-border" mode="ios">
+  <ion-toolbar style="--background: var(--ion-color-primary)">
+    <ion-title style="color: white;letter-spacing: 1px;font-family: 'semi-bold';">Ecoles</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<!-- todo: add elasticsearch support -->
+<ion-content >
+  <div class="main_content_div">
+    <ion-label class="title_lbl">Toutes les écoles</ion-label>
+
+    <ion-refresher [disabled]="plt.is('desktop')" slot="fixed" (ionRefresh)="fetchSchools($event)">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+  
+    <div class="notification_div">
+      <ion-searchbar (ionChange)="search($event.target.value)" debounce="100" animated="true" placeholder="Recherche..."> </ion-searchbar>
+    </div>
+    
+    <ion-list>
+      <ion-item-sliding button detail="true" *ngFor="let school of schools" #slidingItem>
+        <ion-item button (click)="view(school.id)">
+          <ion-label>
+            <ion-text color="primary">
+              <h2>{{school.name}}</h2>
+            </ion-text>
+            <p *ngIf="school.contactPerson">{{school.contactPerson}}</p>
+            <p><b><span *ngIf="school.contactPhone">Phone: {{school.contactPhone}},</span> <span *ngIf="school.contactEmail">Email: {{school.contactEmail}}</span> </b></p>
+          </ion-label>
+        </ion-item>
+        <ion-item-options side="end">
+          <ion-item-option color="primary" (click)="edit(slidingItem, school)"> Modifier</ion-item-option>
+          <ion-item-option color="danger" (click)="delete(school)"> Supprimer</ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+  
+    <ion-item *ngIf="!schools?.length">
+      <ion-label> No sites found. </ion-label>
+    </ion-item>
+  
+    
+  </div>
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="new()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

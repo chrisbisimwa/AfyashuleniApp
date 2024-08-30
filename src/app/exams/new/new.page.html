@@ -1,0 +1,90 @@
+<ion-header class="ion-no-border" mode="ios">
+  <ion-toolbar style="--background: var(--ion-color-primary)">
+    <ion-buttons slot="start">
+      <ion-back-button color="light"></ion-back-button>
+    </ion-buttons>
+    <ion-title style="color: white;letter-spacing: 1px;font-family: 'semi-bold';">Examen</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button [disabled]="!isReadyToSave" (click)="save()" color="light">
+        <span *ngIf="platform.is('ios')">Done</span>
+        <ion-icon name="checkmark" *ngIf="!platform.is('ios')"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="main_content_div">
+    <ion-label class="title_lbl">ajouter ou modifier un examen</ion-label>
+    <ion-list>
+
+      <ion-item-group>
+        <ion-item-divider>
+          <ion-label> 1. Séléctionner l'élève </ion-label>
+        </ion-item-divider>
+
+        <ion-item>
+          <ion-label>Année Scolaire</ion-label>
+          <ion-select [(ngModel)]="selectedYear" (ionChange)="fetchSchools($event)">
+            <ion-select-option *ngFor="let year of schoolYears" [value]="year.id">
+              {{ year.year }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>Ecole</ion-label>
+          <ion-select [(ngModel)]="selectedSchool" (ionChange)="fetchClasses($event)">
+            <ion-select-option *ngFor="let school of schools" [value]="school.id">
+              {{ school.name }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>Classe</ion-label>
+          <ion-select [(ngModel)]="selectedClasse" (ionChange)="fetchStudents($event)">
+            <ion-select-option *ngFor="let classe of classes" [value]="classe.id">
+              {{ classe.name }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>Elève</ion-label>
+          <ion-select [(ngModel)]="selectedStudent" (ionChange)="readyForNexStep($event)">
+            <ion-select-option *ngFor="let student of students" [value]="student.id">
+              {{ student.first_name }} {{ student.last_name }} {{ student.surname }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-item-group>
+
+      
+
+      <div *ngIf="selectedStudent">
+        <ion-item-group *ngFor="let type of examTypes">
+          <ion-item-divider>
+            <ion-label> 3. Examen ({{ ucfirst( type.replace('_', ' ')) }}) </ion-label>
+          </ion-item-divider>
+
+
+
+          <ion-item *ngFor="let question of questionsMedecin[type]">
+            <ion-label>{{ question.label }}</ion-label>
+            <ion-input *ngIf="!question.options" [(ngModel)]="answers[question.label]"></ion-input>
+            <ion-select *ngIf="question.options" [(ngModel)]="answers[question.label]">
+              <ion-select-option *ngFor="let option of question.options" [value]="option">
+                {{ option }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+        </ion-item-group>
+
+      </div>
+    </ion-list>
+  </div>
+
+</ion-content>

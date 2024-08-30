@@ -1,1 +1,15 @@
-
+ion-tabs {
+    ion-fab {
+        margin-bottom: env(safe-area-inset-bottom); /* fix notch ios*/
+        ion-fab-button {
+            --box-shadow: none;
+        }
+    }
+    ion-tab-bar {
+        --border: 0;
+        --background: var(--ion-color-light);
+      
+        
+        
+    }
+}

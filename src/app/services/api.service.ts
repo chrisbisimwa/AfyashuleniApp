@@ -29,6 +29,25 @@ export class ApiService {
     return this.http.get(`${this.apiUrl}/schools`, headers);
   }
 
+  async getProblems() {
+    const headers = await this.getHeaders();
+    return this.http.get(`${this.apiUrl}/problems`, headers);
+  }
+
+  async getClasses(schoolId: number) {
+    const headers = await this.getHeaders();
+    return this.http.get(`${this.apiUrl+'/schools/'+schoolId}/classes`, headers);
+  }
+
+  async getStudentHistory(schoolYearId: number) {
+    const headers = await this.getHeaders();
+    return this.http.get(`${this.apiUrl+'/school-years/'+schoolYearId}/student-histories`, headers);
+  }
+
+  async getStudents(){
+    const headers = await this.getHeaders();
+    return this.http.get(`${this.apiUrl}/students`, headers);
+  }
  
 
   // Méthodes similaires pour les autres ressources...
