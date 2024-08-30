@@ -25,6 +25,15 @@ export class AuthService {
     );
   }
 
+  private async getHeaders() {
+    const token = await this.dataService.get('authToken');
+    return {
+      headers: new HttpHeaders({
+        Authorization: `Bearer ${token}`,
+      }),
+    };
+  }
+
   logout() {
     this.dataService.remove(this.STORAGE_KEY);
     this.isLoggedInSubject.next(false);
@@ -54,13 +63,13 @@ export class AuthService {
   }
 
   async getUser() {
-    const token = await this.getToken();
-    if (!token) {
-      return null;  // Handle case where token is not available
-    }
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-    return this.http.get(`${this.apiUrl}/user`, { headers });
+    const headers = await this.getHeaders();
+    return this.http.get(`${this.apiUrl}/user`, headers);
   }
+
+  
+
+
 
   /* async hasPermission(permission: string): Promise<boolean> {
     const user = await this.getUser();

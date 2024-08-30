@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 import { DataService } from './data.service';
 import { lastValueFrom } from 'rxjs';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +10,9 @@ import { lastValueFrom } from 'rxjs';
 export class SyncService {
   constructor(
     private apiService: ApiService,
-    private dataService: DataService
+    private dataService: DataService,
+    private authService: AuthService
+
   ) { }
 
   async syncData() {
@@ -71,6 +74,11 @@ export class SyncService {
       const studentsObservable = await studentsPromise; // Récupérez l'Observable
       const students = await lastValueFrom(studentsObservable);
       this.dataService.set('students', students);
+
+      const userPromise = this.authService.getUser(); // Stockez la Promise
+      const userObservable = await userPromise; // Récupérez l'Observable
+      const user = await lastValueFrom(userObservable);
+      this.dataService.set('user', user);
       
      
       // Synchronisation des autres ressources...

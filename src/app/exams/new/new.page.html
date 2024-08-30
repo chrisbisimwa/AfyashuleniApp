@@ -6,7 +6,7 @@
     <ion-title style="color: white;letter-spacing: 1px;font-family: 'semi-bold';">Examen</ion-title>
 
     <ion-buttons slot="end">
-      <ion-button [disabled]="!isReadyToSave" (click)="save()" color="light">
+      <ion-button  id="open-modal" expand="block" (click)="save()" color="light">
         <span *ngIf="platform.is('ios')">Done</span>
         <ion-icon name="checkmark" *ngIf="!platform.is('ios')"></ion-icon>
       </ion-button>
@@ -54,14 +54,14 @@
         <ion-item>
           <ion-label>Elève</ion-label>
           <ion-select [(ngModel)]="selectedStudent" (ionChange)="readyForNexStep($event)">
-            <ion-select-option *ngFor="let student of students" [value]="student.id">
+            <ion-select-option *ngFor="let student of students" [value]="student">
               {{ student.first_name }} {{ student.last_name }} {{ student.surname }}
             </ion-select-option>
           </ion-select>
         </ion-item>
       </ion-item-group>
 
-      
+
 
       <div *ngIf="selectedStudent">
         <ion-item-group *ngFor="let type of examTypes">
@@ -72,13 +72,16 @@
 
 
           <ion-item *ngFor="let question of questionsMedecin[type]">
-            <ion-label>{{ question.label }}</ion-label>
-            <ion-input *ngIf="!question.options" [(ngModel)]="answers[question.label]"></ion-input>
-            <ion-select *ngIf="question.options" [(ngModel)]="answers[question.label]">
-              <ion-select-option *ngFor="let option of question.options" [value]="option">
-                {{ option }}
-              </ion-select-option>
-            </ion-select>
+            <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+           
+              <ion-input *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')" [(ngModel)]="answers[question.label]"
+                placeholder="Entrez la réponse"></ion-input>
+              <ion-select *ngIf="question.options && (question.gender===studentGender || question.gender==='both')" [(ngModel)]="answers[question.label]"
+                placeholder="Sélectionnez une option">
+                <ion-select-option *ngFor="let option of question.options" [value]="option">
+                  {{ option }}
+                </ion-select-option>
+              </ion-select>
           </ion-item>
 
         </ion-item-group>
@@ -86,5 +89,37 @@
       </div>
     </ion-list>
   </div>
+
+  <ion-modal #modal trigger="open-modal" [presentingElement]="presentingElement">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>4. Résumé de l'examen et évaluations</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="modal.dismiss()">Close</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <ion-list *ngFor="let examType of examTypes">
+          <ion-item-divider>
+            <ion-label>
+              {{ examType.replace('_', ' ').toUpperCase() }}
+            </ion-label>
+          </ion-item-divider>
+
+          <ion-item *ngFor="let questionKey of getKeys(groupedAnswers[examType])">
+            <ion-label>
+              <h2> {{ questionKey }} :</h2>
+              <p>{{ groupedAnswers[examType][questionKey] }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+
+
+
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 
 </ion-content>

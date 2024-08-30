@@ -48,7 +48,8 @@ export class ApiService {
     const headers = await this.getHeaders();
     return this.http.get(`${this.apiUrl}/students`, headers);
   }
- 
+
+  
 
   // Méthodes similaires pour les autres ressources...
 
