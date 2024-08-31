@@ -20,6 +20,10 @@ const routes: Routes = [
         loadChildren: () => import('../exams/exams.module').then(m => m.ExamsPageModule)
       },
       {
+        path: 'account',
+        loadChildren: () => import('../account/account.module').then( m => m.AccountPageModule)
+      },
+      {
         path: '',
         redirectTo: '/home',
         pathMatch: 'full'
