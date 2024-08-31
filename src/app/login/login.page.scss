@@ -1,0 +1,116 @@
+/* .padding {
+    padding: 5%!important;
+}
+
+ion-content {
+    // --ion-background-color: linear-gradient(#6DD5FA, #2980B9);
+    --ion-background-color: linear-gradient(#00c6ff, #0072ff);
+    // --ion-background-color: linear-gradient(#485563, #29323c);
+}
+ion-item {
+    --ion-background-color: transparent!important;
+}
+.flex {
+    display: flex;
+    justify-content: space-between;
+} */
+
+.logo ion-icon{
+    font-size: 9em;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.logo img{
+    height: 80px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.logo {
+    position: relative;
+    height: 200px;
+}
+
+
+
+
+.main_content_div {
+    padding: 16px;
+    padding-top: 60px;
+
+    ion-label {
+        display: block;
+    }
+
+    .welcome_lbl {
+        font-size: 26px;
+        font-family: 'semi-bold';
+        margin-bottom: 50px;
+    }
+
+    ion-grid {
+        padding: 0px;
+
+        .btn_div {
+            border: 1px solid #77869E;
+            border-radius: 3px;
+            padding-top: 7px;
+            padding-bottom: 7px;
+
+            img {
+                width: 20px;
+                display: block;
+                margin: auto;
+            }
+        }
+    }
+
+    ion-item {
+        --padding-start: 0px;
+        margin-top: 16px;
+    }
+
+    .flex_div {
+        margin-top: 20px;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        align-items: center;
+
+        .check_flex{
+            display: flex;
+            align-items: center;
+
+            ion-label {
+                font-size: 14px;
+                color: #77869E;
+                margin-left: 10px;
+            }
+        }
+
+        .flex_lbl {
+            color: var(--ion-color-primary);
+            font-size: 13px;
+            font-family: 'semi-bold';
+        }
+    }
+
+    ion-button {
+        --border-radius: 3px;
+        font-family: 'semi-bold';
+    }
+
+    .last_lbl {
+        color: #77869E;
+        margin-top: 20px;
+        text-align: center;
+
+        span {
+            color: var(--ion-color-primary);
+            font-family: 'semi-bold';
+        }
+    }
+}
