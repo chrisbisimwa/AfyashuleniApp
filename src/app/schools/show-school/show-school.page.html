@@ -1,0 +1,62 @@
+<ion-header class="ion-no-border" mode="ios">
+  <ion-toolbar style="--background: var(--ion-color-primary)">
+    <ion-buttons slot="start">
+      <ion-back-button color="light"></ion-back-button>
+    </ion-buttons>
+    <ion-title style="color: white;letter-spacing: 1px;font-family: 'semi-bold';">Ecole</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content *ngIf="school">
+  <div class="main_content_div">
+    <ion-label class="title_lbl">school Details</ion-label>
+    <ion-list>
+      <ion-item>
+        <ion-label position="fixed">Code</ion-label>
+        <div item-content>
+          <span id="code-content">{{school.id}}</span>
+        </div>
+      </ion-item>
+      <ion-item>
+        <ion-label>Nom</ion-label>
+        <div item-content>
+          <a>{{school.name}}</a>
+        </div>
+      </ion-item>
+      <ion-item>
+        <ion-label position="fixed">Adresse</ion-label>
+        <div item-content>
+          <span id="designation-content">{{school.address}}</span>
+        </div>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="fixed">Créée par</ion-label>
+        <div item-content>
+          <span id="reportedAt-content" *ngIf="school.reportedAt">{{school.latitude }}</span>
+        </div>
+      </ion-item>
+
+
+    </ion-list>
+
+    <google-map #myGoogleMap height="430px" width="100%" [zoom]="zoom" [center]="center" [options]="options"
+      (mapClick)="eventHandler($event,'mapClick')" (mapDblclick)="eventHandler($event,'mapDblclick')"
+      (mapDrag)="eventHandler($event,'mapDrag')" (mapDragend)="eventHandler($event,'mapDragend')"
+      (mapRightclick)="eventHandler($event,'mapRightclick')"
+      (positionChanged)="eventHandler($event,'marker_positionChanged')"
+      (zoomChanged)="eventHandler($event,'zoomChanged')">
+
+      <map-marker #markerElem="mapMarker" *ngFor="let marker of markers" [position]="marker.position"
+        [label]="marker.label" [title]="marker.title" [options]="marker.options"
+        (mapDrag)="eventHandler($event,'mapDragMarker')" (mapDragend)="eventHandler($event,'mapDragend')">
+      </map-marker>
+
+    </google-map>
+
+
+    <ion-button expand="block" color="primary" (click)="open(school)">Modifier</ion-button>
+    <ion-button expand="block" color="danger" (click)="deleteModal(school)">Supprimer</ion-button>
+  </div>
+
+</ion-content>

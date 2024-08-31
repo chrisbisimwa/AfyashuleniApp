@@ -43,11 +43,11 @@ export class SchoolsPage {
  }
 
  async new() {
-  await this.navController.navigateForward('/tabs/site/new');
+  await this.navController.navigateForward('/schools/new');
 }
 
  async view(id:any) {
-  await this.navController.navigateForward('/tabs/site/' + id + '/view');
+  await this.navController.navigateForward('/schools/' + id + '/view');
 }
 async edit(item: IonItemSliding, site: any) {
   await this.navController.navigateForward('/tabs/entities/customer/' + site.id + '/edit');

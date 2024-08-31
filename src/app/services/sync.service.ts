@@ -19,6 +19,24 @@ export class SyncService {
     const isConnected = navigator.onLine;
 
     if (isConnected) {
+
+      //verifie if there is schools to save to remote database (schools that do not have id and createdDate)
+      this.dataService.get('schools').then(async (data) => {
+        if (data && data.data) {
+          for (let ds of data.data) {
+            if (!ds.id && !ds.created_at) {
+              const schoolPromise = this.apiService.postSchool(ds); // Stockez la Promise
+              const schoolObservable = await schoolPromise; // Récupérez l'Observable
+              const school = await lastValueFrom(schoolObservable);
+              console.log(school);
+              
+            }
+          }
+        }
+      })
+
+
+
       const schoolYearsPromise = this.apiService.getSchoolYears(); // Stockez la Promise
       const schoolYearsObservable = await schoolYearsPromise; // Récupérez l'Observable
       const schoolYears = await lastValueFrom(schoolYearsObservable);
@@ -39,23 +57,26 @@ export class SyncService {
 
       const schs = await this.dataService.get('schools');
 
-      if(schs.data.length > 0) {
+      if (schs.data.length > 0) {
         let clas = [];
         for (const school of schs.data) {
-          const classesPromise = this.apiService.getClasses(school.id); // Stockez la Promise
-          const classesObservable = await classesPromise; // Récupérez l'Observable
-          const classes: any = await lastValueFrom(classesObservable);
-          for (const c of classes.data) {
-            clas.push(c);
+          if (school.id && school.created_at) {
+            const classesPromise = this.apiService.getClasses(school.id); // Stockez la Promise
+            const classesObservable = await classesPromise; // Récupérez l'Observable
+            const classes: any = await lastValueFrom(classesObservable);
+            for (const c of classes.data) {
+              clas.push(c);
+            }
           }
-          
+
+
         }
 
         this.dataService.set(`classes`, clas);
       }
 
       const schYr = await this.dataService.get('schoolYears');
-      if(schYr.data.length > 0) {
+      if (schYr.data.length > 0) {
         let ht = [];
         for (const schoolYear of schYr.data) {
           const studentHistoryPromise = this.apiService.getStudentHistory(schoolYear.id); // Stockez la Promise
@@ -64,7 +85,7 @@ export class SyncService {
           for (const h of studentHistory.data) {
             ht.push(h);
           }
-          
+
         }
 
         this.dataService.set(`student-history`, ht);
@@ -79,8 +100,8 @@ export class SyncService {
       const userObservable = await userPromise; // Récupérez l'Observable
       const user = await lastValueFrom(userObservable);
       this.dataService.set('user', user);
-      
-     
+
+
       // Synchronisation des autres ressources...
     }
   }

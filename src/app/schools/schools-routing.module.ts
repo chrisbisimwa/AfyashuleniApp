@@ -6,6 +6,14 @@ const routes: Routes = [
   {
     path: '',
     component: SchoolsPage,
+  },
+  {
+    path: ':id/view',
+    loadChildren: () => import('./show-school/show-school.module').then( m => m.ShowSchoolPageModule)
+  },
+  {
+    path: 'new',
+    loadChildren: () => import('./create-school/create-school.module').then( m => m.CreateSchoolPageModule)
   }
 ];
 
