@@ -28,14 +28,23 @@ export class SyncService {
               const schoolPromise = this.apiService.postSchool(ds); // Stockez la Promise
               const schoolObservable = await schoolPromise; // Récupérez l'Observable
               const school = await lastValueFrom(schoolObservable);
-              console.log(school);
               
             }
           }
         }
-      })
+      });
 
-
+      this.dataService.get('classes').then(async (data) => {
+        if (data ) {
+          for (let ds of data) {
+            if (!ds.id && !ds.created_at) {
+              const classPromise = this.apiService.postClass(ds); // Stockez la Promise
+              const classObservable = await classPromise; // Récupérez l'Observable
+              const classs = await lastValueFrom(classObservable);
+            }
+          }
+        }
+      });
 
       const schoolYearsPromise = this.apiService.getSchoolYears(); // Stockez la Promise
       const schoolYearsObservable = await schoolYearsPromise; // Récupérez l'Observable

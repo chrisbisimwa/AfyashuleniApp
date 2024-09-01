@@ -14,6 +14,10 @@ const routes: Routes = [
   {
     path: 'new',
     loadChildren: () => import('./create-school/create-school.module').then( m => m.CreateSchoolPageModule)
+  },
+  {
+    path: 'classe/:id/view',
+    loadChildren: () => import('./show-classe/show-classe.module').then( m => m.ShowClassePageModule)
   }
 ];
 

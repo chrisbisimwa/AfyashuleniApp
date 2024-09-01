@@ -34,6 +34,11 @@ export class ApiService {
     return this.http.post(`${this.apiUrl}/schools`, data, headers);
   }
 
+  async postClass(data: any) {
+    const headers = await this.getHeaders();
+    return this.http.post(`${this.apiUrl}/classes`, data, headers);
+  }
+
   async getProblems() {
     const headers = await this.getHeaders();
     return this.http.get(`${this.apiUrl}/problems`, headers);

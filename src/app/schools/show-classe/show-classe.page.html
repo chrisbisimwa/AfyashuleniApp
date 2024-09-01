@@ -7,44 +7,38 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content *ngIf="school">
+<ion-content *ngIf="classe">
   <div class="main_content_div">
-    <ion-label class="title_lbl">school Details</ion-label>
+    <ion-label class="title_lbl">Details de la classe</ion-label>
     <ion-list>
       <ion-item>
         <ion-label >Code</ion-label>
         <div item-content>
-          <span id="code-content">{{school.id ?? "-"}}</span>
+          <span id="code-content">{{classe.id ?? "-"}}</span>
         </div>
       </ion-item>
       <ion-item>
-        <ion-label>Nom</ion-label>
+        <ion-label>Classe</ion-label>
         <div item-content>
-          <span>{{school.name}}</span>
+          <span>{{classe.name}}</span>
         </div>
       </ion-item>
       <ion-item>
-        <ion-label >Adresse</ion-label>
+        <ion-label>Ecole</ion-label>
         <div item-content>
-          <span id="designation-content">{{school.address}}</span>
+          <span>{{shcoolName}}</span>
         </div>
       </ion-item>
 
-      <ion-item>
-        <ion-label position="fixed">Créée par</ion-label>
-        <div item-content>
-          <span id="reportedAt-content" *ngIf="school.reportedAt">{{school.latitude }}</span>
-        </div>
-      </ion-item>
 
       <ion-item-group>
         <ion-item-divider>
           <ion-label>
-            <h2>Liste des classes</h2>
+            <h2>Liste d'élèves</h2>
           </ion-label>
         </ion-item-divider>
-        <ion-item *ngFor="let classe of classes" (click)="showClasse(classe)">
-          <ion-label>{{classe.name}}</ion-label>
+        <ion-item *ngFor="let student of students" (click)="showStudent(student)">
+          <ion-label>{{student.first_name}} {{student.last_name }} {{student.surname}}</ion-label>
         </ion-item>
       </ion-item-group>
 
@@ -53,9 +47,9 @@
 
 
 
-    <ion-button expand="block" color="Medium" id="open-modal">Ajouter une classe</ion-button>
-    <ion-button expand="block" color="primary" (click)="open(school)">Modifier</ion-button>
-    <ion-button expand="block" color="danger" (click)="deleteModal(school)">Supprimer</ion-button>
+    <ion-button expand="block" color="Medium" id="open-modal">Ajouter un élève</ion-button>
+    <ion-button expand="block" color="primary" (click)="open(classe)">Modifier</ion-button>
+    <ion-button expand="block" color="danger" (click)="deleteModal(classe)">Supprimer</ion-button>
   </div>
 
   <ion-modal trigger="open-modal" (willDismiss)="onWillDismiss($event)">
@@ -65,7 +59,7 @@
           <ion-buttons slot="start">
             <ion-button (click)="cancel()">Cancel</ion-button>
           </ion-buttons>
-          <ion-title>Ajouter une nouvelle classse</ion-title>
+          <ion-title>Ajouter un élève</ion-title>
           <ion-buttons slot="end">
             <ion-button (click)="confirm()" [strong]="true">Confirm</ion-button>
           </ion-buttons>
@@ -74,11 +68,11 @@
       <ion-content class="ion-padding">
         <ion-item>
           <ion-input
-            label="Entrez le nom de la classe"
+            label="Entrez le nom l\'élève"
             labelPlacement="stacked"
             type="text"
-            placeholder="Nom de la classe"
-            [(ngModel)]="className"
+            placeholder="Nom de l\'élève"
+            [(ngModel)]="studentName"
           ></ion-input>
         </ion-item>
       </ion-content>
