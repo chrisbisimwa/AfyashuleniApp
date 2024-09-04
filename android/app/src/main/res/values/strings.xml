@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Afya Shuleni</string>
+    <string name="title_activity_main">Afya Shuleni</string>
+    <string name="package_name">io.kivutech.afyashuleni</string>
+    <string name="custom_url_scheme">io.kivutech.afyashuleni</string>
+</resources>

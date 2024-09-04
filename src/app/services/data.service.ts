@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { Preferences } from '@capacitor/preferences';
+
 
 @Injectable({
   providedIn: 'root'
@@ -6,17 +8,20 @@ import { Injectable } from '@angular/core';
 export class DataService {
   private readonly STORAGE_PREFIX = 'myApp_'; // Optional prefix for your app's data
 
-  constructor() {}
+  constructor(
+  ) {}
 
   // Set a key/value
-  public set(key: string, value: any) {
+  public async set(key: string, value: any) {
     const storageKey = this.STORAGE_PREFIX + key;
-    localStorage.setItem(storageKey, JSON.stringify(value));
+    /* localStorage.setItem(storageKey, JSON.stringify(value)); */
+
+    await Preferences.set({ key: storageKey, value: JSON.stringify(value) });
   }
 
   // Get a value from storage
   public async get(key: string): Promise<any | null> {
-    const storageKey = this.STORAGE_PREFIX + key;
+    /* const storageKey = this.STORAGE_PREFIX + key;
     const item = localStorage.getItem(storageKey);
     if (!item) {
       return null;
@@ -26,7 +31,21 @@ export class DataService {
     } catch (error) {
       console.error(`Error parsing data from localStorage key '${storageKey}':`, error);
       return null;
-    }
+    } */
+
+      const storageKey = this.STORAGE_PREFIX + key;
+      console.log('storageKey', storageKey);
+      const item = await Preferences
+      .get({ key: storageKey });
+      if (!item.value) {
+        return null;
+      }
+      try {
+        return JSON.parse(item.value);
+      } catch (error) {
+        console.error(`Error parsing data from Capacitor Storage key '${storageKey}':`, error);
+        return null;
+      }
   }
 
   // search for a value in storage

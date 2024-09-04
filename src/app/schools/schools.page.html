@@ -19,7 +19,7 @@
     
     <ion-list>
       <ion-item-sliding button detail="true" *ngFor="let school of schools" #slidingItem>
-        <ion-item button (click)="view(school.id)">
+        <ion-item button (click)="view(school)">
           <ion-label>
             <ion-text color="primary">
               <h2>{{school.name}}</h2>
@@ -30,13 +30,13 @@
         </ion-item>
         <ion-item-options side="end">
           <ion-item-option color="primary" (click)="edit(slidingItem, school)"> Modifier</ion-item-option>
-          <ion-item-option color="danger" (click)="delete(school)"> Supprimer</ion-item-option>
+          <ion-item-option color="danger" (click)="deleteSchool(school)"> Supprimer</ion-item-option>
         </ion-item-options>
       </ion-item-sliding>
     </ion-list>
   
     <ion-item *ngIf="!schools?.length">
-      <ion-label> No sites found. </ion-label>
+      <ion-label> Aucunne école trouvée. </ion-label>
     </ion-item>
   
     

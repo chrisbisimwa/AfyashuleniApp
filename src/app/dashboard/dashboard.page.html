@@ -1,17 +1,81 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 1
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content>
+  <div class="main_content_div">
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 1</ion-title>
-    </ion-toolbar>
-  </ion-header>
+    <div class="gradient_div">
+      <div class="abs_round"></div>
+      <div class="flex_header">
+        <ion-label>Tableau de bord</ion-label>
+        <!-- <ion-icon name="notifications"></ion-icon> -->
+      </div>
+    </div>
 
-  <app-explore-container name="Tab 1 page"></app-explore-container>
+
+    <div class="container_div">
+
+      <div class="white_box">
+        <div class="flex_div">
+          <ion-label class="bold_lbl" (click)="new()">Ajouter un examen</ion-label>
+        </div>
+
+        
+            <div>
+              <div style="display: block">
+                
+              </div>
+            </div>
+         
+
+
+
+      </div>
+
+
+      <br>
+      <ion-label class="title_lbl">Details</ion-label>
+
+
+      <div class="shopping_div">
+        <div class="color_box" [ngStyle]="{'backgroundColor' : '#d1e7eb'}">
+          <img src="assets/imgs/notification.png">
+        </div>
+        <div class="content_div">
+          <ion-label class="name">This week</ion-label>
+          <!-- <ion-label class="date">17 Monday June</ion-label> -->
+        </div>
+        <ion-label class="reported">0 Reported</ion-label>
+        <ion-label class="resolved">0 Resolved</ion-label>
+        
+      </div>
+
+      <div class="shopping_div">
+        <div class="color_box" [ngStyle]="{'backgroundColor' : '#d1e7eb'}">
+          <img src="assets/imgs/notification.png">
+        </div>
+        <div class="content_div">
+          <ion-label class="name">This month</ion-label>
+          <!-- <ion-label class="date">17 Monday June</ion-label> -->
+        </div>
+        <ion-label class="reported">0 Reported</ion-label>
+        <ion-label class="resolved">0 Resolved</ion-label>
+        
+      </div>
+
+      <div class="shopping_div">
+        <div class="color_box" [ngStyle]="{'backgroundColor' : '#d1e7eb'}">
+          <img src="assets/imgs/notification.png">
+        </div>
+        <div class="content_div">
+          <ion-label class="name">This year</ion-label>
+          <!-- <ion-label class="date">17 Monday June</ion-label> -->
+        </div>
+        <ion-label class="reported">0 Reported</ion-label>
+        <ion-label class="resolved">0 Resolved</ion-label>
+        
+      </div>
+
+    </div>
+    <div>
+    </div>
+  </div>
+
 </ion-content>

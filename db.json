@@ -1,0 +1,23 @@
+{
+    "database": "afyashuleni-db",
+    "version": 1,
+    "encrypted": false,
+    "mode": "full",
+    "tables": [
+      {
+        "name": "schools",
+        "schema": [
+          { "column": "id", "value": "INTEGER PRIMARY KEY NOT NULL" },
+          { "column": "name", "value": "TEXT NOT NULL" },
+          { "column": "address", "value": "TEXT NOT NULL" },
+          { "column": "latitude", "value": "TEXT NOT NULL" },
+          { "column": "longitude", "value": "TEXT NOT NULL" },
+          { "column": "created_at", "value": "TEXT" },
+          { "column": "updated_at", "value": "TEXT" },
+          { "column": "created_by", "value": "TEXT" }
+        ],
+        "values":[]
+      }
+      
+    ]
+  }

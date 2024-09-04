@@ -1,9 +1,10 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { AlertController, IonModal, NavController } from '@ionic/angular';
+import { AlertController, IonItemSliding, IonModal, NavController } from '@ionic/angular';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { OverlayEventDetail } from '@ionic/core/components';
+import { Storage } from '@ionic/storage-angular';
 
 @Component({
   selector: 'app-show-school',
@@ -13,6 +14,8 @@ import { OverlayEventDetail } from '@ionic/core/components';
 export class ShowSchoolPage implements OnInit {
   @ViewChild(IonModal) modal!: IonModal;
 
+  myKey: any = 'schools';
+
   school: any = null;
   classes: any = null;
 
@@ -21,8 +24,9 @@ export class ShowSchoolPage implements OnInit {
   address = '';
 
   schoolYears: any = null;
- 
-  className: string='';
+
+  className: string = '';
+  classeId: number = 0;
 
 
   constructor(private navController: NavController,
@@ -30,6 +34,7 @@ export class ShowSchoolPage implements OnInit {
     private route: ActivatedRoute,
     private dataService: DataService,
     private authService: AuthService,
+    private appStorage: Storage
   ) { }
 
   ngOnInit() {
@@ -49,30 +54,51 @@ export class ShowSchoolPage implements OnInit {
   onWillDismiss(event: Event) {
     const ev = event as CustomEvent<OverlayEventDetail<string>>;
     if (ev.detail.role === 'Enregistrer') {
-      this.dataService.get('classes').then((data)=>{
-        let classes = data;
-     
-        classes.push({name: ev.detail.data, school_id: Number(this.route.snapshot.params['id']), schoolYear_id: this.getLastSchoolYearId()});
-  
-        data=classes;
-  
-        this.dataService.set('classes', data);
-      })
+      let classes = [];
+      this.appStorage.get('classes').then((data) => {
+        if (data) {
+          classes = data;
+        } else {
+          classes = [];
+        }
+
+        classes.push({id:this.generateId(), name: ev.detail.data, school_id: Number(this.route.snapshot.params['id']), schoolYear_id: 1 });
+
+
+
+        this.appStorage.set('classes', classes);
+
+        this.fetchClassesBySchool();
+      });
+
+
+
+
     }
   }
 
-  async fectSchoolYear() {  
+  async fectSchoolYear() {
     let schoolYears = await this.dataService.get('schoolYears');
-    
+
     this.schoolYears = schoolYears.data;
   }
 
-   getLastSchoolYearId() {
+  deleteClasse(item: any) {
+    this.classes = this.classes.filter((classs: any) => classs.id !== item.id);
+
+    this.appStorage.set('classes', this.classes);
+  }
+
+  editClasses(item: IonItemSliding, classe: any) {
+
+  }
+
+  getLastSchoolYearId() {
     // schoolYear example: {id: 1, name: '2021-2022', start_date: '2021-09-01', end_date: '2022-06-30'}
     let schooYear = this.schoolYears.find((sch: any) => {
       if (sch && sch.end_date > new Date().toISOString()) {
         return sch.id;
-      }else{
+      } else {
         return 0;
       }
     });
@@ -81,23 +107,24 @@ export class ShowSchoolPage implements OnInit {
   }
 
   async fetchSchool() {
-    this.dataService.get('schools').then((data) => {
-      let schools = data.data;
-      this.school = schools.find((school: any) => school.id == this.route.snapshot.params['id']);
+    const result = await this.appStorage.get(this.myKey);
+    if (result) {
+      this.school = result.find((sch: any) => sch.id == this.route.snapshot.params['id']);
+
 
       this.fetchClassesBySchool();
-    })
+
+    }
   }
 
   async fetchClassesBySchool() {
-    this.dataService.get('classes').then((data) => {
-      if (data ) {
-        let classes = data;
-        this.classes = classes.filter((classs: any) => classs.school_id == this.route.snapshot.params['id']);
+    const result = await this.appStorage.get('classes');
+    if (result) {
+      this.classes = result.filter((classs: any) => classs.school_id == this.school.id);
+    }
 
-      }
 
-    })
+
   }
 
   async resolve(id: number) {
@@ -129,7 +156,11 @@ export class ShowSchoolPage implements OnInit {
   }
 
 
-
+  generateId() {
+    //returner un très très grand nombre
+    this.classeId = Math.floor(Math.random() * 1000000000000000000);
+    return this.classeId;
+  }
 
 
 
@@ -140,12 +171,13 @@ export class ShowSchoolPage implements OnInit {
   }
 
   showClasse(item: any) {
-    this.navController.navigateForward('/schools/classe/'+ item.id+'/view');
+    console.log(item);
+    this.navController.navigateForward('/tabs/schools/classe/' + item.id + '/view');
   }
 
-  open(item:any){
+  open(item: any) {
 
-    
+
   }
 
 }

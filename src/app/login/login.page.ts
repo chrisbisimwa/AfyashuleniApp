@@ -23,7 +23,7 @@ export class LoginPage implements OnInit {
         () => {
           // Connexion réussie, rediriger vers la page d'accueil
           
-          this.router.navigate(['/home']);
+          this.router.navigate(['/tabs/home']);
         },
         (error) => {
           // Gérer les erreurs de connexion

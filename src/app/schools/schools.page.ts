@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { DataService } from '../services/data.service';
 import { IonItemSliding, NavController, Platform, ToastController } from '@ionic/angular';
+import { Storage } from '@ionic/storage-angular';
 
 @Component({
   selector: 'app-schools',
@@ -10,18 +11,51 @@ import { IonItemSliding, NavController, Platform, ToastController } from '@ionic
 export class SchoolsPage {
   schools: any[] = [];
 
+  myKey:any = 'schools';
+  myValue: any;
+
   constructor( private dataService: DataService,  private navController: NavController,
     private toastCtrl: ToastController,
-    public plt: Platform) {
+    public plt: Platform,
+    private appStorage: Storage
+  ) {
     this.fetchSchools();
+
+   
+
   }
+
+  deleteSchool(school: any) {
+    this.schools = this.schools.filter(item => item.id !== school.id);
+
+
+    this.appStorage.set(this.myKey, this.schools);
+  }
+
+  
+
 
 
   //fech all schools from local storage
 
   async fetchSchools(refresher?: any) {
-    const schools = await this.dataService.get('schools');
-    this.schools = schools.data || [];
+    const result = await this.appStorage.get(this.myKey);
+    if (result) {
+      
+      this.schools = result;
+    }
+
+   /*  const schools = await this.dataService.get('schools');
+    this.schools = schools.data || []; */
+
+
+    /* this.databaseService.getSchoolList().subscribe((res: unknown) => {
+      const result = res as any[];
+      this.schools = Array.from(result);
+
+      console.log(this.schools);
+    }); */
+     
 
   }
 
@@ -43,26 +77,22 @@ export class SchoolsPage {
  }
 
  async new() {
-  await this.navController.navigateForward('/schools/new');
+  await this.navController.navigateForward('/tabs/schools/new');
 }
 
- async view(id:any) {
-  await this.navController.navigateForward('/schools/' + id + '/view');
+ async view(school:any) {
+  if (school.id) {
+    await this.navController.navigateForward('/tabs/schools/' + school.id + '/view');
+  }else{
+    await this.navController.navigateForward('/tabs/schools/' + school.code + '/view');
+  }
+
 }
 async edit(item: IonItemSliding, site: any) {
   await this.navController.navigateForward('/tabs/entities/customer/' + site.id + '/edit');
   await item.close();
 }
 
-async delete(customer:any) {
-  /*  this.customerService.delete(customer.id).subscribe(
-     async () => {
-       const toast = await this.toastCtrl.create({ message: 'Customer deleted successfully.', duration: 3000, position: 'middle' });
-       await toast.present();
-       await this.loadAll();
-     },
-     error => console.error(error)
-   ); */
- }
+
 
 }

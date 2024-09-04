@@ -18,6 +18,10 @@ const routes: Routes = [
   {
     path: 'classe/:id/view',
     loadChildren: () => import('./show-classe/show-classe.module').then( m => m.ShowClassePageModule)
+  },
+  {
+    path: 'show-student',
+    loadChildren: () => import('./show-student/show-student.module').then( m => m.ShowStudentPageModule)
   }
 ];
 

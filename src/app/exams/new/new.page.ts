@@ -3,6 +3,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { NavController, Platform, ToastController } from '@ionic/angular';
 import { DataService } from '../../services/data.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { Storage } from '@ionic/storage-angular';
 
 @Component({
   selector: 'app-new',
@@ -172,7 +173,7 @@ export class NewPage implements OnInit {
 
 
   constructor(protected fb: FormBuilder, public platform: Platform, private dataService: DataService, private authService: AuthService, private navController: NavController,
-    private toastCtrl: ToastController) {
+    private toastCtrl: ToastController, private appStorage: Storage) {
     this.fetchSchoolYears();
     this.fetchProblems();
     this.form = this.fb.group({
@@ -189,6 +190,8 @@ export class NewPage implements OnInit {
     this.presentingElement = document.querySelector('.ion-page');
 
     this.fetchUser();
+
+    this.fetchSchools(null)
 
 
 
@@ -331,23 +334,22 @@ export class NewPage implements OnInit {
 
   async fetchSchoolYears() {
     //fetch school years from local storage
-    const schoolYears = await this.dataService.get('schoolYears');
-    this.schoolYears = schoolYears.data || [];
+    const schoolYears = await this.appStorage.get('schoolYears');
+    this.schoolYears = schoolYears || [];
   }
 
   async fetchSchools(event: any) {
-    console.log(event.target.value);
     //fetch schools from local storage based on selected school year
-    const schools = await this.dataService.get('schools');
-    let ch = schools.data || [];
+    const schools = await this.appStorage.get('schools');
+    
+    let ch = schools || [];
 
-    const cls = await this.dataService.get('classes');
+    const cls = await this.appStorage.get('classes');
     let cl = cls || [];
-
 
     let clas = [];
     for (const c of cl) {
-      if (c.schoolYear_id == event.target.value) {
+      if (c.schoolYear_id == 1) {
         clas.push(c);
       }
     }
@@ -369,7 +371,7 @@ export class NewPage implements OnInit {
   }
 
   async fetchClasses(event: any) {
-    const cls = await this.dataService.get('classes');
+    const cls = await this.appStorage.get('classes');
     let cl = cls || [];
 
     for (const c of cl) {
@@ -380,8 +382,8 @@ export class NewPage implements OnInit {
   }
 
   async fetchProblems() {
-    const problems = await this.dataService.get('problems');
-    this.problems = problems.data || [];
+    const problems = await this.appStorage.get('problems');
+    this.problems = problems || [];
   }
 
   readyForNexStep(event: any) {
@@ -410,7 +412,7 @@ export class NewPage implements OnInit {
   }
 
   async fetchStudents(event: any) {
-    const cls = await this.dataService.get('student-history');
+    const cls = await this.appStorage.get('student-history');
     let cl = cls || [];
 
     let hist = [];

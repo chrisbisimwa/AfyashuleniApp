@@ -71,11 +71,53 @@
             label="Entrez le nom l\'élève"
             labelPlacement="stacked"
             type="text"
-            placeholder="Nom de l\'élève"
+            placeholder="Nom"
             [(ngModel)]="studentName"
           ></ion-input>
         </ion-item>
+        <ion-item>
+          <ion-input
+            label="Entrez le postnom l\'élève"
+            labelPlacement="stacked"
+            type="text"
+            placeholder="Postnom"
+            [(ngModel)]="studentPostName"
+          ></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input
+            label="Entrez le prénom l\'élève"
+            labelPlacement="stacked"
+            type="text"
+            placeholder="Prénom"
+            [(ngModel)]="studentSurname"
+          ></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-select [(ngModel)]="gender" label="Sexe">
+            <ion-select-option value="male">Masculin</ion-select-option>
+            <ion-select-option value="female">Féminin</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item>
+          <ion-input
+            type="date"
+            label="Date de naissance"
+            [(ngModel)]="birthDate"
+          ></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input
+            label="Entrez le lieu de naissance"
+            labelPlacement="stacked"
+            type="text"
+            placeholder="Lieu de naissance"
+            [(ngModel)]="birthPlace"
+          ></ion-input>
+        </ion-item>
       </ion-content>
+      
+  
     </ng-template>
   </ion-modal>
 

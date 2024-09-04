@@ -50,7 +50,7 @@ export class ExamsPage {
 }
 
  async new() {
-  await this.navController.navigateForward('/exams/new');
+  await this.navController.navigateForward('/tabs/exams/new');
 }
 
  async view(id:any) {

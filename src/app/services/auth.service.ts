@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { DataService } from './data.service';
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -13,9 +14,11 @@ export class AuthService {
   private isLoggedInSubject = new BehaviorSubject<boolean>(false);
   isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
 
+
   constructor(private http: HttpClient, private dataService: DataService) { }
 
   login(credentials: { email: string; password: string }) {
+    console.log(credentials);
     return this.http.post(`${this.apiUrl}/login`, credentials).pipe(
       tap((response: any) => {
         console.log('Réponse de connexion:', response.token);
@@ -40,9 +43,14 @@ export class AuthService {
   }
 
   isLoggedIn() {
-    const token = this.dataService.get(this.STORAGE_KEY);
-    return !!token; // Simple check for token presence (converts to boolean)
+    const token:any = this.dataService.get(this.STORAGE_KEY);
+    if(token.__zone_symbol__value.length > 0){
+      return true;
+    }else{
+      return false;
+    }
   }
+
 
   async getToken(): Promise<string | null> {
     return await this.dataService.get(this.STORAGE_KEY);

@@ -6,6 +6,7 @@ import { DashboardPage } from './dashboard.page';
 import { ExploreContainerComponentModule } from '../explore-container/explore-container.module';
 
 import { DashboardPageRoutingModule } from './dashboard-routing.module';
+import { BaseChartDirective } from 'ng2-charts';
 
 @NgModule({
   imports: [
@@ -13,8 +14,10 @@ import { DashboardPageRoutingModule } from './dashboard-routing.module';
     CommonModule,
     FormsModule,
     ExploreContainerComponentModule,
-    DashboardPageRoutingModule
+    DashboardPageRoutingModule,
+    BaseChartDirective
   ],
-  declarations: [DashboardPage]
+  declarations: [DashboardPage],
+  
 })
 export class DashboardPageModule {}

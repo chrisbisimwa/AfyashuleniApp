@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
-  appName: 'AfyashuleniApp',
+  appId: 'io.kivutech.afyashuleni',
+  appName: 'Afya Shuleni',
   webDir: 'www'
 };
 
