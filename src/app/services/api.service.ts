@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { DataService } from './data.service';
+import { Storage } from '@ionic/storage-angular';
 
 @Injectable({
   providedIn: 'root'
@@ -8,10 +9,10 @@ import { DataService } from './data.service';
 export class ApiService {
   private apiUrl = 'https://afiashuleni.kivutech.net/api';
 
-  constructor(private http: HttpClient, private dataService: DataService) {}
+  constructor(private http: HttpClient, private appStorage: Storage) {}
 
   private async getHeaders() {
-    const token = await this.dataService.get('authToken');
+    const token = await this.appStorage.get('authToken');
     return {
       headers: new HttpHeaders({
         Authorization: `Bearer ${token}`,
@@ -34,9 +35,9 @@ export class ApiService {
     return this.http.post(`${this.apiUrl}/schools`, data, headers);
   }
 
-  async postClass(data: any) {
+  async postClass(schoolId:any, data: any) {
     const headers = await this.getHeaders();
-    return this.http.post(`${this.apiUrl}/classes`, data, headers);
+    return this.http.post(`${this.apiUrl+'/schools/'+schoolId+'/classes'}`, data, headers);
   }
 
   async postStudent(data: any) {
@@ -56,7 +57,7 @@ export class ApiService {
 
   async getClasses(schoolId: number) {
     const headers = await this.getHeaders();
-    return this.http.get(`${this.apiUrl+'/schools/'+schoolId}/classes`, headers);
+    return this.http.get(`${this.apiUrl+'/schools/'+schoolId+'/classes'}`, headers);
   }
 
   async getStudentHistory(schoolYearId: number) {

@@ -81,9 +81,10 @@ export class ShowClassePage implements OnInit {
         );
 
 
-        this.appStorage.set('students', students);
+        this.appStorage.set('students', students).then(() => {
+          this.fetchStudentsByClasse();
+          });
 
-        this.fetchStudentsByClasse();
 
 
         let studentHistory = [];
