@@ -10,7 +10,7 @@ import { DataService } from './data.service';
 })
 export class AuthService {
   private apiUrl = 'https://afiashuleni.kivutech.net/api';
-  private readonly STORAGE_KEY = 'authToken'; // Key for storing the token
+  private readonly STORAGE_KEY = 'authToken'; 
   private isLoggedInSubject = new BehaviorSubject<boolean>(false);
   isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
 

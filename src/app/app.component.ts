@@ -28,11 +28,20 @@ export class AppComponent {
      private loadingCtrl: LoadingController,) {
       this.init();
     //this.initializeApp();
+   
   }
 
   async init(){
     await this.appStorage.defineDriver(CordovaSQLiteDriver);
     await this.appStorage.create();
+
+    this.appStorage.get('authToken').then(token => {
+      if (token) {
+        this.router.navigate(['/tabs/home']);
+      } else {
+        this.router.navigate(['/login']);
+      }
+    });
   }
 
   initializeApp() {

@@ -1,6 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { Storage } from '@ionic/storage-angular';
+import { Network, ConnectionStatus } from '@capacitor/network';
 
 @Component({
   selector: 'app-login',
@@ -11,26 +15,68 @@ export class LoginPage implements OnInit {
   email = '';
   password = '';
 
-  constructor(private authService: AuthService, private router:Router) { }
+  networkStatus: ConnectionStatus;
+
+  private apiUrl = 'https://afiashuleni.kivutech.net/api';
+  private readonly STORAGE_KEY = 'authToken';
+  private isLoggedInSubject = new BehaviorSubject<boolean>(false);
+  isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
+
+
+  constructor(private authService: AuthService, private router: Router, private http: HttpClient, private appStorage: Storage) { }
 
   ngOnInit() {
+    if (Network) {
+      Network.getStatus().then(status => {
+        this.networkStatus = status;
+      });
+
+      Network.addListener('networkStatusChange', (status) => {
+        this.networkStatus = status;
+      });
+    }
+
   }
 
-  login() {
-    const credentials = {"email": this.email, "password":this.password};
-    this.authService.login(credentials)
-      .subscribe(
-        () => {
-          // Connexion réussie, rediriger vers la page d'accueil
-          
-          this.router.navigate(['/tabs/home']);
-        },
-        (error) => {
-          // Gérer les erreurs de connexion
-          console.error('Erreur de connexion:', error);
-          // Afficher un message d'erreur à l'utilisateur
+  async login() {
+
+    const credentials = { "email": this.email, "password": this.password };
+
+    console.log(JSON.stringify(this.networkStatus));
+    if (this.networkStatus.connected) {
+      let rs = this.http.post(`${this.apiUrl}/login`, credentials).subscribe((response: any) => {
+        if (response.token) {
+          this.appStorage.set(this.STORAGE_KEY, response.token).then(async () => {
+            const headers = await this.getHeaders();
+            this.http.get(`${this.apiUrl}/user`, headers)
+              .subscribe((user: any) => {
+                this.appStorage.set('user', user);
+                this.router.navigate(['/tabs/home']);
+              });
+          }
+
+          );
         }
-      );
+
+      }, error => {
+        alert(error.error.message);
+      });
+    } else {
+      alert('Vous n\'êtes pas connecté à internet');
+    }
+
+
+
+
+  }
+
+  private async getHeaders() {
+    const token = await this.appStorage.get('authToken');
+    return {
+      headers: new HttpHeaders({
+        Authorization: `Bearer ${token}`,
+      }),
+    };
   }
 
   forgotPassword() {
