@@ -25,7 +25,7 @@ export class NewPage implements OnInit {
   evaluations: any[] = [];
   user: any;
   selectedExamType: string = '';
-  examTypes: string[] = [];
+  examTypes: string[] = ['situation_familiale', 'calendrier_vaccinal', 'deparasitage', 'comportement_langage', 'anamnese', 'examen_clinique'];
   completedExamTypes: string[] = [];
   answers: { [key: string]: any } = {};
   groupedAnswers: { [key: string]: { [key: string]: any } } = {};
@@ -33,17 +33,17 @@ export class NewPage implements OnInit {
   form: FormGroup;
   presentingElement: Element | null = null;
   studentGender: string = "";
+  //user role: tableau de string
+  userRoles: String[] = [];
 
-  public $questionsInfirmier: Exam = {
+  questionsInfirmier: Exam = {
     'situation_familiale': [
       { label: 'Parents en vie', options: ['Les deux', 'Mère seulement', 'Père seulement', 'Aucun'], gender: 'both' },
       { label: 'Elève vit avec', options: ['Les deux parents', 'La mère', 'Le père', 'Famille paternelle', 'Famille maternelle', 'Tuteur'], gender: 'both' },
       { label: 'Occupation des parents avec qui élève vit', options: null, gender: 'both' },
       { label: 'Nombre enfants fratrie', options: null, gender: 'both' },
       { label: 'Rand dans la fratrie', options: null, gender: 'both' },
-      { label: 'Niveau revenu famillial', options: ['Bas', 'Moyen', 'Élevé'], gender: 'both' },
-      { label: 'Type habitation', options: ['Etage', 'Semi-durable', 'Durable', 'Rai de chaussé avec humide', 'Rai de chaussé sans humide', 'Plance', 'Paille', 'Cave', 'Boue'], gender: 'both' },
-      { label: 'Accès aux soins de santé', options: ['Oui', 'Non'], gender: 'both' },
+     
     ],
     'calendrier_vaccinal': [
       { label: 'BCG (tuberculose)', options: ['Lisible', 'Non lisible', 'Douteux'], gender: 'both' },
@@ -58,15 +58,15 @@ export class NewPage implements OnInit {
       { label: 'Deparasite', options: ['Oui', 'Non', 'Inconnu'], gender: 'both' },
       { label: 'Date du dernier déparasitage', options: null, gender: 'both' },
       { label: 'Médicament de déparasitage', options: ['Albendazole 100mg', 'Albendazole 500mg', 'Mebendazole 100mg', 'Mebendazole 500mg'], gender: 'both' },
-      { label: 'Fréquence', options: ['1 mois', '2 mois', '3 mois', '4 mois', 'Plus de 4 mois'], gender: 'both' },
+      { label: 'Fréquence', options: ['Après 1 mois', 'Après 2 mois', 'Après 3 mois', 'Après 4 mois'], gender: 'both' },
     ],
     'comportement_langage': [
       { label: 'Comportement', options: ['Calme', 'Agité', 'Distrait', 'Peureux', 'Curieux', 'Autres'], gender: 'both' },
       { label: 'Si autre comportement, préciser', options: null, gender: 'both' },
-      { label: 'Langage', options: ['Bégaiement', 'Zozotement', 'Autres'], gender: 'both' },
+      { label: 'Langage', options: ['Cohérent', 'incohérent', 'Autres'], gender: 'both' },
       { label: 'Si autre language, préciser', options: null, gender: 'both' },
     ],
-    'anamnes_biometrique': [
+    'anamnese': [
       { label: 'Nutrition', options: null, gender: 'both' },
       { label: 'Sommeil', options: null, gender: 'both' },
       { label: 'Exercice physique', options: null, gender: 'both' },
@@ -85,28 +85,32 @@ export class NewPage implements OnInit {
       { label: 'acuite_visuelle_loin_gauche_sans_correction', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both' },
       { label: 'acuite_loin_droite_avec_lunettes', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both' },
       { label: 'acuite_loin_gauche_avec_lunettes', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both' },
-      { label: 'reflet_corneen', options: ['Bon', 'Pas bon'], gender: 'both' },
-      { label: 'test_occlusion', options: ['Bon', 'Pas bon'], gender: 'both' },
-      { label: 'audiometrie_droite', options: ['1000', '2000', '4000', '3000', '500'], gender: 'both' },
-      { label: 'audiometrie_gauche', options: ['1000', '2000', '4000', '3000', '500'], gender: 'both' },
+      { label: 'audiometrie_droite_500', options: ['Ok', 'Pas bon'], gender: 'both' },
+      { label: 'audiometrie_droite_1000', options: ['Ok', 'Pas bon'], gender: 'both' },
+      { label: 'audiometrie_droite_2000', options: ['Ok', 'Pas bon'], gender: 'both' },
+      { label: 'audiometrie_droite_4000', options: ['Ok', 'Pas bon'], gender: 'both' },
+      { label: 'audiometrie_gauche_500', options: ['Ok', 'Pas bon'], gender: 'both' },
+      { label: 'audiometrie_gauche_1000', options: ['Ok', 'Pas bon'], gender: 'both' },
+      { label: 'audiometrie_gauche_2000', options: ['Ok', 'Pas bon'], gender: 'both' },
+      { label: 'audiometrie_gauche_4000', options: ['Ok', 'Pas bon'], gender: 'both' },
       { label: 'Test de la montre gauche ', options: ['Bon', 'Pas bon'], gender: 'both' },
       { label: 'Test de la montre droite ', options: ['Bon', 'Pas bon'], gender: 'both' },
       { label: 'Test du diapason gauche', options: ['Bon', 'Pas bon'], gender: 'both' },
       { label: 'Test du diapason droite', options: ['Bon', 'Pas bon'], gender: 'both' },
-    ],
+    ]
   };
 
   questionsMedecin: Exam = {
-    "anamnes_biometrique": [
+    // ...
+    "examen_clinique": [
+      { label: 'reflet_corneen', options: ['Bon', 'Pas bon'], gender: 'both' },
+      { label: 'test_occlusion', options: ['Bon', 'Pas bon'], gender: 'both' },
       { label: "Aspect de l'urine", options: null, gender: 'both' },
       { label: "Leucocytes", options: ['Négatif', 'Trace', '1+', '2+', '3+'], gender: 'both' },
       { label: "Nitrites", options: ['Positif', 'Négatif'], gender: 'both' },
       { label: "Protéines", options: ['Négatif', 'Trace', '1+', '2+', '3+'], gender: 'both' },
       { label: "Glucose", options: ['Négatif', '1+', '2+', '3+', '4+'], gender: 'both' },
       { label: "Hémoglobine", options: ['Négatif', '1+', '2+', '3+'], gender: 'both' },
-    ],
-    // ...
-    "clinique": [
       { label: "Anamnese", options: null, gender: 'both' },
       { label: "aspect_general", options: ['Bon', 'Altéré'], gender: 'both' },  // Champ avec valeurs prédéfinies
       { label: "dysmorphie", options: ['Malformation de la gorge', 'Malformation de la bouche', 'Malformation du nez', 'Malformation des oreilles', 'Malformation des yeux', 'Malformation des membres', 'Autres'], gender: 'both' },
@@ -128,7 +132,7 @@ export class NewPage implements OnInit {
       { label: 'Bouchon de cérumen (oreille droite)', options: ['Oui', 'Non'], gender: 'both' },
       { label: 'Corps étranger (oreille gauche)', options: ['Oui', 'Non'], gender: 'both' },
       { label: 'Corps étranger (oreille droite)', options: ['Oui', 'Non'], gender: 'both' },
-      { label: 'Autitte', options: ['Oui', 'Non'], gender: 'both' },
+      { label: 'Otite', options: ['Oui', 'Non'], gender: 'both' },
       { label: 'Autre problème ORL', options: null, gender: 'both' },
       { label: 'thyroide', options: ['normale', 'tuméfiée'], gender: 'both' },
       { label: 'ganglions_droite_gauche', options: null, gender: 'both' },
@@ -153,7 +157,6 @@ export class NewPage implements OnInit {
       { label: 'Si non, averti ?', options: ['Oui', 'Non'], gender: 'female' },
       { label: 'Volume testicule droite', options: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'], gender: 'male' },
       { label: 'Volule testicule gauche', options: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'], gender: 'male' },
-
       { label: 'Pilosité pubienne', options: ['P1', 'P2', 'P3', 'P4', 'P5'], gender: 'both' },
       { label: 'Développement des organes génitaux', options: ['G1', 'G2', 'G3', 'G4', 'G5'], gender: 'male' },
       { label: 'Développement mammaire', options: ['S1', 'S2', 'S3', 'S4', 'S5'], gender: 'female' },
@@ -180,33 +183,51 @@ export class NewPage implements OnInit {
       answers: this.fb.group({}) // Dynamically add controls based on selected exam type
     });
 
+    this.fetchRoles();
+
 
   }
 
   ngOnInit() {
     this.fetchSchoolYears();
 
-    this.examTypes = Object.keys(this.questionsMedecin);
-    this.presentingElement = document.querySelector('.ion-page');
+   
 
     this.fetchUser();
+    
 
     this.fetchSchools(null)
 
 
+    this.presentingElement = document.querySelector('.ion-page');
 
 
   }
 
   initializeAnswers() {
-    for (let examType in this.questionsMedecin) {
-      this.answers[examType] = {};
+    //check if the user is a nurse or a doctor
+    if (this.userRoles.includes('infirmier')) {
+      this.questions = this.questionsInfirmier;
+      for (let examType in this.questionsInfirmier) {
+        this.answers[examType] = {};
+      }
+    } else if(this.userRoles.includes('Medecin')) {
+      this.questions = this.questionsMedecin;
+      for (let examType in this.questionsMedecin) {
+        this.answers[examType] = {};
+      }
     }
+    
   }
 
   async fetchUser() {
-    this.user = await this.dataService.get('user') || {};
+    this.user = await this.appStorage.get('user') || {};
     return this.user;
+  }
+
+  async fetchRoles() {
+    this.userRoles = await this.appStorage.get('roles') || [];
+    
   }
 
   save() {
@@ -214,13 +235,24 @@ export class NewPage implements OnInit {
     this.examTypes.forEach(type => {
       this.groupedAnswers[type] = {};  // Initialiser un objet pour chaque type d'examen
 
-      this.questionsMedecin[type].forEach(question => {
-        const questionLabel = question.label;
+      if (this.userRoles[0]=='infirmier') {
+        this.questionsInfirmier[type].forEach(question => {
+          const questionLabel = question.label;
 
-        if (this.answers[questionLabel] !== undefined) {
-          this.groupedAnswers[type][questionLabel] = this.answers[questionLabel];
-        }
-      });
+          if (this.answers[questionLabel] !== undefined) {
+            this.groupedAnswers[type][questionLabel] = this.answers[questionLabel];
+          }
+        });
+      } else if(this.userRoles[0]=='Medecin') {
+        this.questionsMedecin[type].forEach(question => {
+          const questionLabel = question.label;
+
+          if (this.answers[questionLabel] !== undefined) {
+            this.groupedAnswers[type][questionLabel] = this.answers[questionLabel];
+          }
+        });
+      }
+      
     });
 
 
@@ -307,7 +339,7 @@ export class NewPage implements OnInit {
       // Évaluer les caries de stade 2 à 4
       if (question === 'Carie' && reponse === 'Oui' &&
         ['Stade 2', 'Stade 3', 'Stade 4'].includes(this.answers['Si oui, stade carie'])) {
-          console.log('Caries (Stade 2 à 4) detected');
+        console.log('Caries (Stade 2 à 4) detected');
         evaluations.push({
           problem_id: this.getProblemIdByName('Caries (Stade 2 à 4)'),
           problem_name: 'Caries (Stade 2 à 4)',
@@ -341,7 +373,7 @@ export class NewPage implements OnInit {
   async fetchSchools(event: any) {
     //fetch schools from local storage based on selected school year
     const schools = await this.appStorage.get('schools');
-    
+
     let ch = schools || [];
 
     const cls = await this.appStorage.get('classes');
@@ -381,6 +413,19 @@ export class NewPage implements OnInit {
     }
   }
 
+  async fetchStudents(event: any) {
+    const students = await this.appStorage.get('students');
+    let std = students || [];
+
+    for (const s of std) {
+      if (s.current_class_id == event.target.value) {
+        this.students.push(s);
+      }
+    }
+
+    this.fetchRoles();
+  }
+
   async fetchProblems() {
     const problems = await this.appStorage.get('problems');
     this.problems = problems || [];
@@ -390,18 +435,13 @@ export class NewPage implements OnInit {
     if (event.target.value) {
       this.studentGender = event.target.value.gender;
 
+      
+
       console.log('Selected Student:', event.target.value.gender);
     }
   }
 
 
-  asyncloadQuestions(event: any) {
-    this.initializeAnswers();
-
-    console.log('Selected Exam Type:', event.target.value);
-    console.log('Questions:', this.questionsMedecin[event.target.value]); // Vérifiez si la clé existe
-
-  }
 
   isArray(value: any): boolean {
     return Array.isArray(value);
@@ -411,26 +451,7 @@ export class NewPage implements OnInit {
     return label.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   }
 
-  async fetchStudents(event: any) {
-    const cls = await this.appStorage.get('student-history');
-    let cl = cls || [];
 
-    let hist = [];
-    for (const c of cl) {
-      if (c.class_id == event.target.value && c.schoolYear_id == this.selectedYear) {
-        hist.push(c);
-      }
-    }
-
-
-    const allStudents = await this.dataService.get('students');
-    let allStu = allStudents.data || [];
-    for (const st of allStu) {
-      if (st.current_class_id == event.target.value) {
-        this.students.push(st);
-      }
-    }
-  }
 
 
   ucfirst(str: string): string {

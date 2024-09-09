@@ -37,7 +37,7 @@ export class AppComponent {
     this.checkLogin();
     this.checkNetwork();
 
-
+    
   }
 
   checkLogin() {
@@ -54,10 +54,13 @@ export class AppComponent {
     if (Network) {
       Network.getStatus().then(status => {
         this.networkStatus = status;
-
         if (this.networkStatus.connected) {
-          this.checkDataToSync();
+          this.checkDataToSync().then(() => {
+            this.loadAllData();
+          });
         }
+
+
       });
 
       Network.addListener('networkStatusChange', (status) => {
@@ -95,107 +98,98 @@ export class AppComponent {
         if (!sc.created_at && !sc.updated_at) {
           const schoolPromise = this.apiService.postSchool(sc); // Stockez la Promise
           const schoolObservable = await schoolPromise; // Récupérez l'Observable
-          const school = await lastValueFrom(schoolObservable).then((sch: any) => {
-            if (sch.data) {
-              this.updateClasses(sc.id, sch.data);
+          const school = await lastValueFrom(schoolObservable);
 
-
-            }
+        }else if(sc.status=="deleted"){
+          const schoolPromise = this.apiService.deleteSchool(sc.id);
+          const schoolObservable = await schoolPromise;
+          const school =await lastValueFrom(schoolObservable).then((data:any)=>{
+            console.log(data);
           });
-
-
-
-
         }
       }
 
     }
 
-  }
-
-  async updateClasses(schoolId: number, school: any) {
-    let classes: any = await this.appStorage.get('classes');
+    //verifie s'il y a des classes à synchroniser
+    let classes = await this.appStorage.get('classes');
     if (classes) {
-      let cls: any[] = [];
-
       for (let cl of classes) {
         if (!cl.created_at && !cl.updated_at) {
+          const classPromise = this.apiService.postClass(cl.school_id, cl); // Stockez la Promise
+          const classObservable = await classPromise; // Récupérez l'Observable
+          const cls = await lastValueFrom(classObservable);
 
-          if (cl.school_id == schoolId) {
-
-            cl.school_id = school.id;
-
-            const classPromise = this.apiService.postClass(school.id, cl); // Stockez la Promise
-            const classObservable = await classPromise; // Récupérez l'Observable
-            const cls: any = await lastValueFrom(classObservable).then((cla: any) => {
-              if (cla.data) {
-                this.updateStudents(cl.id, cla.data);
-
-                //cls.push(cl);
-              }
-
-            });
-
-          }
         }
       }
-
-      await this.appStorage.set('classes', cls);
     }
-  }
 
-  async updateStudents(classId: number, cl: any) {
-    let students: any = await this.appStorage.get('students');
+    //verifie s'il y a des élèves à synchroniser
+    let students = await this.appStorage.get('students');
     if (students) {
-      let stds: any[] = [];
-
       for (let st of students) {
         if (!st.created_at && !st.updated_at) {
-          if (st.class_id == classId) {
-            st.class_id = cl.id;
+          const studentPromise = this.apiService.postStudent(st); // Stockez la Promise
+          const studentObservable = await studentPromise; // Récupérez l'Observable
+          const std = await lastValueFrom(studentObservable);
 
-            const studentPromise = this.apiService.postStudent(st); // Stockez la Promise
-            const studentObservable = await studentPromise; // Récupérez l'Observable
-            const std: any = await lastValueFrom(studentObservable).then((st: any) => {
-              if (st.data) {
-                this.updateStudentHistory(st.id, st.data, classId, cl);
-              }
-
-            });
-            //stds.push(st);
-          }
         }
       }
-
     }
-  }
 
-  async updateStudentHistory(studentId: number, student: any, classeId: number, classe: any) {
-    let studentHistory: any = await this.appStorage.get('studentHistory');
+    //verifie s'il y a des historiques des élèves à synchroniser
+    let studentHistory = await this.appStorage.get('student-history');
     if (studentHistory) {
-      let stdH: any[] = [];
-
-      for (let sh of studentHistory) {
-        if (sh.student_id == studentId && sh.class_id == classeId) {
-          sh.student_id = student.id;
-          sh.class_id = classe.id;
-
-          const studentHistoryPromise = this.apiService.postStudentHistory(sh); // Stockez la Promise
+      for (let sth of studentHistory) {
+        if (!sth.created_at && !sth.updated_at) {
+          const studentHistoryPromise = this.apiService.postStudentHistory(sth); // Stockez la Promise
           const studentHistoryObservable = await studentHistoryPromise; // Récupérez l'Observable
-          const stdH: any = await lastValueFrom(studentHistoryObservable).then((sh: any) => {
-            if (sh.data) {
+          const stdHistory = await lastValueFrom(studentHistoryObservable);
 
-            }
-
-          });
         }
       }
-
     }
 
+
+
   }
+
+
+
+
+
+
 
   async loadAllData() {
+    const studentsPromise = this.apiService.getStudents(); // Stockez la Promise
+    const studentsObservable = await studentsPromise; // Récupérez l'Observable
+    const students: any = await lastValueFrom(studentsObservable).then((data: any) => {
+      if (data.data) {
+        this.appStorage.set('students', data.data);
+      }
+    });
+
+    const studentHistoryPromise = this.apiService.getStudentHistory(1); // Stockez la Promise
+    const studentHistoryObservable = await studentHistoryPromise; // Récupérez l'Observable
+    const studentHistory: any = await lastValueFrom(studentHistoryObservable).then((data: any) => {
+      if (data.data) {
+        this.appStorage.set('student-history', data.data);
+      }
+    });
+
+
+
+
+    const problemsPromise = this.apiService.getProblems(); // Stockez la Promise
+    const problemsObservable = await problemsPromise; // Récupérez l'Observable
+    const problems: any = await lastValueFrom(problemsObservable).then((data: any) => {
+      if (data.data) {
+        console.log(data.data);
+        this.appStorage.set('problems', data.data);
+      }
+    });
+
+
     const schoolYearsPromise = this.apiService.getSchoolYears(); // Stockez la Promise
     const schoolYearsObservable = await schoolYearsPromise; // Récupérez l'Observable
     const schoolYears: any = await lastValueFrom(schoolYearsObservable).then((data: any) => {
@@ -208,84 +202,45 @@ export class AppComponent {
 
     const schoolsPromise = this.apiService.getSchools(); // Stockez la Promise
     const schoolsObservable = await schoolsPromise; // Récupérez l'Observable
-    const schools: any = await lastValueFrom(schoolsObservable).then(async (data: any) => {
+    const schools: any = await lastValueFrom(schoolsObservable).then((data: any) => {
+
       if (data.data) {
+        this.appStorage.set('schools', data.data);
+      }
+    });
 
-        this.appStorage.set('schools', data.data).then(async () => {
-          let clses: any = [];
-          for (let sc of data.data) {
-            const classesPromise = this.apiService.getClasses(sc.id); // Stockez la Promise
-            const classesObservable = await classesPromise; // Récupérez l'Observable
-            const classes: any = await lastValueFrom(classesObservable).then(async (dt: any) => {
 
-              if (dt.data && dt.data.length > 0) {
-                for (let cl of dt.data) {
-                  clses.push(cl);
 
-                }
-              }
-            });
+    //load all classes by schools
+    const schls = await this.appStorage.get('schools');
+    if (schls) {
+      let cls: any[] = [];
+      for (let school of schls) {
+        const classesPromise = this.apiService.getClasses(school.id); // Stockez la Promise
+        const classesObservable = await classesPromise; // Récupérez l'Observable
+        const classes: any = await lastValueFrom(classesObservable).then((dt: any) => {
+          if (dt && dt.data && dt.data.length > 0) {
+            for (let cl of dt.data) {
+              cls.push(cl);
+            }
+
+            this.appStorage.set('classes', cls);
+
           }
-
-
-
-
-          this.appStorage.set('classes', clses);
         });
 
+
       }
 
-    });
-
-
-    const studentsPromise = this.apiService.getStudents(); // Stockez la Promise
-    const studentsObservable = await studentsPromise; // Récupérez l'Observable
-    const students: any = await lastValueFrom(studentsObservable).then((data: any) => {
-      if (data.data) {
-        this.appStorage.set('students', data.data);
-      }
-    });
-
-
-
-    const problemsPromise = this.apiService.getProblems(); // Stockez la Promise
-    const problemsObservable = await problemsPromise; // Récupérez l'Observable
-    const problems: any = await lastValueFrom(problemsObservable).then((data: any) => {
-      if (data.data) {
-        this.appStorage.set('problems', data.data);
-      }
-    });
+    }
 
 
 
 
-
-    const studentHistoryPromise = this.apiService.getStudentHistory(1); // Stockez la Promise
-    const studentHistoryObservable = await studentHistoryPromise; // Récupérez l'Observable
-    const studentHistory: any = await lastValueFrom(studentHistoryObservable).then((data: any) => {
-      if (data.data) {
-        this.appStorage.set('student-history', data.data);
-      }
-    });
 
 
   }
 
 
 
-
-
-
-  /* async initializeApp() {
-    this.platform.ready().then(async () => {
-      const loading = await this.loadingCtrl.create();
-      await loading.present();
-      this.databaseService.init();
-      this.databaseService.dbReady.subscribe(isReady => {
-        if (isReady) {
-          loading.dismiss();
-        }
-      });
-    });
-  } */
 }

@@ -42,7 +42,7 @@ export class SchoolsPage {
     const result = await this.appStorage.get(this.myKey);
     if (result) {
       
-      this.schools = result;
+      this.schools = result.filter((item:any) => item.status !== 'deleted');
     }
 
    /*  const schools = await this.dataService.get('schools');
@@ -81,11 +81,8 @@ export class SchoolsPage {
 }
 
  async view(school:any) {
-  if (school.id) {
     await this.navController.navigateForward('/tabs/schools/' + school.id + '/view');
-  }else{
-    await this.navController.navigateForward('/tabs/schools/' + school.code + '/view');
-  }
+ 
 
 }
 async edit(item: IonItemSliding, site: any) {

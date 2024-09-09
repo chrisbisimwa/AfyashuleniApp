@@ -9,7 +9,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "resources": "cordova-res ios && cordova-res android && node scripts/resources.js"
   },
   "private": true,
   "dependencies": {
@@ -41,6 +42,7 @@
     "@ionic/storage-angular": "^4.0.0",
     "@types/swiper": "^5.4.3",
     "chart.js": "^4.4.4",
+    "cordova-res": "^0.15.4",
     "cordova-sqlite-storage": "^6.1.0",
     "ionicons": "^7.0.0",
     "localforage-cordovasqlitedriver": "^1.8.0",

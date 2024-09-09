@@ -32,7 +32,8 @@ export class ShowClassePage implements OnInit {
   studentId: number = 0;
 
 
-  constructor(private navController: NavController,
+  constructor(
+    private navController: NavController,
     private alertController: AlertController,
     private route: ActivatedRoute,
     private dataService: DataService,
@@ -225,7 +226,7 @@ export class ShowClassePage implements OnInit {
   }
 
   showStudent(item: any) {
-    this.navController.navigateForward('/schools/classe/student/' + item.id + '/view');
+    this.navController.navigateForward('/tabs/schools/classe/student/' + item.id + '/view');
   }
 
   open(item: any) {

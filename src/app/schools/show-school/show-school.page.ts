@@ -18,6 +18,7 @@ export class ShowSchoolPage implements OnInit {
 
   school: any = null;
   classes: any = null;
+  user: any = null;
 
   latitude!: any;
   longitude!: any;
@@ -40,7 +41,7 @@ export class ShowSchoolPage implements OnInit {
   ngOnInit() {
     this.fetchSchool();
     this.fectSchoolYear();
-
+    this.fetchUser();
   }
 
   cancel() {
@@ -62,13 +63,15 @@ export class ShowSchoolPage implements OnInit {
           classes = [];
         }
 
-        classes.push({id:this.generateId(), name: ev.detail.data, school_id: Number(this.route.snapshot.params['id']), schoolYear_id: 1 });
+        console.log(ev.detail.data);
+        classes.push({id:this.generateId(), name: ev.detail.data, school_id: Number(this.route.snapshot.params['id']), schoolYear_id: 1, created_by: this.user.id });
 
 
 
-        this.appStorage.set('classes', classes);
+        this.appStorage.set('classes', classes).then(() => {
+          this.fetchClassesBySchool();
+        });
 
-        this.fetchClassesBySchool();
       });
 
 
@@ -77,10 +80,15 @@ export class ShowSchoolPage implements OnInit {
     }
   }
 
-  async fectSchoolYear() {
-    let schoolYears = await this.dataService.get('schoolYears');
+  async fetchUser() {
+    const user: any = await this.appStorage.get('user');
+    this.user = user;
+  }
 
-    this.schoolYears = schoolYears.data;
+  async fectSchoolYear() {
+    let schoolYears = await this.appStorage.get('schoolYears');
+
+    this.schoolYears = schoolYears;
   }
 
   deleteClasse(item: any) {
@@ -133,20 +141,31 @@ export class ShowSchoolPage implements OnInit {
 
   async deleteModal(item: any) {
     const alert = await this.alertController.create({
-      header: 'Confirm the deletion?',
+      header: 'Confirmer la suppression ?',
       buttons: [
         {
-          text: 'Cancel',
+          text: 'Annuler',
           role: 'cancel',
           cssClass: 'secondary',
         },
         {
-          text: 'Delete',
-          handler: () => {
-            console.log(item.id);
-            /*  this.service.delete(item.id).then(async ()=>{
-               await this.navController.navigateForward('/tabs/complaint');
-             }) */
+          text: 'Supprimer',
+          handler: async () => {
+            const result = await this.appStorage.get('schools');
+            
+            let school = result.find((sch: any) => sch.id == item.id);
+            if(school){
+              result.splice(result.indexOf(school), 1);
+
+              school.status="deleted"
+
+              result.push(school);
+
+              this.appStorage.set('schools', result);
+
+              this.back();
+            }
+            
 
           },
         },
@@ -167,7 +186,7 @@ export class ShowSchoolPage implements OnInit {
 
 
   back() {
-    this.navController.navigateBack('tabs/complaint');
+    this.navController.navigateBack('tabs/schools');
   }
 
   showClasse(item: any) {

@@ -20,7 +20,7 @@ const routes: Routes = [
     loadChildren: () => import('./show-classe/show-classe.module').then( m => m.ShowClassePageModule)
   },
   {
-    path: 'show-student',
+    path: 'classe/student/:id/view',
     loadChildren: () => import('./show-student/show-student.module').then( m => m.ShowStudentPageModule)
   }
 ];

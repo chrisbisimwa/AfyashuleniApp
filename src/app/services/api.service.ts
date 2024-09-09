@@ -70,6 +70,21 @@ export class ApiService {
     return this.http.get(`${this.apiUrl}/students`, headers);
   }
 
+  async getExaminations(studentId: number) {
+    const headers = await this.getHeaders();
+    return this.http.get(`${this.apiUrl}/students/${studentId}/examinations`, headers);
+  }
+
+  async getUserRoles(userId: number) {
+    const headers = await this.getHeaders();
+    return this.http.get(`${this.apiUrl}/users/${userId}/roles`, headers);
+  }
+
+  async deleteSchool(schoolId:number){
+    const headers = await this.getHeaders();
+    return this.http.delete(`${this.apiUrl}/schools/${schoolId}`, headers);
+  }
+
   
 
   // Méthodes similaires pour les autres ressources...
