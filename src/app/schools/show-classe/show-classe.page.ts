@@ -196,11 +196,19 @@ export class ShowClassePage implements OnInit {
         },
         {
           text: 'Delete',
-          handler: () => {
-            console.log(item.id);
-            /*  this.service.delete(item.id).then(async ()=>{
-               await this.navController.navigateForward('/tabs/complaint');
-             }) */
+          handler: async () => {
+            const result = await this.appStorage.get('classes');
+            
+            let classe = result.find((sch: any) => sch.id == item.id);
+            if(classe){
+              result.splice(result.indexOf(classe), 1);
+
+              classe.status="deleted"
+
+              result.push(classe);
+
+              this.appStorage.set('classes', result);
+            }
 
           },
         },
@@ -214,6 +222,14 @@ export class ShowClassePage implements OnInit {
   generateId() {
     //returner un très très grand nombre
     this.studentId = Math.floor(Math.random() * 1000000000000000000);
+    this.appStorage.get('students').then((result) => {
+      if (result) {
+        let student = result.find((sch: any) => sch.id == this.studentId);
+        if (student) {
+          this.generateId();
+        }
+      }
+    });
     return this.studentId;
   }
 

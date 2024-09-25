@@ -65,7 +65,7 @@
 
       <div *ngIf="selectedStudent">
         <div *ngIf="userRoles.includes('Medecin')">
-          <ion-item-group *ngFor="let type of examTypes">
+          <ion-item-group *ngFor="let type of examTypesMedecin">
             <ion-item-divider>
               <ion-label> Examen ({{ ucfirst( type.replace('_', ' ')) }}) </ion-label>
             </ion-item-divider>
@@ -94,7 +94,7 @@
 
       <div *ngIf="selectedStudent">
         <div *ngIf="userRoles.includes('infirmier')">
-          <ion-item-group *ngFor="let type of examTypes">
+          <ion-item-group *ngFor="let type of examTypesInfimier">
             <ion-item-divider>
               <ion-label> {{ ucfirst( type.replace('_', ' ')) }} </ion-label>
             </ion-item-divider>
@@ -128,14 +128,15 @@
     <ng-template>
       <ion-header>
         <ion-toolbar>
-          <ion-title>4. Résumé de l'examen et évaluations</ion-title>
+          <ion-title>4. Résumé de l'examen</ion-title>
           <ion-buttons slot="end">
-            <ion-button (click)="modal.dismiss()">Close</ion-button>
+            <ion-button (click)="modal.dismiss()">Annuler</ion-button>
+            <ion-button (click)="submitExam()">Soumettre</ion-button>
           </ion-buttons>
         </ion-toolbar>
       </ion-header>
-      <ion-content>
-        <ion-list *ngFor="let examType of examTypes">
+      <ion-content *ngIf="">
+        <ion-list *ngFor="let examType of examTypesInfimier">
           <ion-item-divider>
             <ion-label>
               {{ examType.replace('_', ' ').toUpperCase() }}
@@ -151,8 +152,9 @@
         </ion-list>
 
 
-
       </ion-content>
+
+      
     </ng-template>
   </ion-modal>
 

@@ -99,8 +99,19 @@ export class CreateSchoolPage implements OnInit {
 
 
   generateId() {
-    //returner un très très grand nombre
+    //returner un très très grand nombre 
     this.schoolId = Math.floor(Math.random() * 1000000000000000000);
+    this.appStorage.get('schools').then((data) => {
+      if (data) {
+        data.forEach((element: any) => {
+          if (element.id == this.schoolId) {
+            this.generateId();
+          }
+        });
+      }
+    });
+
+
     return this.schoolId;
   }
 

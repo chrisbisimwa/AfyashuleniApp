@@ -85,6 +85,39 @@ export class ApiService {
     return this.http.delete(`${this.apiUrl}/schools/${schoolId}`, headers);
   }
 
+
+  async postExam(data: any) {
+    const headers = await this.getHeaders();
+    return this.http.post(`${this.apiUrl}/examinations`, data, headers);
+  }
+
+  async postExamData(examId:number,data: any) {
+    const headers = await this.getHeaders();
+    return this.http.post(`${this.apiUrl}/examinations/${examId}/all-examination-data`, data, headers);
+
+  }
+
+  async postEvaluation(examId:number,data: any) {
+    const headers = await this.getHeaders();
+    return this.http.post(`${this.apiUrl}/examinations/${examId}/evaluations`, data, headers);
+  }
+
+  async getExams() {
+    const headers = await this.getHeaders();
+    return this.http.get(`${this.apiUrl}/examinations`, headers);
+  }
+
+  async getExamData(examId:number){
+    const headers = await this.getHeaders();
+    return this.http.get(`${this.apiUrl}/examinations/${examId}/all-examination-data`, headers);
+  }
+
+  async getEvaluations(examId:number){
+    const headers = await this.getHeaders();
+    return this.http.get(`${this.apiUrl}/examinations/${examId}/evaluations`, headers);
+
+  }
+
   
 
   // Méthodes similaires pour les autres ressources...
@@ -96,5 +129,23 @@ export class ApiService {
       data,
       headers
     );
+  }
+
+
+  async checkTokenValidity(): Promise<boolean> {
+    const token = await this.appStorage.get('authToken');
+    if (!token) {
+      return false;
+    }
+    
+    const response: any = await this.http.get(`${this.apiUrl}/user`, { headers: { Authorization: `Bearer ${token}` } }).toPromise().then((response) => {
+      return response;
+    });
+    if (response && response.id) {
+      
+      return true;
+    }else{
+      return false;
+    }
   }
 }

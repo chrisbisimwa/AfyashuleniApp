@@ -178,6 +178,15 @@ export class ShowSchoolPage implements OnInit {
   generateId() {
     //returner un très très grand nombre
     this.classeId = Math.floor(Math.random() * 1000000000000000000);
+    this.appStorage.get('classes').then((result) => {
+      if (result) {
+        let school = result.find((sch: any) => sch.id == this.classeId);
+        if (school) {
+          this.generateId();
+        }
+      }
+    });
+
     return this.classeId;
   }
 

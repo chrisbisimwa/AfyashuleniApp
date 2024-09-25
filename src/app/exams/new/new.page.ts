@@ -25,7 +25,8 @@ export class NewPage implements OnInit {
   evaluations: any[] = [];
   user: any;
   selectedExamType: string = '';
-  examTypes: string[] = ['situation_familiale', 'calendrier_vaccinal', 'deparasitage', 'comportement_langage', 'anamnese', 'examen_clinique'];
+  examTypesInfimier: string[] = ['situation_familiale', 'calendrier_vaccinal', 'deparasitage', 'comportement_langage', 'anamnese'];
+  examTypesMedecin: string[] = ['examen_clinique']
   completedExamTypes: string[] = [];
   answers: { [key: string]: any } = {};
   groupedAnswers: { [key: string]: { [key: string]: any } } = {};
@@ -36,6 +37,9 @@ export class NewPage implements OnInit {
   //user role: tableau de string
   userRoles: String[] = [];
 
+  examId: number = 0;
+  examCode: string = '';
+
   questionsInfirmier: Exam = {
     'situation_familiale': [
       { label: 'Parents en vie', options: ['Les deux', 'Mère seulement', 'Père seulement', 'Aucun'], gender: 'both' },
@@ -43,7 +47,7 @@ export class NewPage implements OnInit {
       { label: 'Occupation des parents avec qui élève vit', options: null, gender: 'both' },
       { label: 'Nombre enfants fratrie', options: null, gender: 'both' },
       { label: 'Rand dans la fratrie', options: null, gender: 'both' },
-     
+
     ],
     'calendrier_vaccinal': [
       { label: 'BCG (tuberculose)', options: ['Lisible', 'Non lisible', 'Douteux'], gender: 'both' },
@@ -175,7 +179,7 @@ export class NewPage implements OnInit {
   };
 
 
-  constructor(protected fb: FormBuilder, public platform: Platform, private dataService: DataService, private authService: AuthService, private navController: NavController,
+  constructor(protected fb: FormBuilder, public platform: Platform, private authService: AuthService, private navController: NavController,
     private toastCtrl: ToastController, private appStorage: Storage) {
     this.fetchSchoolYears();
     this.fetchProblems();
@@ -191,10 +195,10 @@ export class NewPage implements OnInit {
   ngOnInit() {
     this.fetchSchoolYears();
 
-   
+
 
     this.fetchUser();
-    
+
 
     this.fetchSchools(null)
 
@@ -211,13 +215,13 @@ export class NewPage implements OnInit {
       for (let examType in this.questionsInfirmier) {
         this.answers[examType] = {};
       }
-    } else if(this.userRoles.includes('Medecin')) {
+    } else if (this.userRoles.includes('Medecin')) {
       this.questions = this.questionsMedecin;
       for (let examType in this.questionsMedecin) {
         this.answers[examType] = {};
       }
     }
-    
+
   }
 
   async fetchUser() {
@@ -227,38 +231,94 @@ export class NewPage implements OnInit {
 
   async fetchRoles() {
     this.userRoles = await this.appStorage.get('roles') || [];
-    
+
   }
 
   save() {
 
-    this.examTypes.forEach(type => {
-      this.groupedAnswers[type] = {};  // Initialiser un objet pour chaque type d'examen
+    if (this.userRoles.includes('infirmier')) {
+      this.examTypesInfimier.forEach(type => {
+        this.groupedAnswers[type] = {};
 
-      if (this.userRoles[0]=='infirmier') {
         this.questionsInfirmier[type].forEach(question => {
           const questionLabel = question.label;
 
-          if (this.answers[questionLabel] !== undefined) {
+          if (this.answers[questionLabel] !== undefined && this.answers[questionLabel] !== null) {
             this.groupedAnswers[type][questionLabel] = this.answers[questionLabel];
           }
         });
-      } else if(this.userRoles[0]=='Medecin') {
+
+
+      });
+    } else if (this.userRoles.includes('Medecin')) {
+      this.examTypesMedecin.forEach(type => {
+        this.groupedAnswers[type] = {};
+
         this.questionsMedecin[type].forEach(question => {
           const questionLabel = question.label;
 
-          if (this.answers[questionLabel] !== undefined) {
+          if (this.answers[questionLabel] !== undefined && this.answers[questionLabel] !== null) {
             this.groupedAnswers[type][questionLabel] = this.answers[questionLabel];
           }
         });
-      }
-      
-    });
+      });
+    }
+
+    
+
+
+
 
 
     this.evaluateAnswers();
 
   }
+
+  submitExam() {
+    let exams = [];
+    this.appStorage.get('exams').then((data) => {
+      if (data) {
+        exams = data;
+      } else {
+        exams = [];
+      }
+
+      for (const examType in this.groupedAnswers) {
+        exams.push({
+          id: this.generateExamId(),
+          code: this.generateExamCode(),
+          student_id: this.selectedStudent.id,
+          examiner_id: this.user.id,
+          type: examType,
+          date: new Date().toISOString(),
+        });
+
+        let examData= [];
+        this.appStorage.get('exams-data').then((data) => {
+          if (data) {
+            examData = data;
+          } else {
+            examData = [];
+          }
+
+          examData.push({
+            exam_id: this.examId,
+            answers: this.groupedAnswers[examType]
+          });
+
+          this.appStorage.set('exams-data', examData);
+        });
+      }
+
+
+      this.appStorage.set('exams', exams).then(() => {
+        this.navController.navigateForward('/tabs/exams');
+      });
+     
+
+
+  })
+}
 
 
   evaluateAnswers(): void {
@@ -435,9 +495,7 @@ export class NewPage implements OnInit {
     if (event.target.value) {
       this.studentGender = event.target.value.gender;
 
-      
 
-      console.log('Selected Student:', event.target.value.gender);
     }
   }
 
@@ -466,6 +524,33 @@ export class NewPage implements OnInit {
     // Simulate fetching the problem ID based on the name
     const problem = this.problems.find(p => p.name === problemName);
     return problem ? problem.id : -1;
+  }
+
+  generateExamId() {
+
+    this.examId = Math.floor(Math.random() * 1000000000000000000);
+    this.appStorage.get('exams').then((result) => {
+      if (result) {
+        let exam = result.find((sch: any) => sch.id == this.examId);
+        if (exam) {
+          this.generateExamId();
+        }
+      }
+    });
+
+    return this.examId;
+  }
+
+  generateExamCode(){
+    this.examCode = Math.random().toString(36).substring(7);
+    this.appStorage.get('exams').then((result) => {
+      if (result) {
+        let exam = result.find((sch: any) => sch.code == this.examCode);
+        if (exam) {
+          this.generateExamCode();
+        }
+      }
+    });
   }
 
 }

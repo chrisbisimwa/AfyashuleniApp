@@ -37,13 +37,20 @@ export class AppComponent {
     this.checkLogin();
     this.checkNetwork();
 
-    
+
   }
 
   checkLogin() {
-    this.appStorage.get('authToken').then(token => {
+    this.appStorage.get('authToken').then(async token => {
       if (token) {
-        this.router.navigate(['/tabs/home']);
+        //check if the token is still valid
+        let tokenData = await this.apiService.checkTokenValidity();
+        if (tokenData) {
+          this.router.navigate(['/tabs/home']);
+        }else{
+          this.router.navigate(['/login']);
+        }
+        
       } else {
         this.router.navigate(['/login']);
       }
@@ -85,7 +92,6 @@ export class AppComponent {
       for (let sy of schoolYears) {
         if (!sy.created_at && !sy.updated_at) {
           //synchroniser l'année scolaire
-          console.log('synchroniser l\'année scolaire');
         }
       }
 
@@ -100,11 +106,10 @@ export class AppComponent {
           const schoolObservable = await schoolPromise; // Récupérez l'Observable
           const school = await lastValueFrom(schoolObservable);
 
-        }else if(sc.status=="deleted"){
+        } else if (sc.status == "deleted") {
           const schoolPromise = this.apiService.deleteSchool(sc.id);
           const schoolObservable = await schoolPromise;
-          const school =await lastValueFrom(schoolObservable).then((data:any)=>{
-            console.log(data);
+          const school = await lastValueFrom(schoolObservable).then((data: any) => {
           });
         }
       }
@@ -150,6 +155,41 @@ export class AppComponent {
       }
     }
 
+    //verifie s'il y a des examens à synchroniser
+    let exams = await this.appStorage.get('exams');
+    let examsData = await this.appStorage.get('exams-data');
+    let evaluations = await this.appStorage.get('evaluations');
+    if (exams) {
+      for (let ex of exams) {
+        if (!ex.created_at && !ex.updated_at) {
+          const examPromise = this.apiService.postExam(ex); // Stockez la Promise
+          const examObservable = await examPromise; // Récupérez l'Observable
+          const exam = await lastValueFrom(examObservable).then(async (data: any) => {
+            if (examsData) {
+              for (let ed of examsData) {
+                if (!ed.created_at && !ed.updated_at && ed.examination_id == data.id) {
+                  const examDataPromise = this.apiService.postExamData(data.id, ed); // Stockez la Promise
+                  const examDataObservable = await examDataPromise; // Récupérez l'Observable
+                  const examData = await lastValueFrom(examDataObservable);
+                }
+              }
+            }
+
+            if (evaluations) {
+              for (let ev of evaluations) {
+                if (!ev.created_at && !ev.updated_at && ev.examination_id == data.id) {
+                  const evaluationPromise = this.apiService.postEvaluation(data.id, ev); // Stockez la Promise
+                  const evaluationObservable = await evaluationPromise; // Récupérez l'Observable
+                  const evaluation = await lastValueFrom(evaluationObservable);
+                }
+              }
+            }
+          });
+
+        }
+      }
+    }
+
 
 
   }
@@ -161,85 +201,138 @@ export class AppComponent {
 
 
   async loadAllData() {
-    const studentsPromise = this.apiService.getStudents(); // Stockez la Promise
-    const studentsObservable = await studentsPromise; // Récupérez l'Observable
-    const students: any = await lastValueFrom(studentsObservable).then((data: any) => {
-      if (data.data) {
-        this.appStorage.set('students', data.data);
-      }
-    });
+    try {
+      const studentsPromise = this.apiService.getStudents(); // Stockez la Promise
+      const studentsObservable = await studentsPromise; // Récupérez l'Observable
+      const students: any = await lastValueFrom(studentsObservable).then((data: any) => {
+        if (data.data) {
+          this.appStorage.set('students', data.data);
+        }
+      });
 
-    const studentHistoryPromise = this.apiService.getStudentHistory(1); // Stockez la Promise
-    const studentHistoryObservable = await studentHistoryPromise; // Récupérez l'Observable
-    const studentHistory: any = await lastValueFrom(studentHistoryObservable).then((data: any) => {
-      if (data.data) {
-        this.appStorage.set('student-history', data.data);
-      }
-    });
-
-
-
-
-    const problemsPromise = this.apiService.getProblems(); // Stockez la Promise
-    const problemsObservable = await problemsPromise; // Récupérez l'Observable
-    const problems: any = await lastValueFrom(problemsObservable).then((data: any) => {
-      if (data.data) {
-        console.log(data.data);
-        this.appStorage.set('problems', data.data);
-      }
-    });
-
-
-    const schoolYearsPromise = this.apiService.getSchoolYears(); // Stockez la Promise
-    const schoolYearsObservable = await schoolYearsPromise; // Récupérez l'Observable
-    const schoolYears: any = await lastValueFrom(schoolYearsObservable).then((data: any) => {
-      if (data.data) {
-        this.appStorage.set('schoolYears', data.data);
-      }
-    });
+      const studentHistoryPromise = this.apiService.getStudentHistory(1); // Stockez la Promise
+      const studentHistoryObservable = await studentHistoryPromise; // Récupérez l'Observable
+      const studentHistory: any = await lastValueFrom(studentHistoryObservable).then((data: any) => {
+        if (data.data) {
+          this.appStorage.set('student-history', data.data);
+        }
+      });
 
 
 
-    const schoolsPromise = this.apiService.getSchools(); // Stockez la Promise
-    const schoolsObservable = await schoolsPromise; // Récupérez l'Observable
-    const schools: any = await lastValueFrom(schoolsObservable).then((data: any) => {
 
-      if (data.data) {
-        this.appStorage.set('schools', data.data);
-      }
-    });
+      const problemsPromise = this.apiService.getProblems(); // Stockez la Promise
+      const problemsObservable = await problemsPromise; // Récupérez l'Observable
+      const problems: any = await lastValueFrom(problemsObservable).then((data: any) => {
+        if (data.data) {
+          this.appStorage.set('problems', data.data);
+        }
+      });
+
+
+      const schoolYearsPromise = this.apiService.getSchoolYears(); // Stockez la Promise
+      const schoolYearsObservable = await schoolYearsPromise; // Récupérez l'Observable
+      const schoolYears: any = await lastValueFrom(schoolYearsObservable).then((data: any) => {
+        if (data.data) {
+          this.appStorage.set('schoolYears', data.data);
+        }
+      });
 
 
 
-    //load all classes by schools
-    const schls = await this.appStorage.get('schools');
-    if (schls) {
-      let cls: any[] = [];
-      for (let school of schls) {
-        const classesPromise = this.apiService.getClasses(school.id); // Stockez la Promise
-        const classesObservable = await classesPromise; // Récupérez l'Observable
-        const classes: any = await lastValueFrom(classesObservable).then((dt: any) => {
-          if (dt && dt.data && dt.data.length > 0) {
-            for (let cl of dt.data) {
-              cls.push(cl);
+      const schoolsPromise = this.apiService.getSchools(); // Stockez la Promise
+      const schoolsObservable = await schoolsPromise; // Récupérez l'Observable
+      const schools: any = await lastValueFrom(schoolsObservable).then((data: any) => {
+
+        if (data.data) {
+          this.appStorage.set('schools', data.data);
+        }
+      });
+
+
+
+      //load all classes by schools
+      const schls = await this.appStorage.get('schools');
+      if (schls) {
+        let cls: any[] = [];
+        for (let school of schls) {
+          const classesPromise = this.apiService.getClasses(school.id); // Stockez la Promise
+          const classesObservable = await classesPromise; // Récupérez l'Observable
+          const classes: any = await lastValueFrom(classesObservable).then((dt: any) => {
+            if (dt && dt.data && dt.data.length > 0) {
+              for (let cl of dt.data) {
+                cls.push(cl);
+              }
+
+              this.appStorage.set('classes', cls);
+
             }
+          });
 
-            this.appStorage.set('classes', cls);
 
-          }
-        });
-
+        }
 
       }
 
+      //load all exams
+      const examsPromise = this.apiService.getExams(); // Stockez la Promise
+      const examsObservable = await examsPromise; // Récupérez l'Observable
+      const exams: any = await lastValueFrom(examsObservable).then((data: any) => {
+        if (data.data) {
+          this.appStorage.set('exams', data.data);
+        }
+      });
+
+      //load all exams data by exams
+      const exms = await this.appStorage.get('exams-data');
+      if (exms) {
+        let exmData: any[] = [];
+        for (let exam of exms) {
+          const examsDataPromise = this.apiService.getExamData(exam.id); // Stockez la Promise
+          const examsDataObservable = await examsDataPromise; // Récupérez l'Observable
+          const examsData: any = await lastValueFrom(examsDataObservable).then((dt: any) => {
+            if (dt && dt.data && dt.data.length > 0) {
+              for (let ed of dt.data) {
+                exmData.push(ed);
+              }
+
+              this.appStorage.set('exams-data', exmData);
+
+            }
+          });
+        }
+      }
+
+      //load all evaluations by exams
+      const exms2 = await this.appStorage.get('evaluations');
+      if (exms2) {
+        let evs: any[] = [];
+        for (let exam of exms2) {
+          const evaluationsPromise = this.apiService.getEvaluations(exam.id); // Stockez la Promise
+          const evaluationsObservable = await evaluationsPromise; // Récupérez l'Observable
+          const evaluations: any = await lastValueFrom(evaluationsObservable).then((dt: any) => {
+            if (dt && dt.data && dt.data.length > 0) {
+              for (let ev of dt.data) {
+                evs.push(ev);
+              }
+
+              this.appStorage.set('evaluations', evs);
+
+            }
+          });
+        }
+      }
+
+    } catch (e) {
+      console.log(e);
     }
 
 
 
 
-
-
   }
+
+
 
 
 

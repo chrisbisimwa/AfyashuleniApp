@@ -36,22 +36,22 @@ export class ShowStudentPage implements OnInit {
   }
 
   async fectClasse() {
-    if(this.student) {
+    if (this.student) {
       const classes = await this.appStorage.get('classes');
       const classe = classes.find((item: { id: any; }) => item.id == this.student.current_class_id);
       this.studenClass = classe;
     }
-    
+
   }
 
   async fetchSchool() {
-    if(this.studenClass) {
+    if (this.studenClass) {
       const schools = await this.appStorage.get('schools');
       const school = schools.find((item: { id: any; }) => item.id == this.studenClass.school_id);
       this.studentSchool = school;
     }
 
-   
+
   }
 
   editStudent() {
@@ -59,7 +59,31 @@ export class ShowStudentPage implements OnInit {
   }
 
   deleteModal() {
-    //this.presentAlertConfirm();
+    const alert = this.alertController.create({
+      header: 'Confirmation',
+      message: 'Voulez-vous vraiment supprimer cet élève?',
+      buttons: [
+        {
+          text: 'Annuler',
+          role: 'cancel',
+          cssClass: 'secondary',
+        },
+        {
+          text: 'Supprimer',
+          handler: async () => {
+            const students = await this.appStorage.get('students');
+            const student = students.find((item: { id: any; }) => item.id == this.student.id);
+            if (student) {
+              students.splice(students.indexOf(student), 1);
+              student.status = 'deleted';
+              students.push(student);
+              this.appStorage.set('students', students);
+              this.navController.navigateBack('/students');
+            }
+          }
+        }
+      ]
+    });
   }
 
 }

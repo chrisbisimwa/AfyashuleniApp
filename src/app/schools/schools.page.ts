@@ -45,18 +45,9 @@ export class SchoolsPage {
       this.schools = result.filter((item:any) => item.status !== 'deleted');
     }
 
-   /*  const schools = await this.dataService.get('schools');
-    this.schools = schools.data || []; */
-
-
-    /* this.databaseService.getSchoolList().subscribe((res: unknown) => {
-      const result = res as any[];
-      this.schools = Array.from(result);
-
-      console.log(this.schools);
-    }); */
-     
-
+    if (refresher) {
+      refresher.target.complete();
+    }
   }
 
   search(query:any, refresher?:any) {
@@ -75,6 +66,10 @@ export class SchoolsPage {
      
    } 
  }
+
+ segmentChanged(event:any) {
+  this.fetchSchools(event);
+}
 
  async new() {
   await this.navController.navigateForward('/tabs/schools/new');
