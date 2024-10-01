@@ -55,8 +55,12 @@ export class LoginPage implements OnInit {
                 //fetch user roles
                 this.http.get(`${this.apiUrl}/users/`+user.id+'/roles', headers)
                   .subscribe((roles: any) => {
+                    
                     this.appStorage.set('roles', roles.data);
-                  });
+                  }, error => {
+                    alert(error.error.message);
+                  }
+                );
                 
 
                 this.router.navigate(['/tabs/home']);

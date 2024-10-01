@@ -1,0 +1,79 @@
+<ion-header class="ion-no-border" mode="ios">
+  <ion-toolbar style="--background: var(--ion-color-primary)">
+    <ion-buttons slot="start">
+      <ion-back-button color="light"></ion-back-button>
+    </ion-buttons>
+    <ion-title style="color: white;letter-spacing: 1px;font-family: 'semi-bold';">Examen</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content *ngIf="exam">
+  <div class="main_content_div">
+    <ion-label class="title_lbl">Détails de l'examen</ion-label>
+    <ion-list>
+      <ion-item>
+        <ion-label>Code</ion-label>
+        <div item-content>
+          <span id="code-content">{{exam.id ?? "-"}}</span>
+        </div>
+      </ion-item>
+      <ion-item>
+        <ion-label>Elève</ion-label>
+        <div item-content>
+          <span>{{exam.studentName}}</span>
+        </div>
+      </ion-item>
+      <ion-item>
+        <ion-label>Medecin</ion-label>
+        <div item-content>
+          <span id="designation-content">{{exam.examinerName}}</span>
+        </div>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>Date</ion-label>
+        <div item-content>
+          <span id="reportedAt-content" *ngIf="exam.date">{{exam.date | date :  "dd.MM.y" }}</span>
+        </div>
+      </ion-item>
+
+      <ion-item-group>
+        <ion-item-divider>
+          <ion-label>
+            <h2>Données de l'examen ({{exam.type}})</h2>
+          </ion-label>
+        </ion-item-divider>
+      
+
+        
+          <ion-item-sliding button detail="true" *ngFor="let data of examDatas" #slidingItem>
+            <ion-item>
+              <ion-label>{{data.question}}</ion-label>
+              <div item-content>
+                <span>{{data.answer}}</span>
+              </div>
+            </ion-item>
+           
+            <ion-item-options side="end">
+              <ion-item-option color="primary" > Modifier la classe</ion-item-option>
+              <ion-item-option color="danger" > Supprimer la classe</ion-item-option>
+            </ion-item-options>
+          </ion-item-sliding>
+      
+      </ion-item-group>
+
+      
+
+
+    </ion-list>
+
+
+
+    <ion-button expand="block" color="Medium" (click)="new()">Ajouter un examen</ion-button>
+    <ion-button expand="block" color="primary" (click)="open(exam)">Modifier l'examen</ion-button>
+    <ion-button expand="block" color="danger" (click)="deleteModal(exam)">Supprimer l'examen</ion-button>
+  </div>
+
+
+
+</ion-content>

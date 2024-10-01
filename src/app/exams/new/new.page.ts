@@ -4,6 +4,7 @@ import { NavController, Platform, ToastController } from '@ionic/angular';
 import { DataService } from '../../services/data.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { Storage } from '@ionic/storage-angular';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-new',
@@ -25,6 +26,9 @@ export class NewPage implements OnInit {
   evaluations: any[] = [];
   user: any;
   selectedExamType: string = '';
+  selectedProblem: number= 0;
+  addedProblems: any[]=[];
+  selectedEvaluation: string ="";
   examTypesInfimier: string[] = ['situation_familiale', 'calendrier_vaccinal', 'deparasitage', 'comportement_langage', 'anamnese'];
   examTypesMedecin: string[] = ['examen_clinique']
   completedExamTypes: string[] = [];
@@ -39,10 +43,12 @@ export class NewPage implements OnInit {
 
   examId: number = 0;
   examCode: string = '';
+  step:number = 1;
+  isModalOpen = false;
 
   questionsInfirmier: Exam = {
     'situation_familiale': [
-      { label: 'Parents en vie', options: ['Les deux', 'Mère seulement', 'Père seulement', 'Aucun'], gender: 'both' },
+      { label: 'Parents_en_vie', options: ['Les deux', 'Mère seulement', 'Père seulement', 'Aucun'], gender: 'both' },
       { label: 'Elève vit avec', options: ['Les deux parents', 'La mère', 'Le père', 'Famille paternelle', 'Famille maternelle', 'Tuteur'], gender: 'both' },
       { label: 'Occupation des parents avec qui élève vit', options: null, gender: 'both' },
       { label: 'Nombre enfants fratrie', options: null, gender: 'both' },
@@ -59,44 +65,46 @@ export class NewPage implements OnInit {
       { label: 'DTCoq (diphtérie, tétanos, coqueluce)', options: ['Fait', 'Non fait', 'Inconnu'], gender: 'both' },
     ],
     'deparasitage': [
-      { label: 'Deparasite', options: ['Oui', 'Non', 'Inconnu'], gender: 'both' },
-      { label: 'Date du dernier déparasitage', options: null, gender: 'both' },
-      { label: 'Médicament de déparasitage', options: ['Albendazole 100mg', 'Albendazole 500mg', 'Mebendazole 100mg', 'Mebendazole 500mg'], gender: 'both' },
-      { label: 'Fréquence', options: ['Après 1 mois', 'Après 2 mois', 'Après 3 mois', 'Après 4 mois'], gender: 'both' },
+      { label: 'Deparasité_?', options: ['Oui', 'Non', 'Inconnu'], gender: 'both' },
+      { label: 'Date_du_dernier_déparasitage', options: null, gender: 'both', parent: 'Deparasité_?', parentValue: 'Oui' },
+      { label: 'Médicament_de_déparasitage', options: ['Albendazole 100mg', 'Albendazole 500mg', 'Mebendazole 100mg', 'Mebendazole 500mg'], gender: 'both', parent: 'Deparasité_?', parentValue: 'Oui' },
+      { label: 'Fréquence', options: ['Après 1 mois', 'Après 2 mois', 'Après 3 mois', 'Après 4 mois'], gender: 'both', parent: 'Deparasité_?', parentValue: 'Oui' },
     ],
     'comportement_langage': [
       { label: 'Comportement', options: ['Calme', 'Agité', 'Distrait', 'Peureux', 'Curieux', 'Autres'], gender: 'both' },
-      { label: 'Si autre comportement, préciser', options: null, gender: 'both' },
+      { label: 'Si_autre_comportement,_préciser', options: null, gender: 'both', parent: 'Comportement', parentValue: 'Autres' },
       { label: 'Langage', options: ['Cohérent', 'incohérent', 'Autres'], gender: 'both' },
-      { label: 'Si autre language, préciser', options: null, gender: 'both' },
+      { label: 'Si_autre_language,_préciser', options: null, gender: 'both', parent: 'Langage', parentValue: 'Autres' },
     ],
     'anamnese': [
       { label: 'Nutrition', options: null, gender: 'both' },
       { label: 'Sommeil', options: null, gender: 'both' },
-      { label: 'Exercice physique', options: null, gender: 'both' },
-      { label: 'Hygiènne corporelle', options: null, gender: 'both' },
+      { label: 'Exercice_physique', options: null, gender: 'both' },
+      { label: 'Hygiènne_corporelle', options: null, gender: 'both' },
       { label: 'Hygiènne_vestimentaire', options: null, gender: 'both' },
-      { label: 'Antecedents personnels', options: null, gender: 'both' },
-      { label: 'Anamnese familial', options: null, gender: 'both' },
+      { label: 'Antecedents_personnels', options: null, gender: 'both' },
+      { label: 'Antecedents_familiaux', options: null, gender: 'both' },
       { label: 'Allergies', options: null, gender: 'both' },
-      { label: 'Traitements chroniques', options: null, gender: 'both' },
-      { label: 'Place en classe', options: null, gender: 'both' },
-      { label: 'Plaintes visuelles', options: null, gender: 'both' },
-      { label: 'Plaintes auditives', options: null, gender: 'both' },
-      { label: 'Taille (cm)', options: null, gender: 'both' },
-      { label: 'poids (Kg)', options: null, gender: 'both' },
+      { label: 'Traitements_chroniques', options: null, gender: 'both' },
+      { label: 'Place_en_classe', options: null, gender: 'both' },
+      { label: 'Plaintes_visuelles', options: null, gender: 'both' },
+      { label: 'Plaintes_auditives', options: null, gender: 'both' },
+      { label: 'Taille_(cm)', options: null, gender: 'both' },
+      { label: 'Poids_(kg)', options: null, gender: 'both' },
+      { label: 'Pourcentage', options: null , gender: 'both'},
+      { label: 'IMC', options: null , gender: 'both'},
       { label: 'acuite_visuelle_loin_droite_sans_correction', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both' },
       { label: 'acuite_visuelle_loin_gauche_sans_correction', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both' },
       { label: 'acuite_loin_droite_avec_lunettes', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both' },
       { label: 'acuite_loin_gauche_avec_lunettes', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both' },
-      { label: 'audiometrie_droite_500', options: ['Ok', 'Pas bon'], gender: 'both' },
-      { label: 'audiometrie_droite_1000', options: ['Ok', 'Pas bon'], gender: 'both' },
-      { label: 'audiometrie_droite_2000', options: ['Ok', 'Pas bon'], gender: 'both' },
-      { label: 'audiometrie_droite_4000', options: ['Ok', 'Pas bon'], gender: 'both' },
-      { label: 'audiometrie_gauche_500', options: ['Ok', 'Pas bon'], gender: 'both' },
-      { label: 'audiometrie_gauche_1000', options: ['Ok', 'Pas bon'], gender: 'both' },
-      { label: 'audiometrie_gauche_2000', options: ['Ok', 'Pas bon'], gender: 'both' },
-      { label: 'audiometrie_gauche_4000', options: ['Ok', 'Pas bon'], gender: 'both' },
+      { label: 'audiometrie_droite_500', options: ['Bon', 'Pas bon'], gender: 'both' },
+      { label: 'audiometrie_droite_1000', options: ['Bon', 'Pas bon'], gender: 'both' },
+      { label: 'audiometrie_droite_2000', options: ['Bon', 'Pas bon'], gender: 'both' },
+      { label: 'audiometrie_droite_4000', options: ['Bon', 'Pas bon'], gender: 'both' },
+      { label: 'audiometrie_gauche_500', options: ['Bon', 'Pas bon'], gender: 'both' },
+      { label: 'audiometrie_gauche_1000', options: ['Bon', 'Pas bon'], gender: 'both' },
+      { label: 'audiometrie_gauche_2000', options: ['Bon', 'Pas bon'], gender: 'both' },
+      { label: 'audiometrie_gauche_4000', options: ['Bon', 'Pas bon'], gender: 'both' },
       { label: 'Test de la montre gauche ', options: ['Bon', 'Pas bon'], gender: 'both' },
       { label: 'Test de la montre droite ', options: ['Bon', 'Pas bon'], gender: 'both' },
       { label: 'Test du diapason gauche', options: ['Bon', 'Pas bon'], gender: 'both' },
@@ -107,80 +115,98 @@ export class NewPage implements OnInit {
   questionsMedecin: Exam = {
     // ...
     "examen_clinique": [
-      { label: 'reflet_corneen', options: ['Bon', 'Pas bon'], gender: 'both' },
-      { label: 'test_occlusion', options: ['Bon', 'Pas bon'], gender: 'both' },
-      { label: "Aspect de l'urine", options: null, gender: 'both' },
-      { label: "Leucocytes", options: ['Négatif', 'Trace', '1+', '2+', '3+'], gender: 'both' },
-      { label: "Nitrites", options: ['Positif', 'Négatif'], gender: 'both' },
-      { label: "Protéines", options: ['Négatif', 'Trace', '1+', '2+', '3+'], gender: 'both' },
-      { label: "Glucose", options: ['Négatif', '1+', '2+', '3+', '4+'], gender: 'both' },
-      { label: "Hémoglobine", options: ['Négatif', '1+', '2+', '3+'], gender: 'both' },
       { label: "Anamnese", options: null, gender: 'both' },
-      { label: "aspect_general", options: ['Bon', 'Altéré'], gender: 'both' },  // Champ avec valeurs prédéfinies
+      { label: "etat_general", options: ['Bon', 'Altéré'], gender: 'both' }, 
+      { label: "etat_general_altéré_par", options: null, gender: 'both', parent:'etat_general', parentValue: 'Altéré'},
       { label: "dysmorphie", options: ['Malformation de la gorge', 'Malformation de la bouche', 'Malformation du nez', 'Malformation des oreilles', 'Malformation des yeux', 'Malformation des membres', 'Autres'], gender: 'both' },
-      { label: "Si autre dysmorphie, préciser", options: null, gender: 'both' },
-      { label: "Conjonctive", options: ['Coloré', 'Non coloré'], gender: 'both' },
-      { label: "Brosse à dent", options: ['Oui', 'Non'], gender: 'both' },
+      { label: "Si_autre_dysmorphie,_préciser", options: null, gender: 'both', parent: 'dysmorphie', parentValue: 'Autres' },
+      { label: "Conjonctive", options: ['Palpébrale colorée', 'Palpébrale pâle', 'Bulbaire anicterique', 'Bulbaire ictérique', 'Autres'], gender: 'both' },
+      { label: "Si_autre_conjonctive,_préciser", options: null, gender: 'both', parent: 'Conjonctive', parentValue: 'Autres' },
+      { label: "Brosse_à_dent", options: ['Oui', 'Non'], gender: 'both' },
+      { label: "fréquence_de_brossage", options: null, gender:'both', parent: 'Brosse_à_dent', parentValue: 'Oui'},
+      { label: "utilisation_du_dentifrice", options: ['Oui', 'Non'], gender: 'both',  parent: 'Brosse_à_dent', parentValue: 'Oui'},
+      { label: "Si_non_utilisation_du_dentifrice,_préciser", options: null, gender: 'both', parent: 'utilisation_du_dentifrice', parentValue: 'Non'},
       { label: "Dentiste", options: ['Oui', 'Non'], gender: 'both' },
+      { label: "frequence_visite_dentiste", options: null, gender: 'both', parent: 'Dentiste', parentValue: 'Oui'},
       { label: "Carie", options: ['Oui', 'Non'], gender: 'both' },
-      { label: "Si oui, stade carie", options: ['Stade 1', 'Stade 2', 'Stade 3', 'Stade 4', 'Stade 5'], gender: 'both' },
-      { label: 'Plaque', options: ['-', '+', '2+', '3+', '+/-'], gender: 'both' },
-      { label: 'Tartre', options: ['-', '+', '2+', '3+', '+/-'], gender: 'both' },
-      { label: 'Débri alimentaire', options: ['-', '+', '2+', '3+', '+/-'], gender: 'both' },
-      { label: 'Gingivite', options: ['Plus', 'Moins'], gender: 'both' },
-      { label: 'gorge', options: ['Normale', 'Tuméfiée', 'Hyperhémique'], gender: 'both' },
-      { label: 'nez', options: ['Rien à signaler', 'Corp étranger', 'Polype', 'Autres'], gender: 'both' },
-      { label: 'Triangle limineux (oreille gauche)', options: ['Bon', 'Pas bon'], gender: 'both' },
-      { label: 'Triangle limineux (oreille droite)', options: ['Bon', 'Pas bon'], gender: 'both' },
-      { label: 'Bouchon de cérumen (oreille gauche)', options: ['Oui', 'Non'], gender: 'both' },
-      { label: 'Bouchon de cérumen (oreille droite)', options: ['Oui', 'Non'], gender: 'both' },
-      { label: 'Corps étranger (oreille gauche)', options: ['Oui', 'Non'], gender: 'both' },
-      { label: 'Corps étranger (oreille droite)', options: ['Oui', 'Non'], gender: 'both' },
-      { label: 'Otite', options: ['Oui', 'Non'], gender: 'both' },
-      { label: 'Autre problème ORL', options: null, gender: 'both' },
+      { label: "Si oui, stade carie", options: ['Stade 1', 'Stade 2', 'Stade 3', 'Stade 4', 'Stade 5'], gender: 'both', parent: 'Carie', parentValue: 'Oui' },
+      { label: "Débris_alimentaires", options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both'},
+      { label: 'Plaque', options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
+      { label: 'Tartre', options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
+      { label: 'Gingivite', options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
+      { label: 'gorge', options: ['Saine', 'Pathologique'], gender: 'both' },
+      { label: 'Si_gorge_pathologique,_préciser', options: null, gender: 'both',parent: 'gorge', parentValue: 'Pathologique' },
+      { label: 'nez', options: ['Normal', 'Pahtologique'], gender: 'both' },
+      { label: 'Si_nez_pathologique,_préciser', options: null, gender: 'both',parent: 'nez', parentValue: 'Pathologique' },
+      { label: 'oreille_droite', options: ['Normal', 'Pathologique'], gender: 'both' },
+      { label: 'Si_oreille_droite_pathologique,_préciser', options: null, gender: 'both',parent: 'oreille_droite', parentValue: 'Pathologique' },
+      { label: 'oreille_gauche', options: ['Normal', 'Pathologique'], gender: 'both' },
+      { label: 'Si_oreille_gauche_pathologique,_préciser', options: null, gender: 'both',parent: 'oreille_gauche', parentValue: 'Pathologique' },
       { label: 'thyroide', options: ['normale', 'tuméfiée'], gender: 'both' },
-      { label: 'ganglions_droite_gauche', options: null, gender: 'both' },
-      { label: 'Coeur', options: ['Normal', 'Insouffle'], gender: 'both' },
-      { label: 'Bâtement cardiaque', options: ['Rythme régulier', 'Rythme irrégulier'], gender: 'both' },
-      { label: 'Fréquence cardiaque', options: ['10 bpm', '20 bpm', '30 bpm', '40 bpm', '50 bpm', '60 bpm', '70 bpm', '80 bpm', '90 bpm', '100 bpm', '110 bpm', '120 bpm', '130 bpm', '140 bpm', '150 bpm', '160 bpm', '170 bpm', '180 bpm', '190 bpm', '200 bpm'], gender: 'both' },
-      { label: 'Systole', options: ['10 mmHg', '20 mmHg', '30 mmHg', '40 mmHg', '50 mmHg', '60 mmHg', '70 mmHg', '80 mmHg', '90 mmHg', '100 mmHg', '110 mmHg', '120 mmHg', '130 mmHg', '140 mmHg', '150 mmHg', '160 mmHg', '170 mmHg', '180 mmHg', '190 mmHg', '200 mmHg'], gender: 'both' },
-      { label: 'Diastole', options: ['10 mmHg', '20 mmHg', '30 mmHg', '40 mmHg', '50 mmHg', '60 mmHg', '70 mmHg', '80 mmHg', '90 mmHg', '100 mmHg', '110 mmHg', '120 mmHg', '130 mmHg', '140 mmHg', '150 mmHg', '160 mmHg', '170 mmHg', '180 mmHg', '190 mmHg', '200 mmHg'], gender: 'both' },
-      { label: 'poumons', options: ['MVP', 'Sibulence tier supérieur gauche', 'Sibulence tier supérieur droit', 'Sibulence tier inférieur gauche', 'Sibulence tier inférieur droit', 'Sibulence tier moyen gauche', 'Sibulence tier moyen droit', 'Râles tier supérieur gauche', 'Râles tier supérieur droit', 'Râles tier inférieur gauche', 'Râles tier inférieur droit', 'Râles tier moyen gauche', 'Râles tier moyen droit', 'Autres'], gender: 'both' },
-      { label: 'si autre problème de poumons, préciser', options: null, gender: 'both' },
-      { label: 'Peau', options: ['Saine', 'Mycose', 'Gale', 'Plaie', 'Allergie', 'Autres'], gender: 'both' },
-      { label: 'Si autre problème de peau, préciser', options: null, gender: 'both' },
-      { label: 'Cheveux', options: ['Rien à signaler', 'Teigne tondante', 'Plaie', 'Autres'], gender: 'both' },
-      { label: 'Si autre problème de cheveux, préciser', options: null, gender: 'both' },
-      { label: 'ongles', options: ['Rien à signaler', 'Pied athlète', 'Mycose', 'Onycho-mycose', 'Autres'], gender: 'both' },
-      { label: 'Hernie', options: ['Absente', 'Présente'], gender: 'both' },
-      { label: 'Si hernie, préciser', options: null, gender: 'both' },
-      { label: 'region_inguinale', options: ['Souple', 'Ballonée', 'Autres'], gender: 'both' },
-      { label: 'Si autre problème de région inguinale, préciser', options: null, gender: 'both' },
+      { label: 'ganglions', options: null, gender: 'both' },
+      { label: 'Coeur', options: ['Normal', 'Pathologique'], gender: 'both' },
+      { label: 'Si_coeur_pathologique,_préciser', options: null, gender: 'both',parent: 'Coeur', parentValue: 'Pathologique' },
+      { label: 'Rythme_cardiaque', options: ['Rythme régulier', 'Rythme irrégulier'], gender: 'both' },
+      { label: 'Fréquence_cardiaque_(bpm)', options: null, gender: 'both' },
+      { label: 'tension_arthérielle', options: null, gender: 'both' },
+      { label: 'poumons', options: ['MVP', 'pathologique'], gender: 'both' },
+      { label: 'Si_poumons_pathologique,_préciser', options: null, gender: 'both', parent: 'poumons',parentValue: 'Pathologique' },
+      { label: 'Peau', options: ['Normal', 'Pathologique'], gender: 'both' },
+      { label: 'Si_peau_pathologique,_préciser', options: null, gender: 'both', parent: 'Peau', parentValue: 'Pathologique' },
+      { label: 'Cheveux', options: ['Normal', 'Pathologique'], gender: 'both' },
+      { label: 'Si_cheveux_pathologique,_préciser', options: null, gender: 'both', parent: 'Cheveux', parentValue: 'Pathologique' },
+      { label: 'ongles', options: ['Rien à signaler', 'Pied athlète', 'Onycho-mycose', 'Autres'], gender: 'both' },
+      { label: 'Si_autre_problème_ongles,_préciser', options: null, gender: 'both', parent: 'ongles', parentValue: 'Autres' },
+      { label: 'Inspection_de_abdomen', options: ['Normal', 'Pathologique'], gender: 'both' },
+      { label: 'Si_abdomen_pathologique,_préciser', options: null, gender: 'both', parent: 'Inspection_de_abdomen', parentValue: 'Pathologique' },
+      { label: 'Palpation_de_abdomen', options: ['Normal', 'Pathologique'], gender: 'both' },
+      { label: 'Si_abdomen_palpation_pathologique,_préciser', options: null, gender: 'both', parent: 'Palpation_de_abdomen', parentValue: 'Pathologique' },
+      { label: 'region_inguinale', options: ['Normal', 'Pathologique'], gender: 'both' },
+      { label: 'Si_region_inguinale_pathologique,_préciser', options: null, gender: 'both', parent: 'region_inguinale', parentValue: 'Pathologique' },
+      { label: 'systeme_uro_genital', options: null, gender: 'both'},
       { label: 'Menarche', options: ['Oui', 'Non'], gender: 'female' },
-      { label: 'Si oui, âge de la menarche', options: null, gender: 'female' },
-      { label: 'Si non, averti ?', options: ['Oui', 'Non'], gender: 'female' },
-      { label: 'Volume testicule droite', options: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'], gender: 'male' },
-      { label: 'Volule testicule gauche', options: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'], gender: 'male' },
-      { label: 'Pilosité pubienne', options: ['P1', 'P2', 'P3', 'P4', 'P5'], gender: 'both' },
-      { label: 'Développement des organes génitaux', options: ['G1', 'G2', 'G3', 'G4', 'G5'], gender: 'male' },
-      { label: 'Développement mammaire', options: ['S1', 'S2', 'S3', 'S4', 'S5'], gender: 'female' },
-      { label: 'appareil_locomoteur_statique_colonne', options: ['OK', 'Malformation', 'Autres'], gender: 'both' },
-      { label: 'appareil_locomoteur_statique_bassin', options: ['OK', 'Malformation', 'Autres'], gender: 'both' },
-      { label: 'Membre_inferieur', options: ['OK', 'Malformation', 'Autres'], gender: 'both' },
-      { label: 'Demarche', options: ['Bonne', 'Boiteuse', 'Autres'], gender: 'both' },
-      { label: 'Equilibre', options: ['Bon', 'Aucun'], gender: 'both' },
-      { label: 'fine_motricite', options: ['OK', 'Non'], gender: 'both' },
-      { label: 'coordination', options: ['OK', 'Non'], gender: 'both' },
-      { label: 'reflexe', options: ['OK', 'Non'], gender: 'both' },
-      { label: 'Points attention_conseils', options: null, gender: 'both' },
-      { label: 'Autres problèmes', options: null, gender: 'both' },
+      { label: 'Si_non,_averti_?', options: ['Oui', 'Non'], gender: 'female', parent: 'Menarche', parentValue: 'Non' },
+      { label: 'Volume testicule droite', options: null, gender: 'male' },
+      { label: 'Volule testicule gauche', options: null, gender: 'male' },
+      { label: 'Score_de_Tanner', options: null, gender: 'both' },
+      { label: 'Colonne_vertebrale', options: null, gender: 'both' },
+      { label: 'Bassin', options: null, gender: 'both' },
+      { label: 'Membres_inferieurs', options: null, gender: 'both' },
+      { label: 'Membres_supérieurs', options: null, gender: 'both' },
+      { label: 'Demarche', options: ['Bonne', 'Pathologique'], gender: 'both' },
+      { label: 'Si_démarche_pathologique,_préciser', options: null, gender: 'both', parent: 'Demarche', parentValue: 'Pathologique' },
+      { label: 'Equilibre', options: ['Bon', 'Pathologique'], gender: 'both' },
+      { label: 'Si_equilibre_pathologique,_préciser', options: null, gender: 'both', parent: 'Equilibre', parentValue: 'Pathologique' },
+      { label: 'fine_motricite', options: ['Bonne', 'Pas bonne'], gender: 'both' },
+      { label: 'motricité_pathologique,_préciser', options: null, gender: 'both', parent: 'fine_motricite', parentValue: 'Pas bonne' },
+      { label: 'coordination_des_mouvemments', options: ['Bonne', 'Pas bonne'], gender: 'both' },
+      { label: 'Si_pas_bonne_coordination_des_mouvements,_préciser', options: null, gender: 'both', parent: 'coordination_des_mouvemments', parentValue: 'Pas bonne' },
+      { label: 'reflexe', options: null, gender: 'both' },
+      { label: 'reflet_corneen', options: ['Bon', 'Pas bon'], gender: 'both' },
+      { label: 'Si_pas_bon_reflet_corneen,_préciser', options: null, gender: 'both', parent: 'reflet_corneen', parentValue: 'Pas bon' },
+      { label: 'test_occlusion', options: ['Bon', 'Pas bon'], gender: 'both' },
+      { label: 'Si_pas_bon_test_occlusion,_préciser', options: null, gender: 'both', parent: 'test_occlusion', parentValue: 'Pas bon' },
+      { label: "Aspect de l'urine", options: null, gender: 'both' },
+      { label: "Leucocytes", options: ['-', '±', '+', '++', '+++'], gender: 'both' },
+      { label: "Nitrites", options: ['-', '+'], gender: 'both' },
+      { label: "URO", options: ['0', '1', '2', '4', '8', '12'], gender: 'both' },
+      { label: "Protéines", options: ['-', '±', '+', '++', '+++', '++++'], gender: 'both' },
+      { label: "PH", options: ['5.0', '6.0', '6.5', '7.0', '7.5', '8.0', '8.5'], gender: 'both' },
+      { label: "Sang", options: ['1.00', '1.005', '1.010', '1.015', '1.020', '1.025', '1.030'], gender: 'both' },
+      { label: "KET", options: ['-', '±', '+', '++', '+++', '++++'], gender: 'both' },
+      { label: "BIL", options: ['-', '+', '++', '+++', '++++'], gender: 'both' },
+      { label: "Glucose", options: ['-', '±', '+', '++', '+++', '++++'], gender: 'both' },
+      { label: 'Points_attention_et_conseils', options: null, gender: 'both' },
+      { label: 'Diagnostic', options: null, gender: 'both' },
+      { label: 'Traitement', options: null, gender: 'both' },
+      { label: 'Examen_supplémentaire', options: null, gender: 'both' },
       // ... autres propriétés
     ],
   };
 
 
   constructor(protected fb: FormBuilder, public platform: Platform, private authService: AuthService, private navController: NavController,
-    private toastCtrl: ToastController, private appStorage: Storage) {
+    private toastCtrl: ToastController, private appStorage: Storage, private route: ActivatedRoute) {
     this.fetchSchoolYears();
     this.fetchProblems();
     this.form = this.fb.group({
@@ -193,6 +219,7 @@ export class NewPage implements OnInit {
   }
 
   ngOnInit() {
+
     this.fetchSchoolYears();
 
 
@@ -200,12 +227,32 @@ export class NewPage implements OnInit {
     this.fetchUser();
 
 
-    this.fetchSchools(null)
+    this.fetchSchools(null).then(() => {
+      if(this.route.snapshot.params['id']){
+        this.loadStudent();
+      }
+    });
+
+    
+    
 
 
     this.presentingElement = document.querySelector('.ion-page');
 
 
+  }
+
+  async loadStudent(){
+    let students = await this.appStorage.get('students');
+    this.selectedStudent = students.find((student: { id: any; }) => student.id == this.route.snapshot.params['id']);
+    if(this.selectedStudent){
+      this.fetchClasses2(this.selectedStudent.current_class_id).then(() => {
+        this.selectedClasse = this.selectedStudent.current_class_id;
+      });
+      this.fetchStudents2(this.selectedStudent.current_class_id).then(() => {
+        this.selectedStudent = students.find((student: { id: any; }) => student.id == this.route.snapshot.params['id']);
+      });
+    }
   }
 
   initializeAnswers() {
@@ -270,7 +317,7 @@ export class NewPage implements OnInit {
 
 
 
-    this.evaluateAnswers();
+    //this.evaluateAnswers();
 
   }
 
@@ -473,12 +520,36 @@ export class NewPage implements OnInit {
     }
   }
 
+  async fetchClasses2(classId: any) {
+    const cls = await this.appStorage.get('classes');
+    let cl = cls || [];
+
+    for (const c of cl) {
+      if (c.school_id == classId) {
+        this.classes.push(c);
+      }
+    }
+  }
+
   async fetchStudents(event: any) {
     const students = await this.appStorage.get('students');
     let std = students || [];
 
     for (const s of std) {
       if (s.current_class_id == event.target.value) {
+        this.students.push(s);
+      }
+    }
+
+    this.fetchRoles();
+  }
+
+  async fetchStudents2(classId: any) {
+    const students = await this.appStorage.get('students');
+    let std = students || [];
+
+    for (const s of std) {
+      if (s.current_class_id == classId) {
         this.students.push(s);
       }
     }
@@ -494,6 +565,11 @@ export class NewPage implements OnInit {
   readyForNexStep(event: any) {
     if (event.target.value) {
       this.studentGender = event.target.value.gender;
+      if(this.userRoles.includes('infirmier')){
+        this.step=1;
+      }else if(this.userRoles.includes('Medecin')){
+        this.step=6;
+      }
 
 
     }
@@ -526,6 +602,12 @@ export class NewPage implements OnInit {
     return problem ? problem.id : -1;
   }
 
+  getProblemNameById(problem_id:number){
+    const problem = this.problems.find(p => p.id === problem_id);
+
+    return problem.name;
+  }
+
   generateExamId() {
 
     this.examId = Math.floor(Math.random() * 1000000000000000000);
@@ -553,6 +635,69 @@ export class NewPage implements OnInit {
     });
   }
 
+  goToStep2(){
+    this.step=2;
+  }
+
+  goToStep3(){
+    this.step=3;
+  }
+
+  goToStep4(){
+    this.step=4;
+  }
+
+  goToStep5(){
+    this.step=5;
+  }
+
+  goToStep6(){
+    this.step=6;
+  }
+
+  goToStep7(){
+    this.step=7;
+  }
+
+
+  retour(){
+    if(this.step=7){
+      if(this.userRoles.includes('infirmier')){
+        this.step=5;
+      }else if(this.userRoles.includes('Medecin')){
+        this.step=6;
+      }
+    }else{
+      this.step--;
+    }
+  }
+
+  setOpen(isOpen: boolean) {
+    this.isModalOpen = isOpen;
+  }
+
+  addProblem(){
+    this.evaluations.push({
+      problem_id: this.selectedProblem,
+      problem_name: this.getProblemNameById(this.selectedProblem),
+      evaluation: this.selectedEvaluation,
+    });
+
+    this.selectedProblem=0;
+    this.selectedEvaluation="";
+  }
+
+  isInArray(problemId: number): boolean {
+    return this.evaluations.find(e => e.problem_id === problemId) !== undefined;
+  }
+
+  exit(){
+    this.selectedStudent = null;
+    this.selectedSchool = null;
+    this.selectedClasse = null;
+    this.navController.navigateForward('/tabs/exams');
+  }
+
 }
 
 
@@ -560,6 +705,8 @@ interface Question {
   label: string;
   options?: string[] | null;
   gender: string;
+  parent?: string;
+  parentValue?: string;
 }
 
 interface Exam {

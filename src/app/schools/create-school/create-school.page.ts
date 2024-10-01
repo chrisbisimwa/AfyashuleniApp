@@ -20,19 +20,22 @@ export class CreateSchoolPage implements OnInit {
   latitude: number = 0.0;
   createdBy: string = '';
   schoolId: number=0;
+  quartier: string= "";
+  commune: string = "";
+  ville: string ='';
   form = this.formBuilder.group({
     name: ["", []],
     address: ['', []],
-    latitude: [0.0, []],
-    longitude: [0.0, []],
     createdBy: [0, []],
+    quartier: ['', []],
+    commune: ['', []],
+    ville: ['', []],
     id: [0, []]
   });
 
   constructor(
     public platform: Platform,
     protected formBuilder: FormBuilder,
-    private dataService: DataService,
     private alertControler: AlertController,
     private appStorage: Storage,
     private router: Router
@@ -88,10 +91,11 @@ export class CreateSchoolPage implements OnInit {
   updateForm() {
     this.form.patchValue({
       name: this.name,
-      latitude: this.latitude,
-      longitude: this.longitude,
       address: this.address,
       createdBy: null,
+      quartier: this.quartier,
+      commune: this.commune,
+      ville: this.ville,
       id: this.generateId()
     });
   }

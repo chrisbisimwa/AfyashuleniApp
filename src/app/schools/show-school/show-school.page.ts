@@ -208,4 +208,8 @@ export class ShowSchoolPage implements OnInit {
 
   }
 
+  async edit( school: any) {
+    await this.navController.navigateForward('/tabs/schools/' + school.id + '/edit');
+  }
+
 }

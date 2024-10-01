@@ -35,6 +35,11 @@ export class ApiService {
     return this.http.post(`${this.apiUrl}/schools`, data, headers);
   }
 
+  async updateSchool(data:any){
+    const headers = await this.getHeaders();
+    return this.http.put(`${this.apiUrl}/schools/delete`, data, headers)
+  }
+
   async postClass(schoolId:any, data: any) {
     const headers = await this.getHeaders();
     return this.http.post(`${this.apiUrl+'/schools/'+schoolId+'/classes'}`, data, headers);
@@ -86,6 +91,18 @@ export class ApiService {
   }
 
 
+
+  async deleteClass(classId:number){
+    const headers = await this.getHeaders();
+    return this.http.delete(`${this.apiUrl}/schools/classes/${classId}`, headers);
+  }
+
+  async deleteStudent(studentId:number){
+    const headers = await this.getHeaders();
+    return this.http.delete(`${this.apiUrl}/students/${studentId}`, headers);
+  }
+
+
   async postExam(data: any) {
     const headers = await this.getHeaders();
     return this.http.post(`${this.apiUrl}/examinations`, data, headers);
@@ -117,8 +134,6 @@ export class ApiService {
     return this.http.get(`${this.apiUrl}/examinations/${examId}/evaluations`, headers);
 
   }
-
-  
 
   // Méthodes similaires pour les autres ressources...
 

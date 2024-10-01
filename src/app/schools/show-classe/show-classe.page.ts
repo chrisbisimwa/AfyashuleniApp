@@ -177,7 +177,7 @@ export class ShowClassePage implements OnInit {
   async fetchStudentsByClasse() {
     const result = await this.appStorage.get('students');
     if (result) {
-      this.students = result.filter((student: any) => student.current_class_id == this.route.snapshot.params['id']);
+      this.students = result.filter((student: any) => student.current_class_id == this.route.snapshot.params['id'] && student.status != 'deleted');
     }
   }
 

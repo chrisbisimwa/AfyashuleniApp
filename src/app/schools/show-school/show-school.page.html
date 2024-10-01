@@ -12,12 +12,6 @@
     <ion-label class="title_lbl">school Details</ion-label>
     <ion-list>
       <ion-item>
-        <ion-label>Code</ion-label>
-        <div item-content>
-          <span id="code-content">{{school.id ?? "-"}}</span>
-        </div>
-      </ion-item>
-      <ion-item>
         <ion-label>Nom</ion-label>
         <div item-content>
           <span>{{school.name}}</span>
@@ -31,9 +25,22 @@
       </ion-item>
 
       <ion-item>
-        <ion-label position="fixed">Créée par</ion-label>
+        <ion-label >Quartier/Village</ion-label>
         <div item-content>
-          <span id="reportedAt-content" *ngIf="school.reportedAt">{{school.latitude }}</span>
+          <span id="reportedAt-content" >{{school.quartier }}</span>
+        </div>
+      </ion-item>
+
+      <ion-item>
+        <ion-label >Commune/Groupement</ion-label>
+        <div item-content>
+          <span id="reportedAt-content" >{{school.commune }}</span>
+        </div>
+      </ion-item>
+      <ion-item>
+        <ion-label >Ville/Territoire</ion-label>
+        <div item-content>
+          <span id="reportedAt-content" >{{school.ville }}</span>
         </div>
       </ion-item>
 
@@ -66,7 +73,7 @@
 
 
     <ion-button expand="block" color="Medium" id="open-modal">Ajouter une classe</ion-button>
-    <ion-button expand="block" color="primary" (click)="open(school)">Modifier Ecole</ion-button>
+    <ion-button expand="block" color="primary" (click)="edit(school)">Modifier Ecole</ion-button>
     <ion-button expand="block" color="danger" (click)="deleteModal(school)">Supprimer Ecole</ion-button>
   </div>
 

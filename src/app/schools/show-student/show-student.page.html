@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button color="light"></ion-back-button>
     </ion-buttons>
-    <ion-title style="color: white;letter-spacing: 1px;font-family: 'semi-bold';">Ecole</ion-title>
+    <ion-title style="color: white;letter-spacing: 1px;font-family: 'semi-bold';">Elève</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -11,12 +11,7 @@
   <div class="main_content_div">
     <ion-label class="title_lbl">Details de l'élève</ion-label>
     <ion-list>
-      <ion-item>
-        <ion-label >Code</ion-label>
-        <div item-content>
-          <span id="code-content">{{student.id ?? "-"}}</span>
-        </div>
-      </ion-item>
+     
       <ion-item>
         <ion-label>Nom</ion-label>
         <div item-content>
@@ -33,7 +28,7 @@
       <ion-item>
         <ion-label>Date de naissance</ion-label>
         <div item-content>
-          <span>{{student.date_of_birth}}</span>
+          <span>{{student.date_of_birth | date :  "dd.MM.y"}}</span>
         </div>
       </ion-item>
       <ion-item>
@@ -54,27 +49,92 @@
           <span>{{studentSchool.name}}</span>
         </div>
       </ion-item>
+      
 
-      <ion-item-group>
-        <ion-item-divider>
-          <ion-label>
-            <h2>Examens réalisés</h2>
-          </ion-label>
-        </ion-item-divider>
-        <!-- <ion-item *ngFor="let student of students" (click)="showStudent(student)">
-          <ion-label>{{student.first_name}} {{student.last_name }} {{student.surname}}</ion-label>
-        </ion-item> -->
-      </ion-item-group>
-
+     
 
     </ion-list>
 
 
 
-    <ion-button expand="block" color="Medium" id="open-modal2">Examiner</ion-button>
+    <ion-button expand="block" color="medium" id="open-modal2" (click)="examiner()">Examiner</ion-button>
     <ion-button expand="block" color="primary" (click)="editStudent()">Modifier</ion-button>
+    <ion-button expand="block" color="primary" (click)="setOpenEval(true)" *ngIf="studentEvaluations ">Problèmes de stanté ({{studentEvaluations.length}})</ion-button>
+    <ion-button expand="block" color="primary" (click)="setOpenExam(true)" *ngIf="studentExams ">Resumé des exmans</ion-button>
     <ion-button expand="block" color="danger" (click)="deleteModal()">Supprimer</ion-button>
+    
   </div>
+
+  <ion-modal [isOpen]="isEvalModalOpen">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Problèmes de santé</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="setOpenEval(false)">Fermer</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+       
+
+        <ion-item-group *ngIf="studentEvaluations.length>0">
+          <ion-item-divider>
+            <ion-label> Problèmes identifiés </ion-label>
+          </ion-item-divider>
+          <ion-item *ngFor="let eval of studentEvaluations">
+            <ion-label>{{eval.problem_name}}</ion-label>
+            <div item-content>
+              <span *ngIf="eval.status==='to_follow'">A suivre</span>
+              <span *ngIf="eval.status==='not_to_follow'">A ne pas suivre</span>
+              <span *ngIf="eval.status==='attention'">Pt d'attention</span>
+            </div>
+          </ion-item>
+        </ion-item-group>
+
+
+      </ion-content>
+
+
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal [isOpen]="isExamModalOpen">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Détail des examens</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="setOpenExam(false)">Fermer</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content *ngIf="studentExams">
+       
+        <div *ngFor="let exam of studentExams">
+          <ion-item-divider>
+            <ion-label>{{exam.type}}</ion-label>
+          </ion-item-divider>
+          <div *ngIf="exam.data">
+            <ion-item *ngFor="let data of exam.data">
+              <ion-label>{{data.question}}</ion-label>
+              <div item-content>
+                <span>{{data.answer}}</span>
+              </div>
+            </ion-item>
+          </div>
+         
+          
+          
+        </div>
+
+
+
+      </ion-content>
+
+
+    </ng-template>
+  </ion-modal>
 
 
 </ion-content>

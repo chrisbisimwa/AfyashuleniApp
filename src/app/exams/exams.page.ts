@@ -16,14 +16,50 @@ export class ExamsPage {
 
   constructor(private appStrorage: Storage, private navController: NavController,
     private toastCtrl: ToastController,
-    public plt: Platform) { }
+    public plt: Platform) {
+    this.fetchExams();
+     }
 
 
   async fetchExams(refresher?: any) {
     //fetch exams from local storage
     const exams = await this.appStrorage.get('exams');
-    this.exams = exams.data || [];
+    const exs=[];
+    if(exams) {
+      for (let exam of exams) {
+        exam.studentName = await this.getstudentNameById(exam.student_id);
+        exam.examinerName = await this.getExaminerNameById(exam.examiner_id);
+        exs.push(exam);
+      } 
 
+      this.exams =exs; 
+    }else[
+      this.exams = []
+    ]
+    
+
+  }
+
+  async getstudentNameById(id: any) {
+    let students = await this.appStrorage.get('students');
+
+    let student = null;
+    if(students){
+      student = students.find((item: any) => item.id === id);
+    }
+
+    return student ? student.first_name+' '+student.last_name+' '+student.surname : 'Unknown';
+  }
+
+  async getExaminerNameById(id: any) {
+    let examiners = await this.appStrorage.get('users');
+
+    let examiner = null;
+    if(examiners){
+      examiner = examiners.find((item: any) => item.id === id);
+    }
+
+    return examiner ? examiner.name : 'Unknown';
   }
 
   segmentChanged(event: any) {
@@ -56,9 +92,10 @@ export class ExamsPage {
     await this.navController.navigateForward('/tabs/exams/new');
   }
 
-  async view(id: any) {
-    await this.navController.navigateForward('/tabs/site/' + id + '/view');
-  }
+  async view(examId:any) {
+    await this.navController.navigateForward('/tabs/exams/' + examId + '/view');
+ 
+}
   async edit(item: IonItemSliding, site: any) {
     await this.navController.navigateForward('/tabs/entities/customer/' + site.id + '/edit');
     await item.close();

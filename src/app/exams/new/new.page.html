@@ -1,16 +1,16 @@
 <ion-header class="ion-no-border" mode="ios">
   <ion-toolbar style="--background: var(--ion-color-primary)">
     <ion-buttons slot="start">
-      <ion-back-button color="light"></ion-back-button>
+      <ion-back-button color="light">Retour</ion-back-button>
     </ion-buttons>
     <ion-title style="color: white;letter-spacing: 1px;font-family: 'semi-bold';">Examen</ion-title>
 
-    <ion-buttons slot="end">
+   <!--  <ion-buttons slot="end">
       <ion-button id="open-modal" expand="block" (click)="save()" color="light">
         <span *ngIf="platform.is('ios')">Done</span>
         <ion-icon name="checkmark" *ngIf="!platform.is('ios')"></ion-icon>
       </ion-button>
-    </ion-buttons>
+    </ion-buttons> -->
   </ion-toolbar>
 </ion-header>
 
@@ -61,66 +61,394 @@
         </ion-item>
       </ion-item-group>
 
-
-
       <div *ngIf="selectedStudent">
-        <div *ngIf="userRoles.includes('Medecin')">
+        <div *ngIf="step==1">
+          <div *ngIf="userRoles.includes('infirmier')">
+            <ion-item-group>
+              <ion-item-divider>
+                <ion-label> {{ ucfirst( 'situation_familiale'.replace('_', ' ')) }} </ion-label>
+              </ion-item-divider>
+              <div *ngFor="let question of questionsInfirmier['situation_familiale']">
+
+                <ion-item *ngIf="question.parent && answers[question.parent]===question.parentValue">
+                  <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both') ">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                  </div>
+
+                  <div
+                    *ngIf="question.options && (question.gender===studentGender || question.gender==='both') && (answers[question.parent]===question.parentValue)">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
+                      <ion-select-option *ngFor="let option of question.options" [value]="option">
+                        {{ option }}
+                      </ion-select-option>
+                    </ion-select>
+                  </div>
+                </ion-item>
+                <ion-item *ngIf="!question.parent">
+                  <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                  </div>
+
+                  <div *ngIf="question.options && (question.gender===studentGender || question.gender==='both')">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
+                      <ion-select-option *ngFor="let option of question.options" [value]="option">
+                        {{ option }}
+                      </ion-select-option>
+                    </ion-select>
+                  </div>
+                </ion-item>
+
+              </div>
+            </ion-item-group>
+          </div>
+
+
+
+          <ion-button expand="block" color="primary" (click)="goToStep2()">Suivant</ion-button>
+          <ion-button expand="block" color="danger" (click)="exit()" >Annuler</ion-button>
+
+        </div>
+
+        <div *ngIf="step==2">
+          <div *ngIf="userRoles.includes('infirmier')">
+            <ion-item-group>
+              <ion-item-divider>
+                <ion-label> {{ ucfirst( 'calendrier_vaccinal'.replace('_', ' ')) }} </ion-label>
+              </ion-item-divider>
+              <div *ngFor="let question of questionsInfirmier['calendrier_vaccinal']">
+
+                <ion-item *ngIf="question.parent && answers[question.parent]===question.parentValue">
+                  <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both') ">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                  </div>
+
+                  <div
+                    *ngIf="question.options && (question.gender===studentGender || question.gender==='both') && (answers[question.parent]===question.parentValue)">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
+                      <ion-select-option *ngFor="let option of question.options" [value]="option">
+                        {{ option }}
+                      </ion-select-option>
+                    </ion-select>
+                  </div>
+                </ion-item>
+                <ion-item *ngIf="!question.parent">
+                  <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                  </div>
+
+                  <div *ngIf="question.options && (question.gender===studentGender || question.gender==='both')">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
+                      <ion-select-option *ngFor="let option of question.options" [value]="option">
+                        {{ option }}
+                      </ion-select-option>
+                    </ion-select>
+                  </div>
+                </ion-item>
+
+              </div>
+            </ion-item-group>
+          </div>
+          <ion-button expand="block" color="primary" (click)="goToStep3()">Suivant</ion-button>
+          <ion-button expand="block" color="primary" (click)="retour()">Retour</ion-button>
+          <ion-button expand="block" color="danger" (click)="exit()" >Annuler</ion-button>
+        </div>
+        <div *ngIf="step==3">
+          <div *ngIf="userRoles.includes('infirmier')">
+            <ion-item-group>
+              <ion-item-divider>
+                <ion-label> {{ ucfirst( 'deparasitage'.replace('_', ' ')) }} </ion-label>
+              </ion-item-divider>
+              <div *ngFor="let question of questionsInfirmier['deparasitage']">
+
+                <ion-item *ngIf="question.parent && answers[question.parent]===question.parentValue">
+                  <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both') ">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                  </div>
+
+                  <div
+                    *ngIf="question.options && (question.gender===studentGender || question.gender==='both') && (answers[question.parent]===question.parentValue)">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
+                      <ion-select-option *ngFor="let option of question.options" [value]="option">
+                        {{ option }}
+                      </ion-select-option>
+                    </ion-select>
+                  </div>
+                </ion-item>
+                <ion-item *ngIf="!question.parent">
+                  <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                  </div>
+
+                  <div *ngIf="question.options && (question.gender===studentGender || question.gender==='both')">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
+                      <ion-select-option *ngFor="let option of question.options" [value]="option">
+                        {{ option }}
+                      </ion-select-option>
+                    </ion-select>
+                  </div>
+                </ion-item>
+
+              </div>
+            </ion-item-group>
+          </div>
+          <ion-button expand="block" color="primary" (click)="goToStep4()">Suivant</ion-button>
+          <ion-button expand="block" color="primary" (click)="retour()">Retour</ion-button>
+          <ion-button expand="block" color="danger" (click)="exit()" >Annuler</ion-button>
+        </div>
+        <div *ngIf="step==4">
+          <div *ngIf="userRoles.includes('infirmier')">
+            <ion-item-group>
+              <ion-item-divider>
+                <ion-label> {{ ucfirst( 'comportement_langage'.replace('_', ' ')) }} </ion-label>
+              </ion-item-divider>
+              <div *ngFor="let question of questionsInfirmier['comportement_langage']">
+
+                <ion-item *ngIf="question.parent && answers[question.parent]===question.parentValue">
+                  <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both') ">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                  </div>
+
+                  <div
+                    *ngIf="question.options && (question.gender===studentGender || question.gender==='both') && (answers[question.parent]===question.parentValue)">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
+                      <ion-select-option *ngFor="let option of question.options" [value]="option">
+                        {{ option }}
+                      </ion-select-option>
+                    </ion-select>
+                  </div>
+                </ion-item>
+                <ion-item *ngIf="!question.parent">
+                  <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                  </div>
+
+                  <div *ngIf="question.options && (question.gender===studentGender || question.gender==='both')">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
+                      <ion-select-option *ngFor="let option of question.options" [value]="option">
+                        {{ option }}
+                      </ion-select-option>
+                    </ion-select>
+                  </div>
+                </ion-item>
+
+              </div>
+            </ion-item-group>
+          </div>
+          <ion-button expand="block" color="primary" (click)="goToStep5()">Suivant</ion-button>
+          <ion-button expand="block" color="primary" (click)="retour()">Retour</ion-button>
+          <ion-button expand="block" color="danger" (click)="exit()" >Annuler</ion-button>
+        </div>
+        <div *ngIf="step==5">
+          <div *ngIf="userRoles.includes('infirmier')">
+            <ion-item-group>
+              <ion-item-divider>
+                <ion-label> {{ ucfirst( 'anamnese'.replace('_', ' ')) }} </ion-label>
+              </ion-item-divider>
+              <div *ngFor="let question of questionsInfirmier['anamnese']">
+
+                <ion-item *ngIf="question.parent && answers[question.parent]===question.parentValue">
+                  <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both') ">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                  </div>
+
+                  <div
+                    *ngIf="question.options && (question.gender===studentGender || question.gender==='both') && (answers[question.parent]===question.parentValue)">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
+                      <ion-select-option *ngFor="let option of question.options" [value]="option">
+                        {{ option }}
+                      </ion-select-option>
+                    </ion-select>
+                  </div>
+                </ion-item>
+                <ion-item *ngIf="!question.parent">
+                  <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                  </div>
+
+                  <div *ngIf="question.options && (question.gender===studentGender || question.gender==='both')">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
+                      <ion-select-option *ngFor="let option of question.options" [value]="option">
+                        {{ option }}
+                      </ion-select-option>
+                    </ion-select>
+                  </div>
+                </ion-item>
+
+              </div>
+            </ion-item-group>
+
+          </div>
+          <ion-button expand="block" color="primary" (click)="goToStep7()">Suivant</ion-button>
+          <ion-button expand="block" color="primary" (click)="retour()">Retour</ion-button>
+          <ion-button expand="block" color="danger" (click)="exit()" >Annuler</ion-button>
+        </div>
+        <div *ngIf="step==6">
+          <div *ngIf="userRoles.includes('Medecin')">
+            <ion-item-group>
+              <ion-item-divider>
+                <ion-label> Examen ({{ ucfirst( 'examen_clinique'.replace('_', ' ')) }}) </ion-label>
+              </ion-item-divider>
+
+
+              <div *ngFor="let question of questionsMedecin['examen_clinique']">
+                <ion-item *ngIf="question.parent && answers[question.parent]===question.parentValue">
+                  <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both') ">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                  </div>
+
+                  <div
+                    *ngIf="question.options && (question.gender===studentGender || question.gender==='both') && (answers[question.parent]===question.parentValue)">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
+                      <ion-select-option *ngFor="let option of question.options" [value]="option">
+                        {{ option }}
+                      </ion-select-option>
+                    </ion-select>
+                  </div>
+                </ion-item>
+                <ion-item *ngIf="!question.parent">
+                  <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                  </div>
+
+                  <div *ngIf="question.options && (question.gender===studentGender || question.gender==='both')">
+                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
+                      <ion-select-option *ngFor="let option of question.options" [value]="option">
+                        {{ option }}
+                      </ion-select-option>
+                    </ion-select>
+                  </div>
+                </ion-item>
+              </div>
+            </ion-item-group>
+          </div>
+          <ion-button expand="block" color="primary" (click)="goToStep7()">Suivant</ion-button>
+          <ion-button expand="block" color="primary" (click)="retour()">Retour</ion-button>
+          <ion-button expand="block" color="danger" (click)="exit()" >Annuler</ion-button>
+        </div>
+        <div *ngIf="step==7">
+          <ion-button expand="block" color="primary" (click)="setOpen(true)">Problèmes de stanté ({{evaluations.length}})</ion-button>
+          <ion-button expand="block" color="primary" >Soumettre</ion-button>
+          <ion-button expand="block" color="primary" (click)="retour()">Retour</ion-button>
+          <ion-button expand="block" color="danger" (click)="exit()" >Annuler</ion-button>
+        </div>
+        <!-- <div *ngIf="userRoles.includes('Medecin')">
+
           <ion-item-group *ngFor="let type of examTypesMedecin">
             <ion-item-divider>
               <ion-label> Examen ({{ ucfirst( type.replace('_', ' ')) }}) </ion-label>
             </ion-item-divider>
 
 
-            <ion-item *ngFor="let question of questionsMedecin[type]">
-              <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+            <div *ngFor="let question of questionsMedecin[type]">
+              <ion-item *ngIf="question.parent && answers[question.parent]===question.parentValue">
+                <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both') ">
+                  <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                  <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                </div>
 
-              <ion-input *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')"
-                [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
-              <ion-select *ngIf="question.options && (question.gender===studentGender || question.gender==='both')"
-                [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
-                <ion-select-option *ngFor="let option of question.options" [value]="option">
-                  {{ option }}
-                </ion-select-option>
-              </ion-select>
-            </ion-item>
+                <div
+                  *ngIf="question.options && (question.gender===studentGender || question.gender==='both') && (answers[question.parent]===question.parentValue)">
+                  <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                  <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
+                    <ion-select-option *ngFor="let option of question.options" [value]="option">
+                      {{ option }}
+                    </ion-select-option>
+                  </ion-select>
+                </div>
+              </ion-item>
+              <ion-item *ngIf="!question.parent">
 
 
+                <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')">
+                  <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                  <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                </div>
 
+                <div *ngIf="question.options && (question.gender===studentGender || question.gender==='both')">
+                  <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                  <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
+                    <ion-select-option *ngFor="let option of question.options" [value]="option">
+                      {{ option }}
+                    </ion-select-option>
+                  </ion-select>
+                </div>
+              </ion-item>
+            </div>
           </ion-item-group>
-        </div>
-
-
+        </div> -->
       </div>
 
-      <div *ngIf="selectedStudent">
+      <!-- <div *ngIf="selectedStudent">
         <div *ngIf="userRoles.includes('infirmier')">
           <ion-item-group *ngFor="let type of examTypesInfimier">
             <ion-item-divider>
               <ion-label> {{ ucfirst( type.replace('_', ' ')) }} </ion-label>
             </ion-item-divider>
+            <div *ngFor="let question of questionsInfirmier[type]">
 
+              <ion-item *ngIf="question.parent && answers[question.parent]===question.parentValue">
+                <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both') ">
+                  <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                  <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                </div>
 
-            <ion-item *ngFor="let question of questionsInfirmier[type]">
-              <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                <div
+                  *ngIf="question.options && (question.gender===studentGender || question.gender==='both') && (answers[question.parent]===question.parentValue)">
+                  <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                  <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
+                    <ion-select-option *ngFor="let option of question.options" [value]="option">
+                      {{ option }}
+                    </ion-select-option>
+                  </ion-select>
+                </div>
+              </ion-item>
+              <ion-item *ngIf="!question.parent">
+                <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')">
+                  <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                  <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                </div>
 
-              <ion-input *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')"
-                [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
-              <ion-select *ngIf="question.options && (question.gender===studentGender || question.gender==='both')"
-                [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
-                <ion-select-option *ngFor="let option of question.options" [value]="option">
-                  {{ option }}
-                </ion-select-option>
-              </ion-select>
-            </ion-item>
+                <div *ngIf="question.options && (question.gender===studentGender || question.gender==='both')">
+                  <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                  <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
+                    <ion-select-option *ngFor="let option of question.options" [value]="option">
+                      {{ option }}
+                    </ion-select-option>
+                  </ion-select>
+                </div>
+              </ion-item>
 
-
-
-
+            </div>
           </ion-item-group>
         </div>
 
 
-      </div>
+      </div> -->
+
     </ion-list>
   </div>
 
@@ -152,9 +480,68 @@
         </ion-list>
 
 
+
       </ion-content>
 
-      
+
+    </ng-template>
+  </ion-modal>
+
+
+  <ion-modal [isOpen]="isModalOpen">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Problèmes de santé</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="setOpen(false)">Fermer</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <ion-item-group>
+          <ion-item>
+            <ion-label>Séléctionner un problème</ion-label>
+            <ion-select [(ngModel)]="selectedProblem">
+              <div *ngFor="let problem of problems">
+                <ion-select-option [value]="problem.id" *ngIf="!isInArray(problem.id)">
+                  {{ problem.name }}
+                </ion-select-option>
+              </div>
+
+            </ion-select>
+          </ion-item>
+
+          <ion-item *ngIf="selectedProblem">
+            <ion-label>Evaluer le problème</ion-label>
+            <ion-select [(ngModel)]="selectedEvaluation">
+              <ion-select-option [value]="'to_follow'">A suivre</ion-select-option>
+              <ion-select-option [value]="'not_to_follow'">A ne pas suivre</ion-select-option>
+              <ion-select-option [value]="'attention'">Attention</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-button expand="block" color="primary" *ngIf="selectedEvaluation"
+            (click)="addProblem()">Ajouter</ion-button>
+        </ion-item-group>
+
+        <ion-item-group *ngIf="evaluations.length>0">
+          <ion-item-divider>
+            <ion-label> Problèmes identifiés </ion-label>
+          </ion-item-divider>
+          <ion-item *ngFor="let eval of evaluations">
+            <ion-label>{{eval.problem_name}}</ion-label>
+            <div item-content>
+              <span *ngIf="eval.evaluation==='to_follow'">A suivre</span>
+              <span *ngIf="eval.evaluation==='not_to_follow'">A ne pas suivre</span>
+              <span *ngIf="eval.evaluation==='attention'">Pt d'attention</span>
+            </div>
+          </ion-item>
+        </ion-item-group>
+
+
+      </ion-content>
+
+
     </ng-template>
   </ion-modal>
 

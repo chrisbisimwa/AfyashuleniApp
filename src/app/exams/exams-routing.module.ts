@@ -10,7 +10,15 @@ const routes: Routes = [
   {
     path: 'new',
     loadChildren: () => import('./new/new.module').then( m => m.NewPageModule)
-  }
+  },
+  {
+    path: ':id/view',
+    loadChildren: () => import('./show-exam/show-exam.module').then( m => m.ShowExamPageModule)
+  },
+  {
+    path: 'new/:id',
+    loadChildren: () => import('./new/new.module').then( m => m.NewPageModule)
+  },
 ];
 
 @NgModule({

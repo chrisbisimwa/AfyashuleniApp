@@ -29,7 +29,11 @@ export class SchoolsPage {
     this.schools = this.schools.filter(item => item.id !== school.id);
 
 
-    this.appStorage.set(this.myKey, this.schools);
+    this.appStorage.set(this.myKey, this.schools).then(() => {
+      this.fetchSchools();
+    });
+
+    
   }
 
   
@@ -80,8 +84,8 @@ export class SchoolsPage {
  
 
 }
-async edit(item: IonItemSliding, site: any) {
-  await this.navController.navigateForward('/tabs/entities/customer/' + site.id + '/edit');
+async edit(item: IonItemSliding, school: any) {
+  await this.navController.navigateForward('/tabs/schools/' + school.id + '/edit');
   await item.close();
 }
 

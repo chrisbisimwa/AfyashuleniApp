@@ -107,10 +107,16 @@ export class AppComponent {
           const school = await lastValueFrom(schoolObservable);
 
         } else if (sc.status == "deleted") {
-          const schoolPromise = this.apiService.deleteSchool(sc.id);
-          const schoolObservable = await schoolPromise;
-          const school = await lastValueFrom(schoolObservable).then((data: any) => {
+          (await this.apiService.deleteSchool(sc.id)).subscribe((data: any) => {
+            if (data) {
+              console.log(data);
+            }
           });
+         
+        }else if(sc.status =="updated"){
+          const schoolPromise = this.apiService.updateSchool(sc);
+          const schoolObservable = await schoolPromise;
+          const school = await lastValueFrom(schoolObservable);
         }
       }
 
@@ -138,6 +144,12 @@ export class AppComponent {
           const studentObservable = await studentPromise; // Récupérez l'Observable
           const std = await lastValueFrom(studentObservable);
 
+        }else if (st.status == "deleted") {
+          (await this.apiService.deleteStudent(st.id)).subscribe((data: any) => {
+            if (data) {
+              console.log(data);
+            }
+          });
         }
       }
     }
@@ -218,6 +230,8 @@ export class AppComponent {
         }
       });
 
+      
+
 
 
 
@@ -264,13 +278,15 @@ export class AppComponent {
                 cls.push(cl);
               }
 
-              this.appStorage.set('classes', cls);
+              
 
             }
           });
 
 
         }
+
+        this.appStorage.set('classes', cls);
 
       }
 
@@ -284,7 +300,7 @@ export class AppComponent {
       });
 
       //load all exams data by exams
-      const exms = await this.appStorage.get('exams-data');
+      const exms = await this.appStorage.get('exams');
       if (exms) {
         let exmData: any[] = [];
         for (let exam of exms) {
@@ -296,15 +312,17 @@ export class AppComponent {
                 exmData.push(ed);
               }
 
-              this.appStorage.set('exams-data', exmData);
+              
 
             }
           });
         }
+
+        this.appStorage.set('exams-data', exmData);
       }
 
       //load all evaluations by exams
-      const exms2 = await this.appStorage.get('evaluations');
+      const exms2 = await this.appStorage.get('exams');
       if (exms2) {
         let evs: any[] = [];
         for (let exam of exms2) {
@@ -316,11 +334,13 @@ export class AppComponent {
                 evs.push(ev);
               }
 
-              this.appStorage.set('evaluations', evs);
+              
 
             }
           });
         }
+
+        this.appStorage.set('evaluations', evs);
       }
 
     } catch (e) {
