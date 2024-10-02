@@ -11,70 +11,73 @@
 
     <div class="container_div">
       <div class="white_box">
-          
-          <div >
-            <img src="{{photo}}" alt="" class="user_back">
-          </div>
 
-          <div class="flex_div">
-              <ion-label>{{username}}</ion-label>
-             
-          </div>
+        <div *ngIf="photo">
+          <img src="{{photo}}" alt="" class="user_back">
+        </div>
+        <div *ngIf="!photo">
+          <img src="../../../assets/img/user.png" alt="" class="user_back">
+        </div>
 
-          <ion-label class="grey_lbl">{{email}}</ion-label>
+        <div class="flex_div">
+          <ion-label>{{username}}</ion-label>
 
-         
+        </div>
+
+        <ion-label class="grey_lbl">{{email}}</ion-label>
+
+
 
       </div>
 
       <ion-label class="title_lbl">GENERAL</ion-label>
-        
+
       <div class="shopping_div" (click)="goToEditProfile()">
-          <div class="color_box">
-              <img src="assets/imgs/settings.png">
-          </div>
-          <div class="content_div">
-              <ion-label class="name">Profile Settings</ion-label>
-              <ion-label class="date">Update and modify your profile</ion-label>
-          </div>
-          <ion-icon name="chevron-forward-sharp"></ion-icon>
+        <div class="color_box">
+          <img src="assets/imgs/settings.png">
+        </div>
+        <div class="content_div">
+          <ion-label class="name">Profile Settings</ion-label>
+          <ion-label class="date">Modifier le profile</ion-label>
+        </div>
+        <ion-icon name="chevron-forward-sharp"></ion-icon>
       </div>
 
       <div class="shopping_div" (click)="goToChangePassword()">
-          <div class="color_box">
-              <img src="assets/imgs/privacy.png">
-          </div>
-          <div class="content_div">
-              <ion-label class="name">Privacy</ion-label>
-              <ion-label class="date">Change your password</ion-label>
-          </div>
-          <ion-icon name="chevron-forward-sharp"></ion-icon>
-      </div>
-
-      <div class="shopping_div" (click)="goToManageUsers()" >
         <div class="color_box">
-            <img src="assets/imgs/privacy.png">
+          <img src="assets/imgs/privacy.png">
         </div>
         <div class="content_div">
-            <ion-label class="name">Users</ion-label>
-            <ion-label class="date">Manage all users</ion-label>
+          <ion-label class="name">Privacy</ion-label>
+          <ion-label class="date">Changer le mot de passe</ion-label>
         </div>
         <ion-icon name="chevron-forward-sharp"></ion-icon>
-    </div>
+      </div>
 
-      <div class="shopping_div"  (click)="logOut()" >
-          <div class="color_box">
-            <ion-icon color="primary" style="padding-top: 15px;"  name="log-out"></ion-icon>
-          </div>
-          <div class="content_div">
-              <ion-label class="name">Déconnexion</ion-label>
-              <ion-label class="date">Déconnectez-vous de l'application</ion-label>
-          </div>
-          <ion-icon name="chevron-forward-sharp"></ion-icon>
+      <!-- <div class="shopping_div" (click)="goToManageUsers()">
+        <div class="color_box">
+          <img src="assets/imgs/privacy.png">
+        </div>
+        <div class="content_div">
+          <ion-label class="name">Users</ion-label>
+          <ion-label class="date">Manage all users</ion-label>
+        </div>
+        <ion-icon name="chevron-forward-sharp"></ion-icon>
+      </div> -->
+
+      <div class="shopping_div" (click)="logOut()">
+        <div class="color_box">
+          <ion-icon color="primary" style="padding-top: 15px;" name="log-out"></ion-icon>
+        </div>
+        <div class="content_div">
+          <ion-label class="name">Déconnexion</ion-label>
+          <ion-label class="date">Déconnectez-vous de l'application</ion-label>
+        </div>
+        <ion-icon name="chevron-forward-sharp"></ion-icon>
       </div>
 
 
-  </div>
+    </div>
 
 
   </div>

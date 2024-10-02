@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { NavController, Platform, ToastController } from '@ionic/angular';
+import { AlertController, NavController, Platform, ToastController } from '@ionic/angular';
 import { DataService } from '../../services/data.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { Storage } from '@ionic/storage-angular';
 import { ActivatedRoute } from '@angular/router';
+import { Geolocation } from '@capacitor/geolocation';
 
 @Component({
   selector: 'app-new',
@@ -26,9 +27,9 @@ export class NewPage implements OnInit {
   evaluations: any[] = [];
   user: any;
   selectedExamType: string = '';
-  selectedProblem: number= 0;
-  addedProblems: any[]=[];
-  selectedEvaluation: string ="";
+  selectedProblem: number = 0;
+  addedProblems: any[] = [];
+  selectedEvaluation: string = "";
   examTypesInfimier: string[] = ['situation_familiale', 'calendrier_vaccinal', 'deparasitage', 'comportement_langage', 'anamnese'];
   examTypesMedecin: string[] = ['examen_clinique']
   completedExamTypes: string[] = [];
@@ -42,17 +43,21 @@ export class NewPage implements OnInit {
   userRoles: String[] = [];
 
   examId: number = 0;
+  dataId: number = 0;
   examCode: string = '';
-  step:number = 1;
+  step: number = 1;
   isModalOpen = false;
+
+  longitude: number = 0.0;
+  latitude: number = 0.0;
 
   questionsInfirmier: Exam = {
     'situation_familiale': [
       { label: 'Parents_en_vie', options: ['Les deux', 'Mère seulement', 'Père seulement', 'Aucun'], gender: 'both' },
       { label: 'Elève vit avec', options: ['Les deux parents', 'La mère', 'Le père', 'Famille paternelle', 'Famille maternelle', 'Tuteur'], gender: 'both' },
       { label: 'Occupation des parents avec qui élève vit', options: null, gender: 'both' },
-      { label: 'Nombre enfants fratrie', options: null, gender: 'both' },
-      { label: 'Rand dans la fratrie', options: null, gender: 'both' },
+      { label: 'Nombre_enfants_fratrie', options: null, gender: 'both' },
+      { label: 'Rang_dans_la_fratrie', options: null, gender: 'both' },
 
     ],
     'calendrier_vaccinal': [
@@ -91,8 +96,8 @@ export class NewPage implements OnInit {
       { label: 'Plaintes_auditives', options: null, gender: 'both' },
       { label: 'Taille_(cm)', options: null, gender: 'both' },
       { label: 'Poids_(kg)', options: null, gender: 'both' },
-      { label: 'Pourcentage', options: null , gender: 'both'},
-      { label: 'IMC', options: null , gender: 'both'},
+      { label: 'Pourcentage', options: null, gender: 'both' },
+      { label: 'IMC', options: null, gender: 'both' },
       { label: 'acuite_visuelle_loin_droite_sans_correction', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both' },
       { label: 'acuite_visuelle_loin_gauche_sans_correction', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both' },
       { label: 'acuite_loin_droite_avec_lunettes', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both' },
@@ -116,41 +121,41 @@ export class NewPage implements OnInit {
     // ...
     "examen_clinique": [
       { label: "Anamnese", options: null, gender: 'both' },
-      { label: "etat_general", options: ['Bon', 'Altéré'], gender: 'both' }, 
-      { label: "etat_general_altéré_par", options: null, gender: 'both', parent:'etat_general', parentValue: 'Altéré'},
+      { label: "etat_general", options: ['Bon', 'Altéré'], gender: 'both' },
+      { label: "etat_general_altéré_par", options: null, gender: 'both', parent: 'etat_general', parentValue: 'Altéré' },
       { label: "dysmorphie", options: ['Malformation de la gorge', 'Malformation de la bouche', 'Malformation du nez', 'Malformation des oreilles', 'Malformation des yeux', 'Malformation des membres', 'Autres'], gender: 'both' },
       { label: "Si_autre_dysmorphie,_préciser", options: null, gender: 'both', parent: 'dysmorphie', parentValue: 'Autres' },
       { label: "Conjonctive", options: ['Palpébrale colorée', 'Palpébrale pâle', 'Bulbaire anicterique', 'Bulbaire ictérique', 'Autres'], gender: 'both' },
       { label: "Si_autre_conjonctive,_préciser", options: null, gender: 'both', parent: 'Conjonctive', parentValue: 'Autres' },
       { label: "Brosse_à_dent", options: ['Oui', 'Non'], gender: 'both' },
-      { label: "fréquence_de_brossage", options: null, gender:'both', parent: 'Brosse_à_dent', parentValue: 'Oui'},
-      { label: "utilisation_du_dentifrice", options: ['Oui', 'Non'], gender: 'both',  parent: 'Brosse_à_dent', parentValue: 'Oui'},
-      { label: "Si_non_utilisation_du_dentifrice,_préciser", options: null, gender: 'both', parent: 'utilisation_du_dentifrice', parentValue: 'Non'},
+      { label: "fréquence_de_brossage", options: null, gender: 'both', parent: 'Brosse_à_dent', parentValue: 'Oui' },
+      { label: "utilisation_du_dentifrice", options: ['Oui', 'Non'], gender: 'both', parent: 'Brosse_à_dent', parentValue: 'Oui' },
+      { label: "Si_non_utilisation_du_dentifrice,_préciser", options: null, gender: 'both', parent: 'utilisation_du_dentifrice', parentValue: 'Non' },
       { label: "Dentiste", options: ['Oui', 'Non'], gender: 'both' },
-      { label: "frequence_visite_dentiste", options: null, gender: 'both', parent: 'Dentiste', parentValue: 'Oui'},
+      { label: "frequence_visite_dentiste", options: null, gender: 'both', parent: 'Dentiste', parentValue: 'Oui' },
       { label: "Carie", options: ['Oui', 'Non'], gender: 'both' },
-      { label: "Si oui, stade carie", options: ['Stade 1', 'Stade 2', 'Stade 3', 'Stade 4', 'Stade 5'], gender: 'both', parent: 'Carie', parentValue: 'Oui' },
-      { label: "Débris_alimentaires", options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both'},
+      { label: "Si oui, stade carie", options: ['Stade 1', 'Stade 2', 'Stade 3', 'Stade 4'], gender: 'both', parent: 'Carie', parentValue: 'Oui' },
+      { label: "Débris_alimentaires", options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
       { label: 'Plaque', options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
       { label: 'Tartre', options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
       { label: 'Gingivite', options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
       { label: 'gorge', options: ['Saine', 'Pathologique'], gender: 'both' },
-      { label: 'Si_gorge_pathologique,_préciser', options: null, gender: 'both',parent: 'gorge', parentValue: 'Pathologique' },
+      { label: 'Si_gorge_pathologique,_préciser', options: null, gender: 'both', parent: 'gorge', parentValue: 'Pathologique' },
       { label: 'nez', options: ['Normal', 'Pahtologique'], gender: 'both' },
-      { label: 'Si_nez_pathologique,_préciser', options: null, gender: 'both',parent: 'nez', parentValue: 'Pathologique' },
+      { label: 'Si_nez_pathologique,_préciser', options: null, gender: 'both', parent: 'nez', parentValue: 'Pathologique' },
       { label: 'oreille_droite', options: ['Normal', 'Pathologique'], gender: 'both' },
-      { label: 'Si_oreille_droite_pathologique,_préciser', options: null, gender: 'both',parent: 'oreille_droite', parentValue: 'Pathologique' },
+      { label: 'Si_oreille_droite_pathologique,_préciser', options: null, gender: 'both', parent: 'oreille_droite', parentValue: 'Pathologique' },
       { label: 'oreille_gauche', options: ['Normal', 'Pathologique'], gender: 'both' },
-      { label: 'Si_oreille_gauche_pathologique,_préciser', options: null, gender: 'both',parent: 'oreille_gauche', parentValue: 'Pathologique' },
+      { label: 'Si_oreille_gauche_pathologique,_préciser', options: null, gender: 'both', parent: 'oreille_gauche', parentValue: 'Pathologique' },
       { label: 'thyroide', options: ['normale', 'tuméfiée'], gender: 'both' },
       { label: 'ganglions', options: null, gender: 'both' },
       { label: 'Coeur', options: ['Normal', 'Pathologique'], gender: 'both' },
-      { label: 'Si_coeur_pathologique,_préciser', options: null, gender: 'both',parent: 'Coeur', parentValue: 'Pathologique' },
+      { label: 'Si_coeur_pathologique,_préciser', options: null, gender: 'both', parent: 'Coeur', parentValue: 'Pathologique' },
       { label: 'Rythme_cardiaque', options: ['Rythme régulier', 'Rythme irrégulier'], gender: 'both' },
       { label: 'Fréquence_cardiaque_(bpm)', options: null, gender: 'both' },
       { label: 'tension_arthérielle', options: null, gender: 'both' },
       { label: 'poumons', options: ['MVP', 'pathologique'], gender: 'both' },
-      { label: 'Si_poumons_pathologique,_préciser', options: null, gender: 'both', parent: 'poumons',parentValue: 'Pathologique' },
+      { label: 'Si_poumons_pathologique,_préciser', options: null, gender: 'both', parent: 'poumons', parentValue: 'Pathologique' },
       { label: 'Peau', options: ['Normal', 'Pathologique'], gender: 'both' },
       { label: 'Si_peau_pathologique,_préciser', options: null, gender: 'both', parent: 'Peau', parentValue: 'Pathologique' },
       { label: 'Cheveux', options: ['Normal', 'Pathologique'], gender: 'both' },
@@ -163,7 +168,7 @@ export class NewPage implements OnInit {
       { label: 'Si_abdomen_palpation_pathologique,_préciser', options: null, gender: 'both', parent: 'Palpation_de_abdomen', parentValue: 'Pathologique' },
       { label: 'region_inguinale', options: ['Normal', 'Pathologique'], gender: 'both' },
       { label: 'Si_region_inguinale_pathologique,_préciser', options: null, gender: 'both', parent: 'region_inguinale', parentValue: 'Pathologique' },
-      { label: 'systeme_uro_genital', options: null, gender: 'both'},
+      { label: 'systeme_uro_genital', options: null, gender: 'both' },
       { label: 'Menarche', options: ['Oui', 'Non'], gender: 'female' },
       { label: 'Si_non,_averti_?', options: ['Oui', 'Non'], gender: 'female', parent: 'Menarche', parentValue: 'Non' },
       { label: 'Volume testicule droite', options: null, gender: 'male' },
@@ -206,7 +211,7 @@ export class NewPage implements OnInit {
 
 
   constructor(protected fb: FormBuilder, public platform: Platform, private authService: AuthService, private navController: NavController,
-    private toastCtrl: ToastController, private appStorage: Storage, private route: ActivatedRoute) {
+    private toastCtrl: ToastController, private appStorage: Storage, private route: ActivatedRoute, private alertController: AlertController,) {
     this.fetchSchoolYears();
     this.fetchProblems();
     this.form = this.fb.group({
@@ -228,24 +233,30 @@ export class NewPage implements OnInit {
 
 
     this.fetchSchools(null).then(() => {
-      if(this.route.snapshot.params['id']){
+      if (this.route.snapshot.params['id']) {
         this.loadStudent();
       }
     });
 
-    
-    
+
+
 
 
     this.presentingElement = document.querySelector('.ion-page');
-
+    this.printCurrentPosition();
 
   }
 
-  async loadStudent(){
+  printCurrentPosition = async () => {
+    const coordinates = await Geolocation.getCurrentPosition();
+    this.latitude = coordinates.coords.latitude;
+    this.longitude = coordinates.coords.longitude;
+  };
+
+  async loadStudent() {
     let students = await this.appStorage.get('students');
     this.selectedStudent = students.find((student: { id: any; }) => student.id == this.route.snapshot.params['id']);
-    if(this.selectedStudent){
+    if (this.selectedStudent) {
       this.fetchClasses2(this.selectedStudent.current_class_id).then(() => {
         this.selectedClasse = this.selectedStudent.current_class_id;
       });
@@ -311,7 +322,7 @@ export class NewPage implements OnInit {
       });
     }
 
-    
+
 
 
 
@@ -322,6 +333,8 @@ export class NewPage implements OnInit {
   }
 
   submitExam() {
+    this.save();
+
     let exams = [];
     this.appStorage.get('exams').then((data) => {
       if (data) {
@@ -338,9 +351,11 @@ export class NewPage implements OnInit {
           examiner_id: this.user.id,
           type: examType,
           date: new Date().toISOString(),
+          latitude: this.latitude,
+          longitude: this.longitude
         });
 
-        let examData= [];
+        let examData = [];
         this.appStorage.get('exams-data').then((data) => {
           if (data) {
             examData = data;
@@ -348,24 +363,47 @@ export class NewPage implements OnInit {
             examData = [];
           }
 
-          examData.push({
-            exam_id: this.examId,
-            answers: this.groupedAnswers[examType]
-          });
+          for (const dt in this.answers) {
+            examData.push({
+              id: this.generateDataId(),
+              examination_id: this.examId,
+              question: dt,
+              answer: this.answers[dt]
+            });
+          }
 
           this.appStorage.set('exams-data', examData);
         });
       }
 
+      let examProblems = [];
+      this.appStorage.get('evaluations').then((data) => {
+        if (data) {
+          examProblems = data;
+        } else {
+          examProblems = [];
+        }
+
+        for (const evaluation of this.evaluations) {
+          examProblems.push({
+            examination_id: this.user.id,
+            problem_id: evaluation.problem_id,
+            status: evaluation.evaluation
+          });
+        }
+
+        this.appStorage.set('evaluations', examProblems);
+      });
+
 
       this.appStorage.set('exams', exams).then(() => {
         this.navController.navigateForward('/tabs/exams');
       });
-     
 
 
-  })
-}
+
+    })
+  }
 
 
   evaluateAnswers(): void {
@@ -565,10 +603,10 @@ export class NewPage implements OnInit {
   readyForNexStep(event: any) {
     if (event.target.value) {
       this.studentGender = event.target.value.gender;
-      if(this.userRoles.includes('infirmier')){
-        this.step=1;
-      }else if(this.userRoles.includes('Medecin')){
-        this.step=6;
+      if (this.userRoles.includes('infirmier')) {
+        this.step = 1;
+      } else if (this.userRoles.includes('Medecin')) {
+        this.step = 6;
       }
 
 
@@ -602,7 +640,7 @@ export class NewPage implements OnInit {
     return problem ? problem.id : -1;
   }
 
-  getProblemNameById(problem_id:number){
+  getProblemNameById(problem_id: number) {
     const problem = this.problems.find(p => p.id === problem_id);
 
     return problem.name;
@@ -623,8 +661,23 @@ export class NewPage implements OnInit {
     return this.examId;
   }
 
-  generateExamCode(){
-    this.examCode = Math.random().toString(36).substring(7);
+  generateDataId() {
+
+    this.dataId = Math.floor(Math.random() * 1000000000000000000);
+    this.appStorage.get('exams-data').then((result) => {
+      if (result) {
+        let exam = result.find((sch: any) => sch.id == this.dataId);
+        if (exam) {
+          this.generateDataId();
+        }
+      }
+    });
+
+    return this.dataId;
+  }
+
+  generateExamCode() {
+    this.examCode = Math.random().toString(36).substring(10);
     this.appStorage.get('exams').then((result) => {
       if (result) {
         let exam = result.find((sch: any) => sch.code == this.examCode);
@@ -633,41 +686,43 @@ export class NewPage implements OnInit {
         }
       }
     });
+
+   return this.examCode;
   }
 
-  goToStep2(){
-    this.step=2;
+  goToStep2() {
+    this.step = 2;
   }
 
-  goToStep3(){
-    this.step=3;
+  goToStep3() {
+    this.step = 3;
   }
 
-  goToStep4(){
-    this.step=4;
+  goToStep4() {
+    this.step = 4;
   }
 
-  goToStep5(){
-    this.step=5;
+  goToStep5() {
+    this.step = 5;
   }
 
-  goToStep6(){
-    this.step=6;
+  goToStep6() {
+    this.step = 6;
   }
 
-  goToStep7(){
-    this.step=7;
+  goToStep7() {
+    this.step = 7;
   }
 
 
-  retour(){
-    if(this.step=7){
-      if(this.userRoles.includes('infirmier')){
-        this.step=5;
-      }else if(this.userRoles.includes('Medecin')){
-        this.step=6;
+  retour() {
+    if (this.step = 7) {
+      if (this.userRoles.includes('infirmier')) {
+        this.step = 5;
+      } else if (this.userRoles.includes('Medecin')) {
+        this.step = 6;
       }
-    }else{
+    } else {
       this.step--;
     }
   }
@@ -676,26 +731,76 @@ export class NewPage implements OnInit {
     this.isModalOpen = isOpen;
   }
 
-  addProblem(){
+  addProblem() {
     this.evaluations.push({
       problem_id: this.selectedProblem,
       problem_name: this.getProblemNameById(this.selectedProblem),
       evaluation: this.selectedEvaluation,
     });
 
-    this.selectedProblem=0;
-    this.selectedEvaluation="";
+    this.selectedProblem = 0;
+    this.selectedEvaluation = "";
   }
 
   isInArray(problemId: number): boolean {
     return this.evaluations.find(e => e.problem_id === problemId) !== undefined;
   }
 
-  exit(){
+  exit() {
     this.selectedStudent = null;
     this.selectedSchool = null;
     this.selectedClasse = null;
     this.navController.navigateForward('/tabs/exams');
+  }
+
+  runTimeChange(event: any) {
+
+    if (event.target.name === 'Taille_(cm)' || event.target.name === 'Poids_(kg)') {
+      if (this.answers['Taille_(cm)'] && this.answers['Poids_(kg)']) {
+
+        const taille = parseFloat(this.answers['Taille_(cm)']);
+        const poids = parseFloat(this.answers['Poids_(kg)']);
+        const tailleM = taille / 100;
+        const imc = poids / (tailleM * tailleM);
+        this.answers['IMC'] = imc.toFixed(2);
+
+
+        //calcul du poid idéal selon La formule de Lorentz
+        let poidIdeal = 0;
+        if (this.studentGender === 'male') {
+          poidIdeal = (taille - 100) - ((taille - 150) / 4);
+        } else if (this.studentGender === 'female') {
+          poidIdeal = (taille - 100) - ((taille - 150) / 2.5);
+        }
+
+        const pourcentage = (poids / poidIdeal) * 100;
+
+        this.answers['Pourcentage'] = pourcentage.toFixed(2);
+      }
+    } else if (event.target.name === 'Rang_dans_la_fratrie') {
+
+      if (this.answers['Rang_dans_la_fratrie'] && this.answers['Nombre_enfants_fratrie']) {
+
+        if (this.answers['Rang_dans_la_fratrie'] > this.answers['Nombre_enfants_fratrie']) {
+          console.log(this.answers['Nombre_enfants_fratrie'])
+          const alert = this.alertController.create({
+            header: 'Rang supérieur au nombre enfants',
+            buttons: [
+              {
+                text: 'Fermer',
+                role: 'cancel',
+                cssClass: 'secondary',
+              },
+            ]
+          });
+
+          alert.then((al) => {
+            al.present();
+          });
+        }
+      }
+    }
+
   }
 
 }

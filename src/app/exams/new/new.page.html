@@ -73,7 +73,8 @@
                 <ion-item *ngIf="question.parent && answers[question.parent]===question.parentValue">
                   <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both') ">
                     <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
-                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"
+                    (ionInput)="runTimeChange($event)" name="{{question.label}}"></ion-input>
                   </div>
 
                   <div
@@ -89,7 +90,8 @@
                 <ion-item *ngIf="!question.parent">
                   <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')">
                     <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
-                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"
+                    (ionInput)="runTimeChange($event)" name="{{question.label}}"></ion-input>
                   </div>
 
                   <div *ngIf="question.options && (question.gender===studentGender || question.gender==='both')">
@@ -265,7 +267,8 @@
                 <ion-item *ngIf="question.parent && answers[question.parent]===question.parentValue">
                   <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both') ">
                     <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
-                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse" 
+                      (ionInput)="runTimeChange($event)"  name="{{question.label}}"></ion-input>
                   </div>
 
                   <div
@@ -281,7 +284,8 @@
                 <ion-item *ngIf="!question.parent">
                   <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')">
                     <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
-                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"
+                    (ionInput)="runTimeChange($event)" name="{{question.label}}"></ion-input>
                   </div>
 
                   <div *ngIf="question.options && (question.gender===studentGender || question.gender==='both')">
@@ -351,7 +355,7 @@
         </div>
         <div *ngIf="step==7">
           <ion-button expand="block" color="primary" (click)="setOpen(true)">Problèmes de stanté ({{evaluations.length}})</ion-button>
-          <ion-button expand="block" color="primary" >Soumettre</ion-button>
+          <ion-button expand="block" color="primary" (click)="submitExam()">Soumettre</ion-button>
           <ion-button expand="block" color="primary" (click)="retour()">Retour</ion-button>
           <ion-button expand="block" color="danger" (click)="exit()" >Annuler</ion-button>
         </div>
@@ -452,7 +456,7 @@
     </ion-list>
   </div>
 
-  <ion-modal #modal trigger="open-modal" [presentingElement]="presentingElement">
+  <!-- <ion-modal #modal trigger="open-modal" [presentingElement]="presentingElement">
     <ng-template>
       <ion-header>
         <ion-toolbar>
@@ -485,7 +489,7 @@
 
 
     </ng-template>
-  </ion-modal>
+  </ion-modal> -->
 
 
   <ion-modal [isOpen]="isModalOpen">

@@ -21,7 +21,7 @@ export class AccountPage implements OnInit {
 
 
   goToEditProfile() {
-    this.router.navigate(['tabs/account/edit-profile']);
+    this.router.navigate(['tabs/account/edit-profil']);
   }
 
   goToChangePassword() {

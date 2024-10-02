@@ -1,0 +1,50 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-button (click)="goBack()" fill="clear" slot="start">
+      <ion-icon name="arrow-back" style="font-size: 26px;color: black"></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="main_content_div">
+
+    <ion-label class="welcome_lbl">Edit Profile</ion-label>
+
+
+
+    <div (click)="goToImageUpload()">
+      <div *ngIf="photo">
+        <img src="{{photo}}" alt="" class="user_back">
+      </div>
+      <div *ngIf="!photo">
+        <img src="../../../assets/img/user.png" alt="" class="user_back">
+      </div>
+
+
+    </div>
+
+    <ion-item>
+      <ion-label position="floating">Email</ion-label>
+      <ion-input [(ngModel)]="email" name="email"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Name</ion-label>
+      <ion-input [(ngModel)]="name" name="name"></ion-input>
+    </ion-item>
+
+
+
+
+    <ion-item>
+      <ion-label position="floating">Mobile No</ion-label>
+      <ion-input [(ngModel)]="phone" name="phone"></ion-input>
+    </ion-item>
+
+    <ion-button expand="block" (click)="save()">
+      Edit Profile
+    </ion-button>
+
+  </div>
+</ion-content>
