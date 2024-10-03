@@ -245,9 +245,9 @@ export class ShowClassePage implements OnInit {
     this.navController.navigateForward('/tabs/schools/classe/student/' + item.id + '/view');
   }
 
-  open(item: any) {
+  edit(item: any) {
 
-
+    this.navController.navigateForward('/tabs/schools/classe/' + item.id + '/edit');
   }
 
 }

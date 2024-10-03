@@ -13,13 +13,27 @@ import { Storage } from '@ionic/storage-angular';
 export class DashboardPage {
   @ViewChild('lineCanvas') lineCanvas: any;
   lineChart: any;
+  user: any = {};
+
+  
   
   constructor(
     private appStorage: Storage
-  ) {}
+  ) {
+    
+  }
+
+  async fetchUser(){
+    this.appStorage.get('user').then((val) => {
+      this.user=val;
+    });
+  }
 
   ionViewDidEnter() {
-    this.createLineChart();
+    this.fetchUser().then(()=>{
+      this.createLineChart();
+    });
+    
   }
 
   new(){
@@ -28,7 +42,6 @@ export class DashboardPage {
 
   async createLineChart() {
     
-    const user= await this.appStorage.get('user');
     const exams = await this.appStorage.get('exams');
     
     let labels = [];
@@ -51,13 +64,12 @@ export class DashboardPage {
       let f = 0;
       let g = 0;
       for (let exam of exams) {
-        console.log(user.id, exam.examiner_id);
-        //if (exam.examiner_id== user.id) {
+        if (exam.examiner_id== this.user.id) {
           
           if (mt === new Date(exam.date).toLocaleString('en-fr',{month:'short'})) {
             f++;
           }
-       //}
+       }
       }
 
       if (labels.indexOf(mt) >= 0) {
@@ -66,7 +78,6 @@ export class DashboardPage {
 
     }
 
-    console.log(labels, data);
     //count user examinations by month name
  
     /* for (let month of months) {

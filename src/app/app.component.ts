@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { LoadingController, Platform } from '@ionic/angular';
 import { DataService } from './services/data.service';
 import { AuthService } from './services/auth.service';
-import { Router } from '@angular/router';
+import { ActivationEnd, Router } from '@angular/router';
 import { initZone } from 'zone.js/lib/zone-impl';
 import { SplashScreen } from '@capacitor/splash-screen';
 
@@ -133,6 +133,11 @@ export class AppComponent {
           const classObservable = await classPromise; // Récupérez l'Observable
           const cls = await lastValueFrom(classObservable);
 
+        }else if (cl.status==="updated"){
+          const classPromise = this.apiService.updateClasse(cl.schoo_id, cl);
+          const classObservable = await classPromise ;
+          const cls = await lastValueFrom(classObservable);
+
         }
       }
     }
@@ -216,6 +221,14 @@ export class AppComponent {
 
   async loadAllData() {
     try {
+      const usersPromise = this.apiService.getUsers();
+      const usersObservable = await usersPromise ;
+      const users:any= await lastValueFrom(usersObservable).then((data:any) =>{
+        this.appStorage.set('users', data.data);
+      });
+
+
+
       const studentsPromise = this.apiService.getStudents(); // Stockez la Promise
       const studentsObservable = await studentsPromise; // Récupérez l'Observable
       const students: any = await lastValueFrom(studentsObservable).then((data: any) => {

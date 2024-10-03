@@ -26,6 +26,10 @@ const routes: Routes = [
   {
     path: ':id/edit',
     loadChildren: () => import('./edit-school/edit-school.module').then( m => m.EditSchoolPageModule)
+  },
+  {
+    path: 'classe/:id/edit',
+    loadChildren: () => import('./edit-classe/edit-classe.module').then( m => m.EditClassePageModule)
   }
 ];
 

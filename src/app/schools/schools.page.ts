@@ -10,19 +10,37 @@ import { Storage } from '@ionic/storage-angular';
 })
 export class SchoolsPage {
   schools: any[] = [];
+  user: any;
+  roles: any[] = [];
 
   myKey:any = 'schools';
   myValue: any;
 
-  constructor( private dataService: DataService,  private navController: NavController,
+  constructor(  private navController: NavController,
     private toastCtrl: ToastController,
     public plt: Platform,
     private appStorage: Storage
   ) {
-    this.fetchSchools();
+
+    this.fetUser().then(() => {
+      this.fetchSchools();
+      this.fetchRoles();
+    });
 
    
 
+  }
+
+  async fetUser(){
+    this.appStorage.get('user').then((val) => {
+      this.user=val;
+    });
+  }
+
+  async fetchRoles(){
+    this.appStorage.get('roles').then((val) => {
+      this.roles=val;
+    });
   }
 
   async deleteSchool(sch: any) {
@@ -54,7 +72,7 @@ export class SchoolsPage {
     const result = await this.appStorage.get(this.myKey);
     if (result) {
       
-      this.schools = result.filter((item:any) => item.status !== 'deleted');
+      this.schools = result.filter((item:any) => item.status !== 'deleted' && item.group_id == this.user.group_id);
     }
 
     if (refresher) {

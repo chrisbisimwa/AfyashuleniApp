@@ -20,6 +20,11 @@ export class ApiService {
     };
   }
 
+  async getUsers(){
+    const headers = await this.getHeaders();
+    return this.http.get(`${this.apiUrl}/users`, headers)
+  }
+
   async getSchoolYears() {
     const headers = await this.getHeaders();
     return this.http.get(`${this.apiUrl}/school-years`, headers);
@@ -43,6 +48,11 @@ export class ApiService {
   async postClass(schoolId:any, data: any) {
     const headers = await this.getHeaders();
     return this.http.post(`${this.apiUrl+'/schools/'+schoolId+'/classes'}`, data, headers);
+  }
+
+  async updateClasse(schoolId:any, data:any){
+    const headers = await this.getHeaders();
+    return this.http.put(`${this.apiUrl+'/schools/classes/'+data.id}`, data, headers);
   }
 
   async postStudent(data: any) {
@@ -154,6 +164,7 @@ export class ApiService {
     }
     
     const response: any = await this.http.get(`${this.apiUrl}/user`, { headers: { Authorization: `Bearer ${token}` } }).toPromise().then((response) => {
+      this.appStorage.set('user', response);
       return response;
     });
     if (response && response.id) {

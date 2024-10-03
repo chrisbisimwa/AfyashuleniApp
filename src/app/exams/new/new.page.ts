@@ -527,7 +527,9 @@ export class NewPage implements OnInit {
 
   async fetchSchools(event: any) {
     //fetch schools from local storage based on selected school year
-    const schools = await this.appStorage.get('schools');
+    const result = await this.appStorage.get('schools');
+
+    let schools = result.filter((item:any) => item.status !== 'deleted' && item.group_id == this.user.group_id);
 
     let ch = schools || [];
 
@@ -613,7 +615,7 @@ export class NewPage implements OnInit {
       if (classe) {
         const schools = await this.appStorage.get('schools');
 
-        let ch = schools || [];
+        let ch = schools.filter((item:any) => item.status !== 'deleted' && item.group_id == this.user.group_id) || [];
 
         const cls = await this.appStorage.get('classes');
         let cl = cls || [];

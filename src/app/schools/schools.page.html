@@ -41,7 +41,7 @@
   
     
   </div>
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="roles.includes('Manager') || roles.includes('super-admin') ">
     <ion-fab-button (click)="new()">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>

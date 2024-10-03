@@ -63,7 +63,6 @@ export class ShowSchoolPage implements OnInit {
           classes = [];
         }
 
-        console.log(ev.detail.data);
         classes.push({id:this.generateId(), name: ev.detail.data, school_id: Number(this.route.snapshot.params['id']), schoolYear_id: 1, created_by: this.user.id });
 
 
@@ -199,7 +198,6 @@ export class ShowSchoolPage implements OnInit {
   }
 
   showClasse(item: any) {
-    console.log(item);
     this.navController.navigateForward('/tabs/schools/classe/' + item.id + '/view');
   }
 

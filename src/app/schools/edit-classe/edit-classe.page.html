@@ -1,0 +1,36 @@
+
+
+<ion-header class="ion-no-border" mode="ios">
+  <ion-toolbar style="--background: var(--ion-color-primary)">
+    <ion-button slot="start" (click)="previousState()">
+      <ion-icon name="chevron-back-outline"></ion-icon>
+      Back
+    </ion-button>
+    <ion-title style="color: white;letter-spacing: 1px;font-family: 'semi-bold';">Classe</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button  (click)="save()" color="light">
+        <span *ngIf="platform.is('ios')">Done</span>
+        <ion-icon name="checkmark" *ngIf="!platform.is('ios')"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="main_content_div">
+    <ion-label class="title_lbl">Modifier  une classe</ion-label>
+    <ion-list>
+      
+      <ion-item>
+        <ion-label position="floating">Name</ion-label>
+        <ion-input [(ngModel)]="name" [ngModelOptions]="{standalone: true}" type="text" name="name" ></ion-input>
+      </ion-item>
+    
+      
+   
+     
+    </ion-list>
+  </div>
+   
+</ion-content>
