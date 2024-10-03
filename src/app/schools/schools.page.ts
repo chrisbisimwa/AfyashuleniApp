@@ -25,13 +25,21 @@ export class SchoolsPage {
 
   }
 
-  deleteSchool(school: any) {
-    this.schools = this.schools.filter(item => item.id !== school.id);
+  async deleteSchool(sch: any) {
+    const result = await this.appStorage.get('schools');
+            
+    let school = result.find((sch: any) => sch.id == sch.id);
+    if(school){
+      result.splice(result.indexOf(school), 1);
 
+      school.status="deleted"
 
-    this.appStorage.set(this.myKey, this.schools).then(() => {
+      result.push(school);
+
+      this.appStorage.set('schools', result);
+
       this.fetchSchools();
-    });
+    }
 
     
   }

@@ -21,7 +21,7 @@
 
       <ion-item-group>
         <ion-item-divider>
-          <ion-label> 1. Séléctionner l'élève </ion-label>
+          <ion-label>Séléctionner l'élève </ion-label>
         </ion-item-divider>
 
         <!-- <ion-item>
@@ -54,7 +54,7 @@
         <ion-item>
           <ion-label>Elève</ion-label>
           <ion-select [(ngModel)]="selectedStudent" (ionChange)="readyForNexStep($event)">
-            <ion-select-option *ngFor="let student of students" [value]="student">
+            <ion-select-option *ngFor="let student of students" [value]="student.id">
               {{ student.first_name }} {{ student.last_name }} {{ student.surname }}
             </ion-select-option>
           </ion-select>

@@ -19,7 +19,7 @@
     
     <ion-list>
       <ion-item-sliding button detail="true" *ngFor="let school of schools" #slidingItem>
-        <ion-item button (click)="view(school)">
+        <ion-item button (click)="view(school)" *ngIf="school.status != 'deleted'">
           <ion-label>
             <ion-text color="primary">
               <h2>{{school.name}}</h2>

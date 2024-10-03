@@ -255,13 +255,23 @@ export class NewPage implements OnInit {
 
   async loadStudent() {
     let students = await this.appStorage.get('students');
-    this.selectedStudent = students.find((student: { id: any; }) => student.id == this.route.snapshot.params['id']);
-    if (this.selectedStudent) {
-      this.fetchClasses2(this.selectedStudent.current_class_id).then(() => {
-        this.selectedClasse = this.selectedStudent.current_class_id;
+    let stdnt = students.find((student: { id: any; }) => student.id == this.route.snapshot.params['id']);
+    if (stdnt) {
+      this.fetchClassesByStudentClassId(stdnt.current_class_id).then(() => {
+        this.selectedClasse = stdnt.current_class_id;
       });
-      this.fetchStudents2(this.selectedStudent.current_class_id).then(() => {
-        this.selectedStudent = students.find((student: { id: any; }) => student.id == this.route.snapshot.params['id']);
+      this.fetchStudentsByClasse(stdnt.current_class_id).then(() => {
+        this.selectedStudent = stdnt.id;
+      });
+      this.fetchSchoolsByStudentCurrentClassId(stdnt.current_class_id).then(async () => {
+        if(this.classes){
+          let classe= this.classes.find((c: { id: any }) => c.id === stdnt.current_class_id)
+          if(classe){
+            this.selectedSchool = classe.school_id;
+          }
+          
+        }
+        
       });
     }
   }
@@ -347,7 +357,7 @@ export class NewPage implements OnInit {
         exams.push({
           id: this.generateExamId(),
           code: this.generateExamCode(),
-          student_id: this.selectedStudent.id,
+          student_id: this.selectedStudent,
           examiner_id: this.user.id,
           type: examType,
           date: new Date().toISOString(),
@@ -558,7 +568,7 @@ export class NewPage implements OnInit {
     }
   }
 
-  async fetchClasses2(classId: any) {
+  async fetchClassesByStudentClassId(classId: any) {
     const cls = await this.appStorage.get('classes');
     let cl = cls || [];
 
@@ -582,7 +592,7 @@ export class NewPage implements OnInit {
     this.fetchRoles();
   }
 
-  async fetchStudents2(classId: any) {
+  async fetchStudentsByClasse(classId: any) {
     const students = await this.appStorage.get('students');
     let std = students || [];
 
@@ -594,6 +604,44 @@ export class NewPage implements OnInit {
 
     this.fetchRoles();
   }
+
+  async fetchSchoolsByStudentCurrentClassId(classId: any) {
+
+    const cls = await this.appStorage.get('classes');
+    if (cls) {
+      let classe = cls.find((c: { id: any }) => c.id === classId)
+      if (classe) {
+        const schools = await this.appStorage.get('schools');
+
+        let ch = schools || [];
+
+        const cls = await this.appStorage.get('classes');
+        let cl = cls || [];
+
+        let clas = [];
+        for (const c of cl) {
+          if (c.schoolYear_id == classe.schoolYear_id) {
+            clas.push(c);
+          }
+        }
+
+        this.schools = [];
+        for (const s of ch) {
+          for (const c of clas) {
+            if (s.id == c.school_id) {
+              if (this.schools.indexOf(s) === -1) {
+                this.schools.push(s);
+              }
+            }
+          }
+        }
+      }
+
+    }
+
+  }
+
+
 
   async fetchProblems() {
     const problems = await this.appStorage.get('problems');
@@ -687,7 +735,7 @@ export class NewPage implements OnInit {
       }
     });
 
-   return this.examCode;
+    return this.examCode;
   }
 
   goToStep2() {

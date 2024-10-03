@@ -37,7 +37,7 @@ export class ApiService {
 
   async updateSchool(data:any){
     const headers = await this.getHeaders();
-    return this.http.put(`${this.apiUrl}/schools/delete`, data, headers)
+    return this.http.put(`${this.apiUrl}/schools/${data.id}`, data, headers);
   }
 
   async postClass(schoolId:any, data: any) {

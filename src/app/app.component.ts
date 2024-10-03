@@ -116,7 +116,9 @@ export class AppComponent {
         }else if(sc.status =="updated"){
           const schoolPromise = this.apiService.updateSchool(sc);
           const schoolObservable = await schoolPromise;
-          const school = await lastValueFrom(schoolObservable);
+          const school = await lastValueFrom(schoolObservable).then((data: any) => {
+            console.log(data.data);
+          });
         }
       }
 
@@ -229,11 +231,6 @@ export class AppComponent {
           this.appStorage.set('student-history', data.data);
         }
       });
-
-      
-
-
-
 
       const problemsPromise = this.apiService.getProblems(); // Stockez la Promise
       const problemsObservable = await problemsPromise; // Récupérez l'Observable
