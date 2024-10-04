@@ -54,16 +54,17 @@
         <ion-icon name="chevron-forward-sharp"></ion-icon>
       </div>
 
-      <!-- <div class="shopping_div" (click)="goToManageUsers()">
+      <div class="shopping_div" (click)="syncData()">
         <div class="color_box">
-          <img src="assets/imgs/privacy.png">
+          <img src="assets/imgs/synchronization.png">
         </div>
         <div class="content_div">
-          <ion-label class="name">Users</ion-label>
-          <ion-label class="date">Manage all users</ion-label>
+          <ion-label class="name">Serveur</ion-label>
+          <ion-label class="date">Synchroniser les données</ion-label>
         </div>
-        <ion-icon name="chevron-forward-sharp"></ion-icon>
-      </div> -->
+        <ion-spinner name="circular" *ngIf="loading"></ion-spinner>
+        <ion-icon name="chevron-forward-sharp" *ngIf="!loading"></ion-icon>
+      </div>
 
       <div class="shopping_div" (click)="logOut()">
         <div class="color_box">

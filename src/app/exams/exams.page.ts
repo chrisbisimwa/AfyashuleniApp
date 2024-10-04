@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { DataService } from '../services/data.service';
 import { IonItemSliding, NavController, Platform, ToastController } from '@ionic/angular';
 import { Storage } from '@ionic/storage-angular';
 
@@ -42,7 +41,14 @@ export class ExamsPage {
         if (this.getExaminerGroupIdByExaminerId(exam.examiner_id) === this.user.group_id) {
           exam.studentName = await this.getstudentNameById(exam.student_id);
           exam.examinerName = await this.getExaminerNameById(exam.examiner_id);
-          exs.push(exam);
+          //grouper les examens par examinateur et élève: si l'examen a un même examinateur et un même élève et à une même date, considérer que c'est un seul et même examen
+          let found = exs.find((item: any) => item.student_id === exam.student_id && item.examiner_id === exam.examiner_id && item.date === exam.date);
+          
+          if(!found){
+            exs.push(exam);
+          }
+
+
         }
 
       }

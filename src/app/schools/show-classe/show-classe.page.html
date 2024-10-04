@@ -11,16 +11,29 @@
   <div class="main_content_div">
     <ion-label class="title_lbl">Details de la classe</ion-label>
     <ion-list>
-      <ion-item>
-        <ion-label >Code</ion-label>
-        <div item-content>
-          <span id="code-content">{{classe.id ?? "-"}}</span>
-        </div>
-      </ion-item>
+      
       <ion-item>
         <ion-label>Classe</ion-label>
         <div item-content>
           <span>{{classe.name}}</span>
+        </div>
+      </ion-item>
+      <ion-item>
+        <ion-label>Nombre filles</ion-label>
+        <div item-content>
+          <span>{{classe.nbr_fille}}</span>
+        </div>
+      </ion-item>
+      <ion-item>
+        <ion-label>Nombre garçons</ion-label>
+        <div item-content>
+          <span>{{classe.nbr_garcon}}</span>
+        </div>
+      </ion-item>
+      <ion-item>
+        <ion-label>Redoublants</ion-label>
+        <div item-content>
+          <span>{{classe.nbr_redoublant}}</span>
         </div>
       </ion-item>
       <ion-item>
@@ -29,6 +42,7 @@
           <span>{{shcoolName}}</span>
         </div>
       </ion-item>
+      
 
 
       <ion-item-group>
@@ -47,9 +61,9 @@
 
 
 
-    <ion-button expand="block" color="Medium" id="open-modal2">Ajouter un élève</ion-button>
+    <ion-button expand="block" color="medium" id="open-modal2">Ajouter un élève</ion-button>
     <ion-button expand="block" color="primary" (click)="edit(classe)">Modifier la classe</ion-button>
-    <ion-button expand="block" color="danger" (click)="deleteModal(classe)">Supprimer la classe</ion-button>
+   <!--  <ion-button expand="block" color="danger" (click)="deleteModal(classe)">Supprimer la classe</ion-button> -->
   </div>
 
   <ion-modal trigger="open-modal2" (willDismiss)="onWillDismiss($event)">

@@ -39,18 +39,38 @@ export class ShowExamPage implements OnInit {
 
   async fetchExamData() {
     //fetch exam from local storage
-    const result = await this.appStorage.get('exams-data');
-    let exDatas = [];
-    if(result) {
-      for (let examData of result) {
-        if(examData.examination_id == this.route.snapshot.params['id']) {
-          exDatas.push(examData);
+    const exams = await this.appStorage.get('exams');
+    //grouper les examens par examinateur et élève: si l'examen a un même examinateur et un même élève et à une même date, considérer que c'est un seul et même examen
+    let result: any[] = [];
+    if(exams) {
+      for (let exam of exams) {
+        let found = result.find((item: any) => item.student_id === exam.student_id && item.examiner_id === exam.examiner_id && item.date === exam.date);
+        if(!found){
+          result.push(exam);
         }
       }
-
-      this.examDatas = exDatas ? exDatas : [];
-      
     }
+
+    const examDataStore = await this.appStorage.get('exams-data');
+
+    let exDatas=[]
+    if(result){
+      for( let examen of result){
+        let dtx=[]
+        for(let examData of examDataStore){
+          if(examData.examination_id==examen.id){
+             dtx.push(examData);
+          }
+        }
+
+        if(dtx.length>0){
+          exDatas.push({ 'examen': examen.type, 'data': dtx});
+        }
+        
+      }
+    }
+
+    this.examDatas = exDatas ? exDatas : [];
 
   }
 
@@ -75,6 +95,8 @@ export class ShowExamPage implements OnInit {
 
     return examiner ? examiner.name : 'Unknown';
   }
+
+ 
 
   deleteModal(exam:any) {
   }

@@ -1,7 +1,5 @@
 import { Component } from '@angular/core';
 import { LoadingController, Platform } from '@ionic/angular';
-import { DataService } from './services/data.service';
-import { AuthService } from './services/auth.service';
 import { ActivationEnd, Router } from '@angular/router';
 import { initZone } from 'zone.js/lib/zone-impl';
 import { SplashScreen } from '@capacitor/splash-screen';
@@ -35,8 +33,8 @@ export class AppComponent {
     await this.appStorage.create();
 
     this.checkLogin();
-    this.checkNetwork();
-
+    //this.checkNetwork();
+ 
 
   }
 
@@ -46,7 +44,7 @@ export class AppComponent {
         //check if the token is still valid
         let tokenData = await this.apiService.checkTokenValidity();
         if (tokenData) {
-          this.router.navigate(['/tabs/home']);
+          //this.router.navigate(['/tabs/home']);
         }else{
           this.router.navigate(['/login']);
         }

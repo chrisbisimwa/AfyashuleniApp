@@ -1,8 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AlertController, IonModal, NavController } from '@ionic/angular';
-import { AuthService } from 'src/app/services/auth.service';
-import { DataService } from 'src/app/services/data.service';
 import { OverlayEventDetail } from '@ionic/core/components';
 import { Storage } from '@ionic/storage-angular';
 
@@ -36,8 +34,6 @@ export class ShowClassePage implements OnInit {
     private navController: NavController,
     private alertController: AlertController,
     private route: ActivatedRoute,
-    private dataService: DataService,
-    private authService: AuthService,
     private appStorage: Storage
   ) { }
 
@@ -111,9 +107,12 @@ export class ShowClassePage implements OnInit {
   }
 
   async fectSchoolYear() {
-    let schoolYears = await this.dataService.get('schoolYears');
+    let schoolYears = await this.appStorage.get('schoolYears');
+    if(schoolYears){
+      this.schoolYears = schoolYears;
+    }
 
-    this.schoolYears = schoolYears.data;
+    
   }
 
   saveSchoolYear() {

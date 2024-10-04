@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { DataService } from '../services/data.service';
 import { IonItemSliding, NavController, Platform, ToastController } from '@ionic/angular';
 import { Storage } from '@ionic/storage-angular';
 
@@ -19,8 +18,7 @@ export class SchoolsPage {
   constructor(  private navController: NavController,
     private toastCtrl: ToastController,
     public plt: Platform,
-    private appStorage: Storage
-  ) {
+    private appStorage: Storage) {
 
     this.fetUser().then(() => {
       this.fetchSchools();
@@ -29,6 +27,14 @@ export class SchoolsPage {
 
    
 
+  }
+
+  ionViewDidEnter() {
+    this.fetUser().then(() => {
+      this.fetchSchools();
+      this.fetchRoles();
+    });
+    
   }
 
   async fetUser(){
@@ -70,8 +76,8 @@ export class SchoolsPage {
 
   async fetchSchools(refresher?: any) {
     const result = await this.appStorage.get(this.myKey);
-    if (result) {
-      
+    
+    if (result && this.user) {
       this.schools = result.filter((item:any) => item.status !== 'deleted' && item.group_id == this.user.group_id);
     }
 

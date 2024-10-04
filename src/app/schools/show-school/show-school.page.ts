@@ -19,6 +19,7 @@ export class ShowSchoolPage implements OnInit {
   school: any = null;
   classes: any = null;
   user: any = null;
+  roles: any[] = [];
 
   latitude!: any;
   longitude!: any;
@@ -27,21 +28,24 @@ export class ShowSchoolPage implements OnInit {
   schoolYears: any = null;
 
   className: string = '';
+  nbr_fille: number = 0;
+  nbr_garcon: number = 0;
+  nbr_reboublant: number = 0;
   classeId: number = 0;
 
 
   constructor(private navController: NavController,
     private alertController: AlertController,
     private route: ActivatedRoute,
-    private dataService: DataService,
-    private authService: AuthService,
     private appStorage: Storage
   ) { }
 
   ngOnInit() {
     this.fetchSchool();
     this.fectSchoolYear();
-    this.fetchUser();
+    this.fetchUser().then(() => {
+      this.fetchRoles();
+    });
   }
 
   cancel() {
@@ -63,7 +67,17 @@ export class ShowSchoolPage implements OnInit {
           classes = [];
         }
 
-        classes.push({id:this.generateId(), name: ev.detail.data, school_id: Number(this.route.snapshot.params['id']), schoolYear_id: 1, created_by: this.user.id });
+        console.log(ev.detail.data);
+        classes.push({
+            id:this.generateId(), 
+            name: ev.detail.data, 
+            nbr_fille: this.nbr_fille,
+            nbr_garcon: this.nbr_garcon,
+            nbr_reboulant: this.nbr_reboublant,
+            school_id: Number(this.route.snapshot.params['id']), 
+            schoolYear_id: 1, 
+            created_by: this.user.id 
+          });
 
 
 
@@ -82,6 +96,14 @@ export class ShowSchoolPage implements OnInit {
   async fetchUser() {
     const user: any = await this.appStorage.get('user');
     this.user = user;
+  }
+
+  fetchRoles(){
+    this.appStorage.get('roles').then((roles) => {
+      if(roles){
+        this.roles = roles;
+      }
+    }); 
   }
 
   async fectSchoolYear() {

@@ -7,7 +7,7 @@ import { Storage } from '@ionic/storage-angular';
   providedIn: 'root'
 })
 export class ApiService {
-  private apiUrl = 'https://afiashuleni.kivutech.net/api';
+  private apiUrl = 'https://afiashuleni.net/api';
 
   constructor(private http: HttpClient, private appStorage: Storage) {}
 

@@ -9,7 +9,7 @@
 
 <ion-content *ngIf="school">
   <div class="main_content_div">
-    <ion-label class="title_lbl">school Details</ion-label>
+    <ion-label class="title_lbl">Détails de l'école</ion-label>
     <ion-list>
       <ion-item>
         <ion-label>Nom</ion-label>
@@ -72,9 +72,9 @@
 
 
 
-    <ion-button expand="block" color="Medium" id="open-modal">Ajouter une classe</ion-button>
+    <ion-button expand="block" color="medium" id="open-modal">Ajouter une classe</ion-button>
     <ion-button expand="block" color="primary" (click)="edit(school)">Modifier Ecole</ion-button>
-    <ion-button expand="block" color="danger" (click)="deleteModal(school)">Supprimer Ecole</ion-button>
+    <!-- <ion-button expand="block" color="danger" (click)="deleteModal(school)">Supprimer Ecole</ion-button> -->
   </div>
 
   <ion-modal trigger="open-modal" (willDismiss)="onWillDismiss($event)">
@@ -94,6 +94,18 @@
         <ion-item>
           <ion-input label="Entrez le nom de la classe" labelPlacement="stacked" type="text"
             placeholder="Nom de la classe" [(ngModel)]="className"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input label="Nombre de filles" labelPlacement="stacked" type="text"
+            placeholder="Nombre de filles" [(ngModel)]="nbr_fille"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input label="Nombre de garçons" labelPlacement="stacked" type="text"
+            placeholder="Nombre de garçons" [(ngModel)]="nbr_garcon"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input label="Nombre redoubants" labelPlacement="stacked" type="text"
+            placeholder="Nombre redoubants" [(ngModel)]="nbr_reboublant"></ion-input>
         </ion-item>
       </ion-content>
     </ng-template>

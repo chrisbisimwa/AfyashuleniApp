@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { AlertController, Platform } from '@ionic/angular';
-import { DataService } from 'src/app/services/data.service';
 import { Storage } from '@ionic/storage-angular';
 import { Router } from '@angular/router';
 import { Geolocation } from '@capacitor/geolocation';

@@ -14,6 +14,9 @@ export class EditClassePage implements OnInit {
   classe: any = null;
   classeId: number = 0;
   name: string = '';
+  nbr_fille: number = 0;
+  nbr_garcon: number = 0;
+  nbr_reboulant: number = 0;
   schoolYear_id: number = 0;
   school_id: number = 0;
   created_at: string = '';
@@ -41,6 +44,9 @@ export class EditClassePage implements OnInit {
       cls.status = 'updated';
       cls.id=this.classeId
       cls.name = this.name ?? "";
+      cls.nbr_fille = this.nbr_fille;
+      cls.nbr_garcon = this.nbr_garcon;
+      cls.nbr_reboulant = this.nbr_reboulant;
       cls.schoo_id = this.school_id;
       cls.school_year_id= this.schoolYear_id;
       cls.created_at = this.created_at;
@@ -66,6 +72,9 @@ export class EditClassePage implements OnInit {
       if (this.classe) {
         this.classeId = this.classe.id;
         this.name = this.classe.name;
+        this.nbr_fille = this.classe.nbr_fille;
+        this.nbr_garcon = this.classe.nbr_garcon;
+        this.nbr_reboulant = this.classe.nbr_reboulant;
         this.schoolYear_id = this.classe.schoolYear_id;
         this.school_id = this.classe.school_id;
         this.created_at = this.classe.created_at;

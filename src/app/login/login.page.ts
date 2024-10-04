@@ -17,7 +17,7 @@ export class LoginPage implements OnInit {
 
   networkStatus: ConnectionStatus;
 
-  private apiUrl = 'https://afiashuleni.kivutech.net/api';
+  private apiUrl = 'https://afiashuleni.net/api';
   private readonly STORAGE_KEY = 'authToken';
   private isLoggedInSubject = new BehaviorSubject<boolean>(false);
   isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();

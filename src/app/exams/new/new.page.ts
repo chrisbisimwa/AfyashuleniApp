@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { AlertController, NavController, Platform, ToastController } from '@ionic/angular';
-import { DataService } from '../../services/data.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { Storage } from '@ionic/storage-angular';
 import { ActivatedRoute } from '@angular/router';
@@ -58,6 +57,8 @@ export class NewPage implements OnInit {
       { label: 'Occupation des parents avec qui élève vit', options: null, gender: 'both' },
       { label: 'Nombre_enfants_fratrie', options: null, gender: 'both' },
       { label: 'Rang_dans_la_fratrie', options: null, gender: 'both' },
+      { label: 'Nombre_de_filles', options:null, gender: 'both' },
+      { label: 'Nombre_de_garçons', options: null, gender: 'both' },
 
     ],
     'calendrier_vaccinal': [
@@ -257,8 +258,10 @@ export class NewPage implements OnInit {
     let students = await this.appStorage.get('students');
     let stdnt = students.find((student: { id: any; }) => student.id == this.route.snapshot.params['id']);
     if (stdnt) {
+      this.studentGender= stdnt.gender;
       this.fetchClassesByStudentClassId(stdnt.current_class_id).then(() => {
         this.selectedClasse = stdnt.current_class_id;
+        
       });
       this.fetchStudentsByClasse(stdnt.current_class_id).then(() => {
         this.selectedStudent = stdnt.id;
@@ -652,12 +655,16 @@ export class NewPage implements OnInit {
 
   readyForNexStep(event: any) {
     if (event.target.value) {
-      this.studentGender = event.target.value.gender;
-      if (this.userRoles.includes('infirmier')) {
-        this.step = 1;
-      } else if (this.userRoles.includes('Medecin')) {
-        this.step = 6;
+      let stdnt = this.students.find((s: { id: any }) => s.id === event.target.value);
+      if(stdnt){
+        this.studentGender = stdnt.gender;
+        if (this.userRoles.includes('infirmier')) {
+          this.step = 1;
+        } else if (this.userRoles.includes('Medecin')) {
+          this.step = 6;
+        }
       }
+      
 
 
     }
@@ -766,14 +773,14 @@ export class NewPage implements OnInit {
 
 
   retour() {
-    if (this.step = 7) {
+    if (this.step == 7) {
       if (this.userRoles.includes('infirmier')) {
         this.step = 5;
       } else if (this.userRoles.includes('Medecin')) {
         this.step = 6;
       }
     } else {
-      this.step--;
+      this.step = this.step - 1;
     }
   }
 
@@ -849,6 +856,27 @@ export class NewPage implements OnInit {
           });
         }
       }
+    }else if (event.target.name === 'Nombre_de_filles' || event.target.name==='Nombre_de_garçons') {
+      if (this.answers['Nombre_de_filles'] && this.answers['Nombre_de_garçons']) {
+        const total = parseInt(this.answers['Nombre_de_filles']) + parseInt(this.answers['Nombre_de_garçons']);
+        if(this.answers['Nombre_enfants_fratrie'] && this.answers['Nombre_enfants_fratrie'] !== total){
+          const alert = this.alertController.create({
+            header: 'Nombre total d\'enfants incorrect',
+            buttons: [
+              {
+                text: 'Fermer',
+                role: 'cancel',
+                cssClass: 'secondary'
+              },
+            ]
+          });
+
+          alert.then((al) => {
+            al.present();
+          });
+        }
+      }
+
     }
 
   }

@@ -11,12 +11,12 @@
   <div class="main_content_div">
     <ion-label class="title_lbl">Détails de l'examen</ion-label>
     <ion-list>
-      <ion-item>
+      <!-- <ion-item>
         <ion-label>Code</ion-label>
         <div item-content>
           <span id="code-content">{{exam.id ?? "-"}}</span>
         </div>
-      </ion-item>
+      </ion-item> -->
       <ion-item>
         <ion-label>Elève</ion-label>
         <div item-content>
@@ -38,15 +38,14 @@
       </ion-item>
 
       <ion-item-group>
-        <ion-item-divider>
-          <ion-label>
-            <h2>Données de l'examen ({{exam.type}})</h2>
-          </ion-label>
-        </ion-item-divider>
-      
+        <div *ngFor="let exam of examDatas">
+          <ion-item-divider>
+            <ion-label>
+              <h2>Données de l'examen ({{exam.examen}})</h2>
+            </ion-label>
+          </ion-item-divider>
 
-        
-          <ion-item-sliding button detail="true" *ngFor="let data of examDatas" #slidingItem>
+          <ion-item-sliding  button detail="true" *ngFor="let data of exam.data" #slidingItem>
             <ion-item>
               <ion-label>{{data.question}}</ion-label>
               <div item-content>
@@ -59,6 +58,13 @@
               <ion-item-option color="danger" > Supprimer la classe</ion-item-option>
             </ion-item-options>
           </ion-item-sliding>
+
+        </div>
+        
+      
+
+        
+          
       
       </ion-item-group>
 
