@@ -10,27 +10,27 @@ import { Storage } from '@ionic/storage-angular';
 export class ExamsPage {
   exams: any[] = [];
   segment = "Unresolved"
-  user:any={};
-  users: any[]=[];
+  user: any = {};
+  users: any[] = [];
 
 
 
   constructor(private appStrorage: Storage, private navController: NavController,
     private toastCtrl: ToastController,
     public plt: Platform) {
-      this.fetchUser().then(()=>{
-        this.fetchExams();
-      });
-    
+    this.fetchUser().then(() => {
+      this.fetchExams(null, this.user);
+    });
+
   }
 
-  async fetchUser(){
-    this.user= await this.appStrorage.get('user');
-    this.users= await this.appStrorage.get('users');
+  async fetchUser() {
+    this.user = await this.appStrorage.get('user');
+    this.users = await this.appStrorage.get('users');
   }
 
 
-  async fetchExams(refresher?: any) {
+  async fetchExams(refresher?: any, user?: any) {
 
 
     //fetch exams from local storage
@@ -38,13 +38,13 @@ export class ExamsPage {
     const exs = [];
     if (exams) {
       for (let exam of exams) {
-        if (this.getExaminerGroupIdByExaminerId(exam.examiner_id) === this.user.group_id) {
+        if (this.getExaminerGroupIdByExaminerId(exam.examiner_id) === user.group_id) {
           exam.studentName = await this.getstudentNameById(exam.student_id);
           exam.examinerName = await this.getExaminerNameById(exam.examiner_id);
           //grouper les examens par examinateur et élève: si l'examen a un même examinateur et un même élève et à une même date, considérer que c'est un seul et même examen
           let found = exs.find((item: any) => item.student_id === exam.student_id && item.examiner_id === exam.examiner_id && item.date === exam.date);
-          
-          if(!found){
+
+          if (!found) {
             exs.push(exam);
           }
 
@@ -54,10 +54,16 @@ export class ExamsPage {
       }
 
       this.exams = exs;
-    } else[
-      this.exams = []
-    ]
 
+
+    } else {
+      this.exams = []
+    }
+
+
+    if (refresher) {
+      refresher.target.complete();
+    }
 
   }
 
@@ -79,7 +85,11 @@ export class ExamsPage {
       examiner = this.users.find((item: any) => item.id === id);
     }
 
-    return examiner.group_id ;
+    if(examiner){
+    return examiner.group_id;
+    }else{
+      return 0;
+    }
   }
 
   async getExaminerNameById(id: any) {

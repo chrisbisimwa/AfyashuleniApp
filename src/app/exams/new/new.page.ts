@@ -734,7 +734,10 @@ export class NewPage implements OnInit {
   }
 
   generateExamCode() {
-    this.examCode = Math.random().toString(36).substring(10);
+
+    //générer un code alaphanumérique de 10 caractères
+  
+    this.examCode = Math.random().toString(36).substring(7);
     this.appStorage.get('exams').then((result) => {
       if (result) {
         let exam = result.find((sch: any) => sch.code == this.examCode);

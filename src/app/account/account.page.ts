@@ -6,6 +6,7 @@ import { Storage } from '@ionic/storage-angular';
 import { ApiService } from '../services/api.service';
 import { Network, ConnectionStatus } from '@capacitor/network';
 import { lastValueFrom } from 'rxjs';
+import { LoadingController } from '@ionic/angular';
 
 @Component({
   selector: 'app-account',
@@ -18,13 +19,14 @@ export class AccountPage implements OnInit {
   email: string = "";
   photo: string = "";
 
-  loading: boolean= false;
+  loading: HTMLIonLoadingElement | null = null;
   constructor(
     public authService: AuthService, 
     private router: Router, 
     private sanitizer: DomSanitizer, 
     private appStorage: Storage,
     private apiService: ApiService,
+    private loadingCtrl: LoadingController
   ) { }
 
   ngOnInit() {
@@ -32,13 +34,22 @@ export class AccountPage implements OnInit {
 
 
   syncData() {
-    this.loading=true
+    this.showLoading();
     this.checkLogin().then(() => {
       this.checkNetwork().then(()=>{
-        this.loading=false;
+
       });
     });
     
+  }
+
+  async showLoading() {
+   this.loading = await this.loadingCtrl.create({
+      message: 'Chargement...',
+      duration: 5000,
+    });
+
+    this.loading.present();
   }
 
   async checkLogin() {

@@ -153,6 +153,7 @@ export class ShowStudentPage implements OnInit {
   }
 
   setOpenExam(isOpen: boolean) {
+    console.log('setOpenExam', isOpen);
     this.isExamModalOpen = isOpen;
   }
 
