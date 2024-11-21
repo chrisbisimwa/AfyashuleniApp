@@ -47,7 +47,7 @@ export class EditClassePage implements OnInit {
       cls.nbr_fille = this.nbr_fille;
       cls.nbr_garcon = this.nbr_garcon;
       cls.nbr_reboulant = this.nbr_reboulant;
-      cls.schoo_id = this.school_id;
+      cls.school_id = this.school_id;
       cls.school_year_id= this.schoolYear_id;
       cls.created_at = this.created_at;
       cls.updated_at = this.updated_at;

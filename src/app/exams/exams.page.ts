@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { IonItemSliding, NavController, Platform, ToastController } from '@ionic/angular';
 import { Storage } from '@ionic/storage-angular';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-exams',
@@ -15,9 +16,13 @@ export class ExamsPage {
 
 
 
-  constructor(private appStrorage: Storage, private navController: NavController,
+  constructor(private appStrorage: Storage, 
+    private navController: NavController,
     private toastCtrl: ToastController,
-    public plt: Platform) {
+    public plt: Platform,
+    private datePipe: DatePipe
+  
+  ) {
     this.fetchUser().then(() => {
       this.fetchExams(null, this.user);
     });
@@ -42,7 +47,7 @@ export class ExamsPage {
           exam.studentName = await this.getstudentNameById(exam.student_id);
           exam.examinerName = await this.getExaminerNameById(exam.examiner_id);
           //grouper les examens par examinateur et élève: si l'examen a un même examinateur et un même élève et à une même date, considérer que c'est un seul et même examen
-          let found = exs.find((item: any) => item.student_id === exam.student_id && item.examiner_id === exam.examiner_id && item.date === exam.date);
+          let found = exs.find((item: any) => item.student_id === exam.student_id && item.examiner_id === exam.examiner_id && this.datePipe.transform(item.date, 'yyyy-MM-dd') === this.datePipe.transform(exam.date, 'yyyy-MM-dd'));
 
           if (!found) {
             exs.push(exam);

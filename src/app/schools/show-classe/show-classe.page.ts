@@ -158,17 +158,26 @@ export class ShowClassePage implements OnInit {
 
     if (result) {
       this.classe = result.find((classe: any) => classe.id == this.route.snapshot.params['id']);
-      this.shcoolName = this.getSchoolName();
+      this.shcoolName = this.getSchoolName(this.classe.school_id);
       this.fetchStudentsByClasse();
     }
   }
 
-  async getSchoolName() {
+  async getSchoolName(schoolId:any) {
     const result = await this.appStorage.get('schools');
     if (result) {
-      const school = result.find((school: any) => school.id == this.classe.school_id);
-      this.shcoolName = school.name;
+      const school = result.find((school: any) => school.id == schoolId);
+      
+
+      if(school){
+        this.shcoolName = school.name;
+      }else{
+        this.shcoolName = "Ecole non trouvée";
+      }
+      
     }
+
+    
 
     return this.shcoolName;
   }

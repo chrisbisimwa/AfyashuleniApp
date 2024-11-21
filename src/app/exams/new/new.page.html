@@ -21,7 +21,7 @@
 
       <ion-item-group>
         <ion-item-divider>
-          <ion-label>Séléctionner l'élève </ion-label>
+          <ion-label color="primary">Séléctionner l'élève </ion-label>
         </ion-item-divider>
 
         <!-- <ion-item>
@@ -119,7 +119,7 @@
           <div *ngIf="userRoles.includes('infirmier')">
             <ion-item-group>
               <ion-item-divider>
-                <ion-label> {{ ucfirst( 'calendrier_vaccinal'.replace('_', ' ')) }} </ion-label>
+                <ion-label color="primary"> {{ ucfirst( 'calendrier_vaccinal'.replace('_', ' ')) }} </ion-label>
               </ion-item-divider>
               <div *ngFor="let question of questionsInfirmier['calendrier_vaccinal']">
 
@@ -166,7 +166,7 @@
           <div *ngIf="userRoles.includes('infirmier')">
             <ion-item-group>
               <ion-item-divider>
-                <ion-label> {{ ucfirst( 'deparasitage'.replace('_', ' ')) }} </ion-label>
+                <ion-label color="primary"> {{ ucfirst( 'deparasitage'.replace('_', ' ')) }} </ion-label>
               </ion-item-divider>
               <div *ngFor="let question of questionsInfirmier['deparasitage']">
 
@@ -213,7 +213,7 @@
           <div *ngIf="userRoles.includes('infirmier')">
             <ion-item-group>
               <ion-item-divider>
-                <ion-label> {{ ucfirst( 'comportement_langage'.replace('_', ' ')) }} </ion-label>
+                <ion-label color="primary"> {{ ucfirst( 'comportement_langage'.replace('_', ' ')) }} </ion-label>
               </ion-item-divider>
               <div *ngFor="let question of questionsInfirmier['comportement_langage']">
 
@@ -260,7 +260,7 @@
           <div *ngIf="userRoles.includes('infirmier')">
             <ion-item-group>
               <ion-item-divider>
-                <ion-label> {{ ucfirst( 'anamnese'.replace('_', ' ')) }} </ion-label>
+                <ion-label color="primary"> {{ ucfirst( 'anamnese'.replace('_', ' ')) }} </ion-label>
               </ion-item-divider>
               <div *ngFor="let question of questionsInfirmier['anamnese']">
 
@@ -310,7 +310,7 @@
           <div *ngIf="userRoles.includes('Medecin')">
             <ion-item-group>
               <ion-item-divider>
-                <ion-label> Examen ({{ ucfirst( 'examen_clinique'.replace('_', ' ')) }}) </ion-label>
+                <ion-label color="primary"> Examen ({{ ucfirst( 'examen_clinique'.replace('_', ' ')) }}) </ion-label>
               </ion-item-divider>
 
 
@@ -519,13 +519,13 @@
           <ion-item *ngIf="selectedProblem">
             <ion-label>Evaluer le problème</ion-label>
             <ion-select [(ngModel)]="selectedEvaluation">
-              <ion-select-option [value]="'to_follow'">A suivre</ion-select-option>
-              <ion-select-option [value]="'not_to_follow'">A ne pas suivre</ion-select-option>
-              <ion-select-option [value]="'attention'">Attention</ion-select-option>
+              <ion-select-option [value]="'identified'"  *ngIf="userRoles.includes('infirmier')">Identifié</ion-select-option>
+              <ion-select-option [value]="'to_follow'" *ngIf="userRoles.includes('Medecin')">A suivre</ion-select-option>
+              <ion-select-option [value]="'not_to_follow'" *ngIf="userRoles.includes('Medecin')">A ne pas suivre</ion-select-option>
+              <ion-select-option [value]="'attention'" *ngIf="userRoles.includes('Medecin')">Attention</ion-select-option>
             </ion-select>
           </ion-item>
-          <ion-button expand="block" color="primary" *ngIf="selectedEvaluation"
-            (click)="addProblem()">Ajouter</ion-button>
+          <ion-button expand="block" color="medium" *ngIf="selectedEvaluation" (click)="addProblem()">Ajouter</ion-button>
         </ion-item-group>
 
         <ion-item-group *ngIf="evaluations.length>0">
@@ -535,6 +535,7 @@
           <ion-item *ngFor="let eval of evaluations">
             <ion-label>{{eval.problem_name}}</ion-label>
             <div item-content>
+              <span *ngIf="eval.evaluation==='identified'">Identifié</span>
               <span *ngIf="eval.evaluation==='to_follow'">A suivre</span>
               <span *ngIf="eval.evaluation==='not_to_follow'">A ne pas suivre</span>
               <span *ngIf="eval.evaluation==='attention'">Pt d'attention</span>

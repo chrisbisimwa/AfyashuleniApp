@@ -127,7 +127,7 @@ export class AccountPage implements OnInit {
             }
           });
          
-        }else if(sc.status =="updated"){
+        }else if(sc.status =="updated" && sc.created_at && sc.updated_at){
           const schoolPromise = this.apiService.updateSchool(sc);
           const schoolObservable = await schoolPromise;
           const school = await lastValueFrom(schoolObservable).then((data: any) => {
@@ -147,7 +147,7 @@ export class AccountPage implements OnInit {
           const classObservable = await classPromise; // Récupérez l'Observable
           const cls = await lastValueFrom(classObservable);
 
-        }else if (cl.status==="updated"){
+        }else if (cl.status==="updated" && cl.created_at && cl.updated_at){
           const classPromise = this.apiService.updateClasse(cl.schoo_id, cl);
           const classObservable = await classPromise ;
           const cls = await lastValueFrom(classObservable);
@@ -170,6 +170,12 @@ export class AccountPage implements OnInit {
             if (data) {
               console.log(data);
             }
+          });
+        }else if(st.status=="updated" &&  st.created_at && st.updated_at){
+          const studentPromise = this.apiService.updateStudent(st);
+          const studentObservable = await studentPromise;
+          const std = await lastValueFrom(studentObservable).then((data: any) => {
+            console.log(data.data);
           });
         }
       }

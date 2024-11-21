@@ -5,6 +5,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { Storage } from '@ionic/storage-angular';
 import { ActivatedRoute } from '@angular/router';
 import { Geolocation } from '@capacitor/geolocation';
+import { v4 as uuidv4 } from 'uuid';
 
 @Component({
   selector: 'app-new',
@@ -29,8 +30,11 @@ export class NewPage implements OnInit {
   selectedProblem: number = 0;
   addedProblems: any[] = [];
   selectedEvaluation: string = "";
-  examTypesInfimier: string[] = ['situation_familiale', 'calendrier_vaccinal', 'deparasitage', 'comportement_langage', 'anamnese'];
-  examTypesMedecin: string[] = ['examen_clinique']
+  //examTypesInfimier: string[] = ['situation_familiale', 'calendrier_vaccinal', 'deparasitage', 'comportement_langage', 'anamnese'];
+  //nom du type d'examen infirmier et son ID
+  examTypesInfimier: any[] = [{ 'exam': 'situation_familiale', 'temp_id': null }, { 'exam': 'calendrier_vaccinal', 'temp_id': null }, { 'exam': 'deparasitage', 'temp_id': null }, { 'exam': 'comportement_langage', 'temp_id': null }, { 'exam': 'anamnese', 'temp_id': null }];
+  //examTypesMedecin: string[] = ['examen_clinique']
+  examTypesMedecin: any[] = [{ 'exam': 'examen_clinique', 'temp_id': null }];
   completedExamTypes: string[] = [];
   answers: { [key: string]: any } = {};
   groupedAnswers: { [key: string]: { [key: string]: any } } = {};
@@ -57,7 +61,7 @@ export class NewPage implements OnInit {
       { label: 'Occupation des parents avec qui élève vit', options: null, gender: 'both' },
       { label: 'Nombre_enfants_fratrie', options: null, gender: 'both' },
       { label: 'Rang_dans_la_fratrie', options: null, gender: 'both' },
-      { label: 'Nombre_de_filles', options:null, gender: 'both' },
+      { label: 'Nombre_de_filles', options: null, gender: 'both' },
       { label: 'Nombre_de_garçons', options: null, gender: 'both' },
 
     ],
@@ -219,18 +223,34 @@ export class NewPage implements OnInit {
       answers: this.fb.group({}) // Dynamically add controls based on selected exam type
     });
 
-    this.fetchRoles();
+    this.fetchUser().then(() => {
+      this.fetchRoles().then(() => {
+        if (this.userRoles.includes('infirmier')) {
+          //initialize id for each exam type
+          this.examTypesInfimier.forEach((exam) => {
+            exam.temp_id = this.generateExamId();
+          });
+        } else if (this.userRoles.includes('Medecin')) {
+          //initialize id for each exam type
+          this.examTypesMedecin.forEach((exam) => {
+            exam.temp_id = this.generateExamId();
+          });
+        }
+      });
+    });
+
 
 
   }
 
   ngOnInit() {
 
+    this.examCode = this.generateExamCode();
     this.fetchSchoolYears();
 
 
 
-    this.fetchUser();
+
 
 
     this.fetchSchools(null).then(() => {
@@ -246,6 +266,8 @@ export class NewPage implements OnInit {
     this.presentingElement = document.querySelector('.ion-page');
     this.printCurrentPosition();
 
+
+
   }
 
   printCurrentPosition = async () => {
@@ -258,23 +280,22 @@ export class NewPage implements OnInit {
     let students = await this.appStorage.get('students');
     let stdnt = students.find((student: { id: any; }) => student.id == this.route.snapshot.params['id']);
     if (stdnt) {
-      this.studentGender= stdnt.gender;
-      this.fetchClassesByStudentClassId(stdnt.current_class_id).then(() => {
-        this.selectedClasse = stdnt.current_class_id;
-        
-      });
+      this.studentGender = stdnt.gender;
+
       this.fetchStudentsByClasse(stdnt.current_class_id).then(() => {
         this.selectedStudent = stdnt.id;
       });
       this.fetchSchoolsByStudentCurrentClassId(stdnt.current_class_id).then(async () => {
-        if(this.classes){
-          let classe= this.classes.find((c: { id: any }) => c.id === stdnt.current_class_id)
-          if(classe){
-            this.selectedSchool = classe.school_id;
-          }
-          
+        let classes = await this.appStorage.get('classes');
+        let cl = classes.find((classe: { id: any; }) => classe.id == stdnt.current_class_id);
+        if (cl) {
+          this.fetchClassesBySchoolId(cl.school_id).then(() => {
+            this.selectedClasse = cl.id;
+            this.selectedSchool = cl.school_id;
+          });
+
         }
-        
+
       });
     }
   }
@@ -286,6 +307,8 @@ export class NewPage implements OnInit {
       for (let examType in this.questionsInfirmier) {
         this.answers[examType] = {};
       }
+
+
     } else if (this.userRoles.includes('Medecin')) {
       this.questions = this.questionsMedecin;
       for (let examType in this.questionsMedecin) {
@@ -309,23 +332,33 @@ export class NewPage implements OnInit {
 
     if (this.userRoles.includes('infirmier')) {
       this.examTypesInfimier.forEach(type => {
-        this.groupedAnswers[type] = {};
 
-        this.questionsInfirmier[type].forEach(question => {
+
+
+
+        this.groupedAnswers[type.exam] = {};
+
+        this.questionsInfirmier[type.exam].forEach(question => {
           const questionLabel = question.label;
 
           if (this.answers[questionLabel] !== undefined && this.answers[questionLabel] !== null) {
-            this.groupedAnswers[type][questionLabel] = this.answers[questionLabel];
+            
+            this.groupedAnswers[type.exam][questionLabel] = this.answers[questionLabel];
+            
+            
+            //this.groupedAnswers[type.exam][questionLabel] = this.answers[questionLabel];
           }
+
+
         });
 
 
       });
     } else if (this.userRoles.includes('Medecin')) {
       this.examTypesMedecin.forEach(type => {
-        this.groupedAnswers[type] = {};
+        this.groupedAnswers[type.exam] = {};
 
-        this.questionsMedecin[type].forEach(question => {
+        this.questionsMedecin[type.exam].forEach(question => {
           const questionLabel = question.label;
 
           if (this.answers[questionLabel] !== undefined && this.answers[questionLabel] !== null) {
@@ -357,37 +390,60 @@ export class NewPage implements OnInit {
       }
 
       for (const examType in this.groupedAnswers) {
-        exams.push({
-          id: this.generateExamId(),
-          code: this.generateExamCode(),
-          student_id: this.selectedStudent,
-          examiner_id: this.user.id,
-          type: examType,
-          date: new Date().toISOString(),
-          latitude: this.latitude,
-          longitude: this.longitude
-        });
-
-        let examData = [];
-        this.appStorage.get('exams-data').then((data) => {
-          if (data) {
-            examData = data;
-          } else {
-            examData = [];
-          }
-
-          for (const dt in this.answers) {
-            examData.push({
-              id: this.generateDataId(),
-              examination_id: this.examId,
-              question: dt,
-              answer: this.answers[dt]
+        if (this.userRoles.includes('infirmier')) {
+          // grouper les réponses par type d'examen format: {type: {"question": questionLabel, "answer": this.answers[questionLabel]}}
+          let dt = [];
+          for (const question in this.groupedAnswers[examType]) {
+            dt.push({
+              question: question,
+              answer: this.groupedAnswers[examType][question]
             });
           }
 
-          this.appStorage.set('exams-data', examData);
-        });
+          exams.push({
+            id: this.examTypesInfimier.find((exam) => exam.exam === examType)?.temp_id,
+            code: this.examCode,
+            student_id: this.selectedStudent,
+            examiner_id: this.user.id,
+            type: examType,
+            date: new Date().toISOString(),
+            latitude: this.latitude,
+            longitude: this.longitude,
+            data: dt
+
+          });
+
+          /* let examData = [];
+          this.appStorage.get('exams-data').then((data) => {
+            if (data) {
+              examData = data;
+            } else {
+              examData = [];
+            }
+
+
+
+            for (const dt in this.answers) {
+              examData.push({
+                id: this.generateDataId(),
+                examination_id: this.examTypesInfimier.find((exam) => exam.exam === examType)?.temp_id,
+                question: dt,
+                answer: this.answers[dt]
+              });
+
+              console.log(examData);
+
+            }
+
+            
+            this.appStorage.set('exams-data', examData);
+          }); */
+        }
+
+
+
       }
+
 
       let examProblems = [];
       this.appStorage.get('evaluations').then((data) => {
@@ -532,7 +588,7 @@ export class NewPage implements OnInit {
     //fetch schools from local storage based on selected school year
     const result = await this.appStorage.get('schools');
 
-    let schools = result.filter((item:any) => item.status !== 'deleted' && item.group_id == this.user.group_id);
+    let schools = result.filter((item: any) => item.status !== 'deleted' && item.group_id == this.user.group_id);
 
     let ch = schools || [];
 
@@ -573,15 +629,18 @@ export class NewPage implements OnInit {
     }
   }
 
-  async fetchClassesByStudentClassId(classId: any) {
+  async fetchClassesBySchoolId(schoolId: any) {
     const cls = await this.appStorage.get('classes');
     let cl = cls || [];
 
     for (const c of cl) {
-      if (c.school_id == classId) {
+      if (c.school_id == schoolId) {
         this.classes.push(c);
       }
+
     }
+
+
   }
 
   async fetchStudents(event: any) {
@@ -618,7 +677,7 @@ export class NewPage implements OnInit {
       if (classe) {
         const schools = await this.appStorage.get('schools');
 
-        let ch = schools.filter((item:any) => item.status !== 'deleted' && item.group_id == this.user.group_id) || [];
+        let ch = schools.filter((item: any) => item.status !== 'deleted' && item.group_id == this.user.group_id) || [];
 
         const cls = await this.appStorage.get('classes');
         let cl = cls || [];
@@ -656,7 +715,7 @@ export class NewPage implements OnInit {
   readyForNexStep(event: any) {
     if (event.target.value) {
       let stdnt = this.students.find((s: { id: any }) => s.id === event.target.value);
-      if(stdnt){
+      if (stdnt) {
         this.studentGender = stdnt.gender;
         if (this.userRoles.includes('infirmier')) {
           this.step = 1;
@@ -664,7 +723,7 @@ export class NewPage implements OnInit {
           this.step = 6;
         }
       }
-      
+
 
 
     }
@@ -736,8 +795,8 @@ export class NewPage implements OnInit {
   generateExamCode() {
 
     //générer un code alaphanumérique de 10 caractères
-  
-    this.examCode = Math.random().toString(36).substring(7);
+
+    this.examCode = uuidv4();
     this.appStorage.get('exams').then((result) => {
       if (result) {
         let exam = result.find((sch: any) => sch.code == this.examCode);
@@ -859,10 +918,10 @@ export class NewPage implements OnInit {
           });
         }
       }
-    }else if (event.target.name === 'Nombre_de_filles' || event.target.name==='Nombre_de_garçons') {
+    } else if (event.target.name === 'Nombre_de_filles' || event.target.name === 'Nombre_de_garçons') {
       if (this.answers['Nombre_de_filles'] && this.answers['Nombre_de_garçons']) {
         const total = parseInt(this.answers['Nombre_de_filles']) + parseInt(this.answers['Nombre_de_garçons']);
-        if(this.answers['Nombre_enfants_fratrie'] && this.answers['Nombre_enfants_fratrie'] !== total){
+        if (this.answers['Nombre_enfants_fratrie'] && this.answers['Nombre_enfants_fratrie'] !== total) {
           const alert = this.alertController.create({
             header: 'Nombre total d\'enfants incorrect',
             buttons: [

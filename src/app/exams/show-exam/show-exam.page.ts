@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NavController } from '@ionic/angular';
@@ -12,10 +13,12 @@ export class ShowExamPage implements OnInit {
 
   exam: any = null;
   examDatas: any = null;
+  exams: any = null;
   constructor(
     private appStorage: Storage,
     private route: ActivatedRoute,
-    private navController: NavController
+    private navController: NavController,
+    private datePipe: DatePipe
   ) { }
 
   ngOnInit() {
@@ -40,37 +43,46 @@ export class ShowExamPage implements OnInit {
   async fetchExamData() {
     //fetch exam from local storage
     const exams = await this.appStorage.get('exams');
-    //grouper les examens par examinateur et élève: si l'examen a un même examinateur et un même élève et à une même date, considérer que c'est un seul et même examen
-    let result: any[] = [];
-    if(exams) {
-      for (let exam of exams) {
-        let found = result.find((item: any) => item.student_id === exam.student_id && item.examiner_id === exam.examiner_id && item.date === exam.date);
-        if(!found){
-          result.push(exam);
-        }
-      }
-    }
+    
+    let ex= exams.find((exa: any) => exa.id == this.route.snapshot.params['id']);
 
-    const examDataStore = await this.appStorage.get('exams-data');
+
+    let result: any[] = [];
+    if(ex){
+      
+      if(exams){
+        result = exams.filter((exa: any) => exa.code === ex.code);
+      }
+      
+    }
+    
+    console.log(result);
+    this.exams = result ? result : [];
+
+    /* const examDataStore = await this.appStorage.get('exams-data');
 
     let exDatas=[]
     if(result){
+      let dtx=[]
       for( let examen of result){
-        let dtx=[]
-        for(let examData of examDataStore){
-          if(examData.examination_id==examen.id){
-             dtx.push(examData);
-          }
-        }
+        
+        if(examDataStore){
+          dtx = examDataStore.filter((exa: any) => exa.examination_id === examen.id);
 
-        if(dtx.length>0){
-          exDatas.push({ 'examen': examen.type, 'data': dtx});
+          console.log(dtx);
+          if(dtx){
+            exDatas.push({'examen':examen.type, 'data':dtx});
+          }
+
         }
         
       }
-    }
 
-    this.examDatas = exDatas ? exDatas : [];
+    }
+    console.log(exDatas);
+
+
+    this.examDatas = exDatas ? exDatas : []; */
 
   }
 

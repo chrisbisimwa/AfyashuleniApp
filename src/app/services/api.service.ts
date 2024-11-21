@@ -60,6 +60,11 @@ export class ApiService {
     return this.http.post(`${this.apiUrl}/students`, data, headers);
   }
 
+  async updateStudent(data:any){
+    const headers = await this.getHeaders();
+    return this.http.put(`${this.apiUrl}/students/${data.id}`, data, headers);
+  }
+
   async postStudentHistory(data: any) {
     const headers = await this.getHeaders();
     return this.http.post(`${this.apiUrl}/student-histories`, data, headers);

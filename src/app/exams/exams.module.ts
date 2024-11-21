@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ExamsPage } from './exams.page';
 import { ExploreContainerComponentModule } from '../explore-container/explore-container.module';
+import { DatePipe } from '@angular/common';
 
 import { ExamsPageRoutingModule } from './exams-routing.module';
 
@@ -15,6 +16,9 @@ import { ExamsPageRoutingModule } from './exams-routing.module';
     ExploreContainerComponentModule,
     ExamsPageRoutingModule
   ],
-  declarations: [ExamsPage]
+  declarations: [ExamsPage],
+  providers: [
+    DatePipe
+  ]
 })
 export class ExamsPageModule {}
