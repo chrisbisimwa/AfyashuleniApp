@@ -377,6 +377,10 @@ export class AccountPage implements OnInit {
 
   }
 
+  goToSyncData(){
+    this.router.navigate(['tabs/account/sync-data']);
+  }
+
   goToEditProfile() {
     this.router.navigate(['tabs/account/edit-profil']);
   }

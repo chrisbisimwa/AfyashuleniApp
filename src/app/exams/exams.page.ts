@@ -34,9 +34,23 @@ export class ExamsPage {
     this.users = await this.appStrorage.get('users');
   }
 
+  reload(refresher: any) {
+    this.fetchUser().then(() => {
+      if(this.user){
+        this.fetchExams(refresher, this.user);
+      }
+
+      
+    });
+
+    if (refresher) {
+      refresher.target.complete();
+    }
+  }
+
 
   async fetchExams(refresher?: any, user?: any) {
-
+    
 
     //fetch exams from local storage
     const exams = await this.appStrorage.get('exams');
@@ -66,9 +80,7 @@ export class ExamsPage {
     }
 
 
-    if (refresher) {
-      refresher.target.complete();
-    }
+    
 
   }
 
@@ -85,6 +97,7 @@ export class ExamsPage {
 
   getExaminerGroupIdByExaminerId(id: any) {
 
+    console.log('users', this.users);
     let examiner = null;
     if (this.users) {
       examiner = this.users.find((item: any) => item.id === id);

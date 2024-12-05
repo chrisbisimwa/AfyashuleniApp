@@ -14,6 +14,10 @@ const routes: Routes = [
   {
     path: 'change-password',
     loadChildren: () => import('./change-password/change-password.module').then( m => m.ChangePasswordPageModule)
+  },
+  {
+    path: 'sync-data',
+    loadChildren: () => import('./sync-data/sync-data.module').then( m => m.SyncDataPageModule)
   }
 
 ];

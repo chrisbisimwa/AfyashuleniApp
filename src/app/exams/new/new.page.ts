@@ -409,7 +409,7 @@ export class NewPage implements OnInit {
             date: new Date().toISOString(),
             latitude: this.latitude,
             longitude: this.longitude,
-            data: dt
+            data: JSON.stringify(dt.map(item => ({ question: item.question, answer: item.answer })))
 
           });
 

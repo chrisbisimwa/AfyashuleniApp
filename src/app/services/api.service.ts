@@ -123,6 +123,11 @@ export class ApiService {
     return this.http.post(`${this.apiUrl}/examinations`, data, headers);
   }
 
+  async postStudentExamination(studentId: number, data: any) {
+    const headers = await this.getHeaders();
+    return this.http.post(`${this.apiUrl}/students/${studentId}/examinations`, data, headers);
+  }
+
   async postExamData(examId:number,data: any) {
     const headers = await this.getHeaders();
     return this.http.post(`${this.apiUrl}/examinations/${examId}/all-examination-data`, data, headers);
@@ -137,6 +142,11 @@ export class ApiService {
   async getExams() {
     const headers = await this.getHeaders();
     return this.http.get(`${this.apiUrl}/examinations`, headers);
+  }
+
+  async getStudentExaminations(studentId: number) {
+    const headers = await this.getHeaders();
+    return this.http.get(`${this.apiUrl}/students/${studentId}/examinations`, headers);
   }
 
   async getExamData(examId:number){

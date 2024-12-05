@@ -52,11 +52,14 @@ export class ShowExamPage implements OnInit {
       
       if(exams){
         result = exams.filter((exa: any) => exa.code === ex.code);
+        //parse exam data to json
+        for(let exa of result){
+          exa.data = JSON.parse(exa.data);
+        }
       }
       
     }
     
-    console.log(result);
     this.exams = result ? result : [];
 
     /* const examDataStore = await this.appStorage.get('exams-data');

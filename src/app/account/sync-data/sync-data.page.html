@@ -1,0 +1,49 @@
+<ion-header class="ion-no-border" mode="ios">
+  <ion-toolbar style="--background: var(--ion-color-primary)">
+    <ion-buttons slot="start">
+      <ion-back-button color="light"></ion-back-button>
+    </ion-buttons>
+    <ion-title style="color: white;letter-spacing: 1px;font-family: 'semi-bold';">Synchronisation</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-list>
+    <ion-item [button]="true" (click)="loadSchoolsFormAPI()">
+      <ion-icon slot="start" color="primary" [name]="schools.id ? 'ellipse' : ''"></ion-icon>
+      <ion-label>
+        <h2>Charger les écoles</h2>
+        <p>New message from </p>
+      </ion-label>
+    </ion-item>
+    <ion-item [button]="true" (click)="syncClasses()">
+      <ion-icon slot="start" color="primary" [name]="schools.id ? 'ellipse' : ''"></ion-icon>
+      <ion-label>
+        <h2>Synchroniser les classes</h2>
+        <p>Vous avez {{classesToSync.length}} à synchroniser </p>
+      </ion-label>
+    </ion-item>
+    <ion-item [button]="true" (click)="syncStudents()">
+      <ion-icon slot="start" color="primary" [name]="schools.id ? 'ellipse' : ''"></ion-icon>
+      <ion-label>
+        <h2>Synchroniser les élèves</h2>
+        <p>Vous avez élèves {{studentsToSync.length}} à synchroniser </p>
+      </ion-label>
+    </ion-item>
+    <ion-item [button]="true" (click)="syncExams()">
+      <ion-icon slot="start" color="primary" [name]="schools.id ? 'ellipse' : ''"></ion-icon>
+      <ion-label>
+        <h2>Synchroniser les examens</h2>
+        <p>Vous avez examens {{examsToSync.length}} à synchroniser </p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+
+
+
+</ion-content>

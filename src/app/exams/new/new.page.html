@@ -354,7 +354,7 @@
           <ion-button expand="block" color="danger" (click)="exit()" >Annuler</ion-button>
         </div>
         <div *ngIf="step==7">
-          <ion-button expand="block" color="primary" (click)="setOpen(true)">Problèmes de stanté ({{evaluations.length}})</ion-button>
+          <ion-button *ngIf="userRoles.includes('Medecin')" expand="block" color="primary" (click)="setOpen(true)">Problèmes de stanté ({{evaluations.length}})</ion-button>
           <ion-button expand="block" color="primary" (click)="submitExam()">Soumettre</ion-button>
           <ion-button expand="block" color="primary" (click)="retour()">Retour</ion-button>
           <ion-button expand="block" color="danger" (click)="exit()" >Annuler</ion-button>
