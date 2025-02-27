@@ -1,9 +1,13 @@
 <ion-header class="ion-no-border" mode="ios">
   <ion-toolbar style="--background: var(--ion-color-primary)">
-    <ion-buttons slot="start">
-      <ion-back-button color="light"></ion-back-button>
-    </ion-buttons>
-    <ion-title style="color: white;letter-spacing: 1px;font-family: 'semi-bold';">Synchronisation</ion-title>
+    <ion-button slot="start" (click)="previousState()" style="color: white">
+      <ion-icon name="chevron-back-outline"></ion-icon>
+      Back
+    </ion-button>
+    <ion-title
+      style="color: white; letter-spacing: 1px; font-family: 'semi-bold'"
+      >Synchronisation</ion-title
+    >
   </ion-toolbar>
 </ion-header>
 
@@ -12,38 +16,94 @@
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
-  <ion-list>
+  <b>Column 2 has <code>size</code> set to <code>"auto"</code> and a defined width</b >
+  <ion-grid>
+    <ion-row>
+      <ion-col><ion-item>Ecoles</ion-item></ion-col>
+      <ion-col size="2"><ion-item>{{schoolToSync.length}}</ion-item></ion-col>
+      <ion-col size="2">
+        <ion-button shape="round" *ngIf="schoolToSync.length>0"><ion-icon slot="icon-only" name="save-outline"></ion-icon></ion-button>
+        <ion-button shape="round" *ngIf="schoolToSync.length==0" (click)="loadSchoolsFormAPI()"><ion-icon slot="icon-only" name="reload-circle-outline"></ion-icon></ion-button>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col><ion-item>Classes</ion-item></ion-col>
+      <ion-col size="2"><ion-item>{{classesToSync.length}}</ion-item></ion-col>
+      <ion-col size="2">
+        <ion-button shape="round" *ngIf="classesToSync.length>0" (click)="syncClasses()"><ion-icon slot="icon-only" name="save-outline"></ion-icon></ion-button>
+        <ion-button shape="round" *ngIf="classesToSync.length==0" (click)="loadClassesFromAPI()"><ion-icon slot="icon-only" name="reload-circle-outline"></ion-icon></ion-button>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col><ion-item>Elèves</ion-item></ion-col>
+      <ion-col size="2"><ion-item>{{studentsToSync.length}}</ion-item></ion-col>
+      <ion-col size="2">
+        <ion-button shape="round" *ngIf="studentsToSync.length>0" (click)="syncStudents()"><ion-icon slot="icon-only" name="save-outline"></ion-icon></ion-button>
+        <ion-button shape="round" *ngIf="studentsToSync.length==0"><ion-icon slot="icon-only" name="reload-circle-outline"></ion-icon></ion-button>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col><ion-item>Examens</ion-item></ion-col>
+      <ion-col size="2"><ion-item>{{examsToSync.length}}</ion-item></ion-col>
+      <ion-col size="2">
+        <ion-button shape="round" *ngIf="examsToSync.length>0" (click)="syncExams()"><ion-icon slot="icon-only" name="save-outline"></ion-icon></ion-button>
+        <ion-button shape="round" *ngIf="examsToSync.length==0" (click)="loadExamsFromAPI()"><ion-icon slot="icon-only" name="reload-circle-outline"></ion-icon></ion-button>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col><ion-item>Problèmes de santé</ion-item></ion-col>
+      <ion-col size="2"><ion-item>{{studentsToSync.length}}</ion-item></ion-col>
+      <ion-col size="2">
+        <ion-button shape="round" *ngIf="studentsToSync.length>0"><ion-icon slot="icon-only" name="save-outline"></ion-icon></ion-button>
+        <ion-button shape="round" *ngIf="studentsToSync.length==0"><ion-icon slot="icon-only" name="reload-circle-outline"></ion-icon></ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <!-- <ion-list>
     <ion-item [button]="true" (click)="loadSchoolsFormAPI()">
-      <ion-icon slot="start" color="primary" [name]="schools.id ? 'ellipse' : ''"></ion-icon>
+      <ion-icon
+        slot="start"
+        color="primary"
+        [name]="schools.id ? 'ellipse' : ''"
+      ></ion-icon>
       <ion-label>
         <h2>Charger les écoles</h2>
-        <p>New message from </p>
+        <p>New message from</p>
       </ion-label>
     </ion-item>
     <ion-item [button]="true" (click)="syncClasses()">
-      <ion-icon slot="start" color="primary" [name]="schools.id ? 'ellipse' : ''"></ion-icon>
+      <ion-icon
+        slot="start"
+        color="primary"
+        [name]="schools.id ? 'ellipse' : ''"
+      ></ion-icon>
       <ion-label>
         <h2>Synchroniser les classes</h2>
-        <p>Vous avez {{classesToSync.length}} à synchroniser </p>
+        <p>Vous avez {{classesToSync.length}} à synchroniser</p>
       </ion-label>
     </ion-item>
     <ion-item [button]="true" (click)="syncStudents()">
-      <ion-icon slot="start" color="primary" [name]="schools.id ? 'ellipse' : ''"></ion-icon>
+      <ion-icon
+        slot="start"
+        color="primary"
+        [name]="schools.id ? 'ellipse' : ''"
+      ></ion-icon>
       <ion-label>
         <h2>Synchroniser les élèves</h2>
-        <p>Vous avez élèves {{studentsToSync.length}} à synchroniser </p>
+        <p>Vous avez élèves {{studentsToSync.length}} à synchroniser</p>
       </ion-label>
     </ion-item>
     <ion-item [button]="true" (click)="syncExams()">
-      <ion-icon slot="start" color="primary" [name]="schools.id ? 'ellipse' : ''"></ion-icon>
+      <ion-icon
+        slot="start"
+        color="primary"
+        [name]="schools.id ? 'ellipse' : ''"
+      ></ion-icon>
       <ion-label>
         <h2>Synchroniser les examens</h2>
-        <p>Vous avez examens {{examsToSync.length}} à synchroniser </p>
+        <p>Vous avez examens {{examsToSync.length}} à synchroniser</p>
       </ion-label>
     </ion-item>
-  </ion-list>
-
-
-
-
+  </ion-list> -->
 </ion-content>

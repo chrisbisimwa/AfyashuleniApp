@@ -17,6 +17,7 @@ export class SyncDataPage implements OnInit {
 
   classes: any = null;
   classesToSync: any = [];
+  schoolToSync: any = [];
   students: any = null;
   studentsToSync: any = [];
   exams: any = null;
@@ -41,7 +42,7 @@ export class SyncDataPage implements OnInit {
 
     this.checkLogin().then(() => {
       this.checkNetwork().then(() => {
-
+        //this.loadExamsFromAPI();
       });
     });
 
@@ -126,6 +127,12 @@ export class SyncDataPage implements OnInit {
     this.appStorage.get('schools').then((data) => {
       this.schools = data || [];
 
+      for(let school of this.schools){
+        if(!school.created_at || school.status==="updated" || school.status==="deleted"){
+          this.schoolToSync.push(school);
+        }
+      }
+
     });
   }
 
@@ -143,97 +150,7 @@ export class SyncDataPage implements OnInit {
     });
   }
 
-  async loadSchoolsFormAPI() {
-    this.presentLoading('Chargement des écoles en cours...');
-    setTimeout(() => {
-      this.dismissLoading();
-    }, 60000);
-
-
-
-    const schoolYearsPromise = this.apiService.getSchoolYears(); // Stockez la Promise
-    const schoolYearsObservable = await schoolYearsPromise; // Récupérez l'Observable
-    const schoolYears: any = await lastValueFrom(schoolYearsObservable).then((data: any) => {
-      if (data.data) {
-        this.appStorage.set('schoolYears', data.data);
-      }
-    });
-
-    const schoolsPromise = this.apiService.getSchools(); // Stockez la Promise
-    const schoolsObservable = await schoolsPromise; // Récupérez l'Observable
-    const schools: any = await lastValueFrom(schoolsObservable).then((data: any) => {
-
-      if (data.data) {
-        this.appStorage.set('schools', data.data.filter((item: any) => item.group_id == this.user.group_id));
-
-      }
-    });
-
-
-    const usersPromise = this.apiService.getUsers();
-    const usersObservable = await usersPromise;
-    const users: any = await lastValueFrom(usersObservable).then((data: any) => {
-      this.appStorage.set('users', data.data);
-      
-    });
-
-
-    //check if there is classes to sync
-    this.classesToSync = [];
-    this.appStorage.get('classes').then((data) => {
-      this.classes = data || [];
-
-      for (let classe of this.classes) {
-        if (!classe.created_at || classe.status === 'updated' || classe.status === 'deleted') {
-          this.classesToSync.push(classe);
-        }
-      }
-
-    });
-
-
-    if (this.classesToSync.length == 0) {
-      console.log('Classes to sync', this.classesToSync);
-      this.loadClassesFromAPI();
-    }
-
-    //check if there is students to sync
-    this.studentsToSync = [];
-    this.appStorage.get('students').then((data) => {
-      this.students = data || [];
-
-      for (let student of this.students) {
-        if (!student.created_at || student.status === 'updated' || student.status === 'deleted') {
-          this.studentsToSync.push(student);
-        }
-      }
-
-    });
-
-    if (this.studentsToSync.length == 0) {
-      this.loadStudentsFromAPI();
-    }
-
-    //check if there is exams to sync
-    this.examsToSync = [];
-    this.appStorage.get('exams').then((data) => {
-      this.exams = data || [];
-
-      for (let exam of this.exams) {
-        if (!exam.created_at || exam.status === 'updated' || exam.status === 'deleted') {
-          this.examsToSync.push(exam);
-        }
-      }
-
-    });
-
-    if (this.examsToSync.length == 0) {
-      this.loadExamsFromAPI();
-    }
-
-    this.dismissLoading();
-
-  }
+ 
 
 
 
@@ -434,6 +351,9 @@ export class SyncDataPage implements OnInit {
         }
 
 
+
+      }else{
+        this.presentAlert('Veuillez vérifier votre connexion internet');
       }
 
     });
@@ -459,7 +379,14 @@ export class SyncDataPage implements OnInit {
 
   }
 
+
+
   async loadClassesFromAPI() {
+    this.presentLoading('Chargement des classes en cours...');
+    /* setTimeout(() => {
+      this.dismissLoading();
+    }, 60000); */
+
     let cls: any[] = [];
     this.appStorage.get('schools').then(async (data) => {
 
@@ -478,8 +405,8 @@ export class SyncDataPage implements OnInit {
 
 
         this.classes = cls;
-        console.log(this.classes);
         this.appStorage.set('classes', cls);
+        this.refreshData();
         this.dismissLoading();
       }
 
@@ -526,15 +453,113 @@ export class SyncDataPage implements OnInit {
       const examsObservable = await examsPromise;
       const exams: any = await lastValueFrom(examsObservable).then((data: any) => {
         if (data.data && data.data.length > 0) {
+          //console.log(data.data);
           for (let exam of data.data) {
             exs.push(exam);
+            
           }
         }
 
       });
     }
 
+    
+
     this.appStorage.set('exams', exs);
+    this.dismissLoading();
+
+  }
+
+  async loadSchoolsFormAPI() {
+    this.presentLoading('Chargement des écoles en cours...');
+    /* setTimeout(() => {
+      this.dismissLoading();
+    }, 60000); */
+
+
+
+    const schoolYearsPromise = this.apiService.getSchoolYears(); // Stockez la Promise
+    const schoolYearsObservable = await schoolYearsPromise; // Récupérez l'Observable
+    const schoolYears: any = await lastValueFrom(schoolYearsObservable).then((data: any) => {
+      if (data.data) {
+        this.appStorage.set('schoolYears', data.data);
+      }
+    });
+
+    const schoolsPromise = this.apiService.getSchools(); // Stockez la Promise
+    const schoolsObservable = await schoolsPromise; // Récupérez l'Observable
+    const schools: any = await lastValueFrom(schoolsObservable).then((data: any) => {
+
+      if (data.data) {
+        this.appStorage.set('schools', data.data.filter((item: any) => item.group_id == this.user.group_id));
+
+      }
+    });
+
+
+    const usersPromise = this.apiService.getUsers();
+    const usersObservable = await usersPromise;
+    const users: any = await lastValueFrom(usersObservable).then((data: any) => {
+      this.appStorage.set('users', data.data);
+      
+    });
+
+
+    //check if there is classes to sync
+    this.classesToSync = [];
+    this.appStorage.get('classes').then((data) => {
+      this.classes = data || [];
+
+      for (let classe of this.classes) {
+        if (!classe.created_at || classe.status === 'updated' || classe.status === 'deleted') {
+          this.classesToSync.push(classe);
+        }
+      }
+
+    });
+
+
+    if (this.classesToSync.length == 0) {
+      console.log('Classes to sync', this.classesToSync);
+      this.loadClassesFromAPI();
+    }
+
+    //check if there is students to sync
+    this.studentsToSync = [];
+    this.appStorage.get('students').then((data) => {
+      this.students = data || [];
+
+      for (let student of this.students) {
+        if (!student.created_at || student.status === 'updated' || student.status === 'deleted') {
+          this.studentsToSync.push(student);
+        }
+      }
+
+    });
+
+    if (this.studentsToSync.length == 0) {
+      this.loadStudentsFromAPI();
+    }
+
+    //check if there is exams to sync
+    this.examsToSync = [];
+    this.appStorage.get('exams').then((data) => {
+      this.exams = data || [];
+
+      for (let exam of this.exams) {
+        if (!exam.created_at || exam.status === 'updated' || exam.status === 'deleted') {
+          this.examsToSync.push(exam);
+        }
+      }
+
+    });
+
+    if (this.examsToSync.length == 0) {
+      this.loadExamsFromAPI();
+    }
+
+    this.refreshData();
+
     this.dismissLoading();
 
   }
@@ -587,6 +612,10 @@ export class SyncDataPage implements OnInit {
     });
 
     await alert.present();
+  }
+
+  previousState(){
+    this.router.navigate(['/tabs/account']);
   }
 
 }

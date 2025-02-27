@@ -389,63 +389,26 @@ export class NewPage implements OnInit {
         exams = [];
       }
 
-      for (const examType in this.groupedAnswers) {
-        if (this.userRoles.includes('infirmier')) {
-          // grouper les réponses par type d'examen format: {type: {"question": questionLabel, "answer": this.answers[questionLabel]}}
-          let dt = [];
-          for (const question in this.groupedAnswers[examType]) {
-            dt.push({
-              question: question,
-              answer: this.groupedAnswers[examType][question]
-            });
-          }
+      
 
-          exams.push({
-            id: this.examTypesInfimier.find((exam) => exam.exam === examType)?.temp_id,
+      if(this.userRoles.includes('infirmier')){
+
+        exams.push({
+            id: this.generateExamId(),
             code: this.examCode,
             student_id: this.selectedStudent,
             examiner_id: this.user.id,
-            type: examType,
             date: new Date().toISOString(),
             latitude: this.latitude,
             longitude: this.longitude,
-            data: JSON.stringify(dt.map(item => ({ question: item.question, answer: item.answer })))
-
-          });
-
-          /* let examData = [];
-          this.appStorage.get('exams-data').then((data) => {
-            if (data) {
-              examData = data;
-            } else {
-              examData = [];
-            }
-
-
-
-            for (const dt in this.answers) {
-              examData.push({
-                id: this.generateDataId(),
-                examination_id: this.examTypesInfimier.find((exam) => exam.exam === examType)?.temp_id,
-                question: dt,
-                answer: this.answers[dt]
-              });
-
-              console.log(examData);
-
-            }
-
-            
-            this.appStorage.set('exams-data', examData);
-          }); */
-        }
-
-
-
+            data: JSON.stringify(this.groupedAnswers)
+        })
       }
 
+      
 
-      let examProblems = [];
+
+      /* let examProblems = [];
       this.appStorage.get('evaluations').then((data) => {
         if (data) {
           examProblems = data;
@@ -462,7 +425,7 @@ export class NewPage implements OnInit {
         }
 
         this.appStorage.set('evaluations', examProblems);
-      });
+      }); */
 
 
       this.appStorage.set('exams', exams).then(() => {

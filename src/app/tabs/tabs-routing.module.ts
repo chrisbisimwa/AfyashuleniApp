@@ -24,6 +24,10 @@ const routes: Routes = [
         loadChildren: () => import('../account/account.module').then( m => m.AccountPageModule)
       },
       {
+        path: 'followup',
+        loadChildren: ()=> import('../followup/followup.module').then(m => m.FollowupPageModule)
+      },
+      {
         path: '',
         redirectTo: '/tabs/home',
         pathMatch: 'full'

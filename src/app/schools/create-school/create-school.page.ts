@@ -124,7 +124,8 @@ export class CreateSchoolPage implements OnInit {
 
 
   previousState() {
-    window.history.back();
+    this.router.navigate(['/tabs/schools']);
+
   }
 
 }

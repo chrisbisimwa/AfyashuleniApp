@@ -1,8 +1,9 @@
 <ion-header class="ion-no-border" mode="ios">
   <ion-toolbar style="--background: var(--ion-color-primary)">
-    <ion-buttons slot="start">
-      <ion-back-button color="light"></ion-back-button>
-    </ion-buttons>
+    <ion-button slot="start" (click)="previousState()">
+      <ion-icon name="chevron-back-outline"></ion-icon>
+      Back
+    </ion-button>
     <ion-title style="color: white;letter-spacing: 1px;font-family: 'semi-bold';">Examen</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -37,23 +38,25 @@
         </div>
       </ion-item>
 
-      <ion-item-group>
+
+      <ion-item-group *ngIf="exam.data">
 
 
 
-        <div *ngFor="let exam of exams">
+        <div *ngFor="let ex of exam.data">
           <ion-item-divider>
             <ion-label>
-              <h2>Données de l'examen ({{exam.type}})</h2>
+              
+              <h2>Données de l'examen ( {{ex.type.replaceAll("_", " ").charAt(0).toUpperCase() + ex.type.replaceAll("_", " ").slice(1)}})</h2>
             </ion-label>
           </ion-item-divider>
 
 
-          <ion-item-sliding  button detail="true" *ngFor="let data of exam.data" #slidingItem>
+          <ion-item-sliding  button detail="true" *ngFor="let dx of ex.dt" #slidingItem>
             <ion-item>
-              <ion-label>{{data.question}}</ion-label>
+              <ion-label>{{dx.question.replaceAll("_", " ").charAt(0).toUpperCase() + dx.question.replaceAll("_", " ").slice(1)}}</ion-label>
               <div item-content>
-                <span>{{data.answer}}</span>
+                <span>{{dx.answer}}</span>
               </div>
             </ion-item>
            
@@ -63,11 +66,11 @@
             </ion-item-options>
           </ion-item-sliding>
 
-          <ion-item-sliding  button detail="true" *ngFor="let data of exam.data" #slidingItem>
+          <ion-item-sliding  button detail="true" *ngFor="let dx of ex.dt" #slidingItem>
             <ion-item>
-              <ion-label>{{data.question}}</ion-label>
+              <ion-label>{{dx.question.replaceAll("_", " ").charAt(0).toUpperCase() + dx.question.replaceAll("_", " ").slice(1)}}</ion-label>
               <div item-content>
-                <span>{{data.answer}}</span>
+                <span>{{dx.answer}}</span>
               </div>
             </ion-item>
            

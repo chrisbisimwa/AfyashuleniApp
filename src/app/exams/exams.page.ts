@@ -53,14 +53,13 @@ export class ExamsPage {
     
 
     //fetch exams from local storage
-    const exams = await this.appStrorage.get('exams');
+   /*  const exams = await this.appStrorage.get('exams');
     const exs = [];
     if (exams) {
       for (let exam of exams) {
         if (this.getExaminerGroupIdByExaminerId(exam.examiner_id) === user.group_id) {
           exam.studentName = await this.getstudentNameById(exam.student_id);
           exam.examinerName = await this.getExaminerNameById(exam.examiner_id);
-          //grouper les examens par examinateur et élève: si l'examen a un même examinateur et un même élève et à une même date, considérer que c'est un seul et même examen
           let found = exs.find((item: any) => item.student_id === exam.student_id && item.examiner_id === exam.examiner_id && this.datePipe.transform(item.date, 'yyyy-MM-dd') === this.datePipe.transform(exam.date, 'yyyy-MM-dd'));
 
           if (!found) {
@@ -77,9 +76,28 @@ export class ExamsPage {
 
     } else {
       this.exams = []
+    } */
+
+    //fetch exams from local storage
+    const exams = await this.appStrorage.get('exams');
+    const exs = [];
+    if (exams) {
+      for (let exam of exams){
+        if(this.getExaminerGroupIdByExaminerId(exam.examiner_id) === user.group_id){
+          exam.studentName = await this.getstudentNameById(exam.student_id);
+          exam.examinerName = await this.getExaminerNameById(exam.examiner_id);
+          exs.push(exam);
+        }
+      }
     }
 
+    //trier les examens par date
+    exs.sort((a, b) => {
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+    this.exams = exs;
 
+    console.log('exams', this.exams);
     
 
   }
@@ -97,7 +115,6 @@ export class ExamsPage {
 
   getExaminerGroupIdByExaminerId(id: any) {
 
-    console.log('users', this.users);
     let examiner = null;
     if (this.users) {
       examiner = this.users.find((item: any) => item.id === id);
@@ -152,6 +169,7 @@ export class ExamsPage {
   }
 
   async view(examId: any) {
+    //console.log('examId', examId);
     await this.navController.navigateForward('/tabs/exams/' + examId + '/view');
 
   }
