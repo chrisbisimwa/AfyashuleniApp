@@ -72,14 +72,14 @@
 
                 <ion-item *ngIf="question.parent && answers[question.parent]===question.parentValue">
                   <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both') ">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"
                     (ionInput)="runTimeChange($event)" name="{{question.label}}"></ion-input>
                   </div>
 
                   <div
                     *ngIf="question.options && (question.gender===studentGender || question.gender==='both') && (answers[question.parent]===question.parentValue)">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
                       <ion-select-option *ngFor="let option of question.options" [value]="option">
                         {{ option }}
@@ -89,13 +89,13 @@
                 </ion-item>
                 <ion-item *ngIf="!question.parent">
                   <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"
                     (ionInput)="runTimeChange($event)" name="{{question.label}}"></ion-input>
                   </div>
 
                   <div *ngIf="question.options && (question.gender===studentGender || question.gender==='both')">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
                       <ion-select-option *ngFor="let option of question.options" [value]="option">
                         {{ option }}
@@ -125,13 +125,13 @@
 
                 <ion-item *ngIf="question.parent && answers[question.parent]===question.parentValue">
                   <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both') ">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
                   </div>
 
                   <div
                     *ngIf="question.options && (question.gender===studentGender || question.gender==='both') && (answers[question.parent]===question.parentValue)">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
                       <ion-select-option *ngFor="let option of question.options" [value]="option">
                         {{ option }}
@@ -141,12 +141,12 @@
                 </ion-item>
                 <ion-item *ngIf="!question.parent">
                   <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
                   </div>
 
                   <div *ngIf="question.options && (question.gender===studentGender || question.gender==='both')">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
                       <ion-select-option *ngFor="let option of question.options" [value]="option">
                         {{ option }}
@@ -172,13 +172,13 @@
 
                 <ion-item *ngIf="question.parent && answers[question.parent]===question.parentValue">
                   <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both') ">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
                   </div>
 
                   <div
                     *ngIf="question.options && (question.gender===studentGender || question.gender==='both') && (answers[question.parent]===question.parentValue)">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
                       <ion-select-option *ngFor="let option of question.options" [value]="option">
                         {{ option }}
@@ -188,12 +188,12 @@
                 </ion-item>
                 <ion-item *ngIf="!question.parent">
                   <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
                   </div>
 
                   <div *ngIf="question.options && (question.gender===studentGender || question.gender==='both')">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
                       <ion-select-option *ngFor="let option of question.options" [value]="option">
                         {{ option }}
@@ -219,13 +219,13 @@
 
                 <ion-item *ngIf="question.parent && answers[question.parent]===question.parentValue">
                   <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both') ">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
                   </div>
 
                   <div
                     *ngIf="question.options && (question.gender===studentGender || question.gender==='both') && (answers[question.parent]===question.parentValue)">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
                       <ion-select-option *ngFor="let option of question.options" [value]="option">
                         {{ option }}
@@ -235,12 +235,12 @@
                 </ion-item>
                 <ion-item *ngIf="!question.parent">
                   <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
                   </div>
 
                   <div *ngIf="question.options && (question.gender===studentGender || question.gender==='both')">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
                       <ion-select-option *ngFor="let option of question.options" [value]="option">
                         {{ option }}
@@ -266,14 +266,14 @@
 
                 <ion-item *ngIf="question.parent && answers[question.parent]===question.parentValue">
                   <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both') ">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse" 
                       (ionInput)="runTimeChange($event)"  name="{{question.label}}"></ion-input>
                   </div>
 
                   <div
                     *ngIf="question.options && (question.gender===studentGender || question.gender==='both') && (answers[question.parent]===question.parentValue)">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
                       <ion-select-option *ngFor="let option of question.options" [value]="option">
                         {{ option }}
@@ -283,13 +283,13 @@
                 </ion-item>
                 <ion-item *ngIf="!question.parent">
                   <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"
                     (ionInput)="runTimeChange($event)" name="{{question.label}}"></ion-input>
                   </div>
 
                   <div *ngIf="question.options && (question.gender===studentGender || question.gender==='both')">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
                       <ion-select-option *ngFor="let option of question.options" [value]="option">
                         {{ option }}
@@ -317,13 +317,13 @@
               <div *ngFor="let question of questionsMedecin['examen_clinique']">
                 <ion-item *ngIf="question.parent && answers[question.parent]===question.parentValue">
                   <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both') ">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
                   </div>
 
                   <div
                     *ngIf="question.options && (question.gender===studentGender || question.gender==='both') && (answers[question.parent]===question.parentValue)">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
                       <ion-select-option *ngFor="let option of question.options" [value]="option">
                         {{ option }}
@@ -333,12 +333,12 @@
                 </ion-item>
                 <ion-item *ngIf="!question.parent">
                   <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
                   </div>
 
                   <div *ngIf="question.options && (question.gender===studentGender || question.gender==='both')">
-                    <ion-label>{{ ucfirst(question.label.replace('_', ' ')) }}</ion-label>
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <ion-select [(ngModel)]="answers[question.label]" placeholder="Sélectionnez une option">
                       <ion-select-option *ngFor="let option of question.options" [value]="option">
                         {{ option }}

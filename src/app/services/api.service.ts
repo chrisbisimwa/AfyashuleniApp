@@ -128,6 +128,16 @@ export class ApiService {
     return this.http.post(`${this.apiUrl}/students/${studentId}/examinations`, data, headers);
   }
 
+  async updateStudentExamination(studentId: number, data: any) {
+    const headers = await this.getHeaders();
+    return this.http.put(`${this.apiUrl}/students/${studentId}/examinations`, data, headers);
+  }
+
+  async deleteExamination(examId:number){
+    const headers = await this.getHeaders();
+    return this.http.delete(`${this.apiUrl}/examinations/${examId}`, headers);
+  }
+
   async postExamData(examId:number,data: any) {
     const headers = await this.getHeaders();
     return this.http.post(`${this.apiUrl}/examinations/${examId}/all-examination-data`, data, headers);

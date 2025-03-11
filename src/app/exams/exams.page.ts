@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IonItemSliding, NavController, Platform, ToastController } from '@ionic/angular';
+import { IonItemSliding, NavController, Platform, ToastController, AlertController } from '@ionic/angular';
 import { Storage } from '@ionic/storage-angular';
 import { DatePipe } from '@angular/common';
 
@@ -20,7 +20,8 @@ export class ExamsPage {
     private navController: NavController,
     private toastCtrl: ToastController,
     public plt: Platform,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private alertCtrl: AlertController
   
   ) {
     this.fetchUser().then(() => {
@@ -83,7 +84,7 @@ export class ExamsPage {
     const exs = [];
     if (exams) {
       for (let exam of exams){
-        if(this.getExaminerGroupIdByExaminerId(exam.examiner_id) === user.group_id){
+        if(this.getExaminerGroupIdByExaminerId(exam.examiner_id) === user.group_id && exam.status !== "deleted"){
           exam.studentName = await this.getstudentNameById(exam.student_id);
           exam.examinerName = await this.getExaminerNameById(exam.examiner_id);
           exs.push(exam);
@@ -178,7 +179,24 @@ export class ExamsPage {
     await item.close();
   }
 
-  async delete(customer: any) {
+  async delete(examId: any) {
+    this.alertCtrl.create({
+      header: 'Confirmation de suppression',
+      message: 'Est vous sûr de vouloir supprimer cet examen?',
+      buttons: [
+        {
+          text: 'Oui',
+          handler: () => {
+            this.deleteExam(examId);
+          }
+        },
+        {
+          text: 'Non',
+          handler: () => { }
+        }
+      ]
+    }).then(alert => alert.present());
+  
     /*  this.customerService.delete(customer.id).subscribe(
        async () => {
          const toast = await this.toastCtrl.create({ message: 'Customer deleted successfully.', duration: 3000, position: 'middle' });
@@ -187,6 +205,35 @@ export class ExamsPage {
        },
        error => console.error(error)
      ); */
+  }
+
+  deleteExam(examId: any) {
+    this.appStrorage.get('exams').then((exams) => {
+      let exam = exams.filter((item: any) => item.id == examId)[0];
+      
+
+       exams.splice(exams.indexOf(exam), 1);
+
+      exams.push({
+        id: exam.id,
+        code: exam.code,
+        student_id: exam.student_id,
+        examiner_id: exam.examiner_id,
+        date: exam.date,
+        latitude: exam.latitude,
+        longitude: exam.longitude,
+        data: exam.data,
+        status:"deleted",
+        created_at:exam.created_at,
+        updated_at: exam.updated_at
+      });
+
+
+      this.appStrorage.set('exams', exams).then(() => {
+        this.fetchExams(null);
+      });
+      
+    });
   }
 
 

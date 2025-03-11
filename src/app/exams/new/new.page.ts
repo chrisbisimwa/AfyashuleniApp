@@ -231,10 +231,14 @@ export class NewPage implements OnInit {
             exam.temp_id = this.generateExamId();
           });
         } else if (this.userRoles.includes('Medecin')) {
+
           //initialize id for each exam type
           this.examTypesMedecin.forEach((exam) => {
             exam.temp_id = this.generateExamId();
+
+            this.step = 6;
           });
+
         }
       });
     });
@@ -250,9 +254,6 @@ export class NewPage implements OnInit {
 
 
 
-
-
-
     this.fetchSchools(null).then(() => {
       if (this.route.snapshot.params['id']) {
         this.loadStudent();
@@ -261,12 +262,8 @@ export class NewPage implements OnInit {
 
 
 
-
-
     this.presentingElement = document.querySelector('.ion-page');
     this.printCurrentPosition();
-
-
 
   }
 
@@ -332,20 +329,16 @@ export class NewPage implements OnInit {
 
     if (this.userRoles.includes('infirmier')) {
       this.examTypesInfimier.forEach(type => {
-
-
-
-
         this.groupedAnswers[type.exam] = {};
 
         this.questionsInfirmier[type.exam].forEach(question => {
           const questionLabel = question.label;
 
           if (this.answers[questionLabel] !== undefined && this.answers[questionLabel] !== null) {
-            
+
             this.groupedAnswers[type.exam][questionLabel] = this.answers[questionLabel];
-            
-            
+
+
             //this.groupedAnswers[type.exam][questionLabel] = this.answers[questionLabel];
           }
 
@@ -355,6 +348,7 @@ export class NewPage implements OnInit {
 
       });
     } else if (this.userRoles.includes('Medecin')) {
+
       this.examTypesMedecin.forEach(type => {
         this.groupedAnswers[type.exam] = {};
 
@@ -362,9 +356,15 @@ export class NewPage implements OnInit {
           const questionLabel = question.label;
 
           if (this.answers[questionLabel] !== undefined && this.answers[questionLabel] !== null) {
-            this.groupedAnswers[type][questionLabel] = this.answers[questionLabel];
+
+            this.groupedAnswers[type.exam][questionLabel] = this.answers[questionLabel];
+
           }
+
+
         });
+
+
       });
     }
 
@@ -389,26 +389,88 @@ export class NewPage implements OnInit {
         exams = [];
       }
 
-      
 
-      if(this.userRoles.includes('infirmier')){
+
+      if (this.userRoles.includes('infirmier')) {
 
         exams.push({
-            id: this.generateExamId(),
-            code: this.examCode,
-            student_id: this.selectedStudent,
-            examiner_id: this.user.id,
-            date: new Date().toISOString(),
-            latitude: this.latitude,
-            longitude: this.longitude,
-            data: JSON.stringify(this.groupedAnswers)
+          id: this.generateExamId(),
+          code: this.examCode,
+          student_id: this.selectedStudent,
+          examiner_id: this.user.id,
+          date: new Date().toISOString(),
+          latitude: this.latitude,
+          longitude: this.longitude,
+          data: JSON.stringify(this.groupedAnswers)
         })
+      } else if (this.userRoles.includes('Medecin')) {
+        let exm = exams.find((exam: { student_id: any; }) => exam.student_id == this.selectedStudent);
+        if(exm){
+        let exID = exm.id;
+        let exCode = exm.code;
+        let exStudent = exm.student_id;
+        let exExaminer = exm.examiner_id;
+        let exDate = exm.date;
+        let exLatitude = exm.latitude;
+        let exLongitute = exm.longitude;
+
+        let examData = JSON.parse(exm.data);
+        let newExamData = this.groupedAnswers;
+
+        const combinedData = {
+          ...examData,
+          ...newExamData
+        };
+
+        exams.splice(exams.indexOf(exm), 1);
+
+        exams.push({
+          id: exm.id,
+          code: exm.code,
+          student_id: exm.student_id,
+          examiner_id: exm.examiner_id,
+          date: exm.date,
+          latitude: exm.latitude,
+          longitude: exm.longitude,
+          data: JSON.stringify(combinedData),
+          status:"updated",
+          created_at:exm.created_at,
+          updated_at: exm.updated_at
+        });
+
+      }else{
+        this.alertController.create({
+          header: 'Erreur',
+          message: 'L\'infimier n\'a pas encore exmaniné cet élève ! Voulez-vous continuer ?',
+          buttons: [
+            {
+              text: 'Oui',
+              handler: () => {
+                exams.push({
+                  id: this.generateExamId(),
+                  code: this.examCode,
+                  student_id: this.selectedStudent,
+                  examiner_id: this.user.id,
+                  date: new Date().toISOString(),
+                  latitude: this.latitude,
+                  longitude: this.longitude,
+                  data: JSON.stringify(this.groupedAnswers)
+                });
+              }
+            },
+            {
+              text: 'Non',
+              handler: () => { }
+            }
+          ]
+        }).then(alert => alert.present());
       }
 
-      
+      }
 
 
-      /* let examProblems = [];
+
+      let examProblems = [];
       this.appStorage.get('evaluations').then((data) => {
         if (data) {
           examProblems = data;
@@ -425,10 +487,10 @@ export class NewPage implements OnInit {
         }
 
         this.appStorage.set('evaluations', examProblems);
-      }); */
+      }); 
 
 
-      this.appStorage.set('exams', exams).then(() => {
+       this.appStorage.set('exams', exams).then(() => {
         this.navController.navigateForward('/tabs/exams');
       });
 

@@ -323,11 +323,25 @@ export class SyncDataPage implements OnInit {
           }
 
           if (exam.status === 'updated') {
-
+            const examPromise = this.apiService.updateStudentExamination(exam.student_id, exam);
+            const examObservable = await examPromise;
+            const exm = await lastValueFrom(examObservable).then((data: any) => {
+              //console.log(data);
+              if (data ) {
+                counter++;
+              }
+            });
           }
 
           if (exam.status === 'deleted') {
-
+            const examPromise = this.apiService.deleteExamination(exam.id);
+            const examObservable = await examPromise;
+            const exm = await lastValueFrom(examObservable).then((data: any) => {
+              //console.log(data);
+              if (data) {
+                counter++;
+              }
+            });
           }
 
         }
@@ -419,6 +433,11 @@ export class SyncDataPage implements OnInit {
   }
 
   async loadStudentsFromAPI() {
+    this.presentLoading('Chargement des élèves en cours...');
+    /* setTimeout(() => {
+      this.dismissLoading();
+    }, 60000); */
+
     let stds: any[] = [];
     let classes: any[] = await this.appStorage.get('classes') || [];
     let stdsHist: any[] = [];
@@ -445,7 +464,7 @@ export class SyncDataPage implements OnInit {
   }
 
   async loadExamsFromAPI() {
-
+    this.presentLoading('Chargement des examens en cours...');
     let exs: any[] = [];
     let students: any[] = await this.appStorage.get('students');
     for (let student of students) {
@@ -465,7 +484,9 @@ export class SyncDataPage implements OnInit {
 
     
 
-    this.appStorage.set('exams', exs);
+    this.appStorage.set('exams', exs).then(() => {
+      this.loadEvaluationsFromAPI();
+    });
     this.dismissLoading();
 
   }
@@ -558,10 +579,49 @@ export class SyncDataPage implements OnInit {
       this.loadExamsFromAPI();
     }
 
+    this.loadProblemsFromAPI();
+
     this.refreshData();
 
     this.dismissLoading();
 
+  }
+
+  async loadEvaluationsFromAPI(){
+    this.presentLoading('Chargement des évaluations en cours...');
+
+    let exams: any[] = await this.appStorage.get('exams');
+    let evaluations:any[] = [];
+
+    for(let exam of exams){
+      const evaluationsPromise = this.apiService.getEvaluations(exam.id);
+      const evaluationsObservable = await evaluationsPromise;
+      const evals: any = await lastValueFrom(evaluationsObservable).then((data: any) => {
+        if (data.data && data.data.length > 0) {
+          for (let evaluation of data.data) {
+            evaluations.push(evaluation);
+          }
+        }
+      });
+    }
+
+    this.appStorage.set('evaluations', evaluations);
+    this.dismissLoading();
+
+  }
+
+  async loadProblemsFromAPI(){
+    this.presentLoading('Chargement des problèmes en cours...');
+
+    const problemsPromise = this.apiService.getProblems();
+    const problemsObservable = await problemsPromise;
+    const problems: any = await lastValueFrom(problemsObservable).then((data: any) => {
+      if (data.data) {
+        this.appStorage.set('problems', data.data);
+      }
+    });
+
+    this.dismissLoading();
   }
 
   refreshData() {

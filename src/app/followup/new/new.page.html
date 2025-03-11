@@ -1,0 +1,97 @@
+<ion-header class="ion-no-border" mode="ios">
+  <ion-toolbar style="--background: var(--ion-color-primary)">
+    <ion-button slot="start" (click)="previousState()" style="color: white">
+      <ion-icon name="chevron-back-outline"></ion-icon>
+      Retour
+    </ion-button>
+    <ion-title style="color: white;letter-spacing: 1px;font-family: 'semi-bold';">Suivi de problèmes</ion-title>
+
+   
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="main_content_div">
+    <ion-label class="title_lbl">ajouter ou modifier un examen</ion-label>
+    <ion-list>
+
+      <ion-item-group>
+        <ion-item-divider>
+          <ion-label color="primary">Séléctionner l'élève </ion-label>
+        </ion-item-divider>
+
+        
+
+        <ion-item>
+          <ion-label>Ecole</ion-label>
+          <ion-select [(ngModel)]="selectedSchool" (ionChange)="fetchClasses($event)">
+            <ion-select-option *ngFor="let school of schools" [value]="school.id">
+              {{ school.name }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>Classe</ion-label>
+          <ion-select [(ngModel)]="selectedClasse" (ionChange)="fetchStudents($event)">
+            <ion-select-option *ngFor="let classe of classes" [value]="classe.id">
+              {{ classe.name }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>Elève</ion-label>
+          <ion-select [(ngModel)]="selectedStudent" (ionChange)="readyForNexStep($event)">
+            <ion-select-option *ngFor="let student of students" [value]="student.id">
+              {{ student.first_name }} {{ student.last_name }} {{ student.surname }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-item-group>
+
+      <div *ngIf="selectedStudent">
+        
+          <div *ngIf="userRoles.includes('infirmier')">
+            
+
+
+            <ion-item-group *ngIf="evaluations.length>0">
+              <ion-item-divider>
+                <ion-label> Problèmes identifiés </ion-label>
+              </ion-item-divider>
+              <ion-item *ngFor="let eval of evaluations">
+                <ion-label>{{eval.problem_name}}</ion-label>
+                <div item-content>
+                  <span *ngIf="eval.evaluation==='identified'">Identifié</span>
+                  <span *ngIf="eval.evaluation==='to_follow'">A suivre</span>
+                  <span *ngIf="eval.evaluation==='not_to_follow'">A ne pas suivre</span>
+                  <span *ngIf="eval.evaluation==='attention'">Pt d'attention</span>
+                </div>
+              </ion-item>
+            </ion-item-group>
+
+
+          </div>
+
+  
+        <div >
+          <ion-button *ngIf="userRoles.includes('Medecin')" expand="block" color="primary" (click)="setOpen(true)">Problèmes de stanté ({{evaluations.length}})</ion-button>
+          <ion-button expand="block" color="primary" >Soumettre</ion-button>
+          <ion-button expand="block" color="primary" >Retour</ion-button>
+          <ion-button expand="block" color="danger"  >Annuler</ion-button>
+        </div>
+        
+      </div>
+
+      
+
+    </ion-list>
+  </div>
+
+  
+
+
+
+
+</ion-content>

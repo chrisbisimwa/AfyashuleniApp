@@ -33,7 +33,7 @@ export class FollowupPage implements OnInit {
   }
 
   async new(){
-
+    await this.navController.navigateForward('/tabs/followup/new');
   }
 
   edit(item: IonItemSliding, site: any){
