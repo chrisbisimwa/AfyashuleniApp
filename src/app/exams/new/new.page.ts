@@ -6,6 +6,9 @@ import { Storage } from '@ionic/storage-angular';
 import { ActivatedRoute } from '@angular/router';
 import { Geolocation } from '@capacitor/geolocation';
 import { v4 as uuidv4 } from 'uuid';
+import { ApiService } from 'src/app/services/api.service';
+import { lastValueFrom } from 'rxjs';
+import { Network, ConnectionStatus } from '@capacitor/network';
 
 @Component({
   selector: 'app-new',
@@ -214,9 +217,17 @@ export class NewPage implements OnInit {
     ],
   };
 
+  classesToSync: any = [];
+  studentsToSync: any = [];
+  schoolToSync: any = [];
+  examsToSync: any = [];
+  exams: any = null;
+
+  networkStatus: ConnectionStatus;
+
 
   constructor(protected fb: FormBuilder, public platform: Platform, private authService: AuthService, private navController: NavController,
-    private toastCtrl: ToastController, private appStorage: Storage, private route: ActivatedRoute, private alertController: AlertController,) {
+    private toastCtrl: ToastController, private appStorage: Storage, private route: ActivatedRoute, private alertController: AlertController, private apiService: ApiService) {
     this.fetchSchoolYears();
     this.fetchProblems();
     this.form = this.fb.group({
@@ -327,6 +338,10 @@ export class NewPage implements OnInit {
 
   save() {
 
+    this.checkSchoolsToSync();
+    this.checkClassesToSync();
+    this.checkStudentsToSync();
+
     if (this.userRoles.includes('infirmier')) {
       this.examTypesInfimier.forEach(type => {
         this.groupedAnswers[type.exam] = {};
@@ -405,66 +420,66 @@ export class NewPage implements OnInit {
         })
       } else if (this.userRoles.includes('Medecin')) {
         let exm = exams.find((exam: { student_id: any; }) => exam.student_id == this.selectedStudent);
-        if(exm){
-        let exID = exm.id;
-        let exCode = exm.code;
-        let exStudent = exm.student_id;
-        let exExaminer = exm.examiner_id;
-        let exDate = exm.date;
-        let exLatitude = exm.latitude;
-        let exLongitute = exm.longitude;
+        if (exm) {
+          let exID = exm.id;
+          let exCode = exm.code;
+          let exStudent = exm.student_id;
+          let exExaminer = exm.examiner_id;
+          let exDate = exm.date;
+          let exLatitude = exm.latitude;
+          let exLongitute = exm.longitude;
 
-        let examData = JSON.parse(exm.data);
-        let newExamData = this.groupedAnswers;
+          let examData = JSON.parse(exm.data);
+          let newExamData = this.groupedAnswers;
 
-        const combinedData = {
-          ...examData,
-          ...newExamData
-        };
+          const combinedData = {
+            ...examData,
+            ...newExamData
+          };
 
-        exams.splice(exams.indexOf(exm), 1);
+          exams.splice(exams.indexOf(exm), 1);
 
-        exams.push({
-          id: exm.id,
-          code: exm.code,
-          student_id: exm.student_id,
-          examiner_id: exm.examiner_id,
-          date: exm.date,
-          latitude: exm.latitude,
-          longitude: exm.longitude,
-          data: JSON.stringify(combinedData),
-          status:"updated",
-          created_at:exm.created_at,
-          updated_at: exm.updated_at
-        });
+          exams.push({
+            id: exm.id,
+            code: exm.code,
+            student_id: exm.student_id,
+            examiner_id: exm.examiner_id,
+            date: exm.date,
+            latitude: exm.latitude,
+            longitude: exm.longitude,
+            data: JSON.stringify(combinedData),
+            status: "updated",
+            created_at: exm.created_at,
+            updated_at: exm.updated_at
+          });
 
-      }else{
-        this.alertController.create({
-          header: 'Erreur',
-          message: 'L\'infimier n\'a pas encore exmaniné cet élève ! Voulez-vous continuer ?',
-          buttons: [
-            {
-              text: 'Oui',
-              handler: () => {
-                exams.push({
-                  id: this.generateExamId(),
-                  code: this.examCode,
-                  student_id: this.selectedStudent,
-                  examiner_id: this.user.id,
-                  date: new Date().toISOString(),
-                  latitude: this.latitude,
-                  longitude: this.longitude,
-                  data: JSON.stringify(this.groupedAnswers)
-                });
+        } else {
+          this.alertController.create({
+            header: 'Erreur',
+            message: 'L\'infimier n\'a pas encore exmaniné cet élève ! Voulez-vous continuer ?',
+            buttons: [
+              {
+                text: 'Oui',
+                handler: () => {
+                  exams.push({
+                    id: this.generateExamId(),
+                    code: this.examCode,
+                    student_id: this.selectedStudent,
+                    examiner_id: this.user.id,
+                    date: new Date().toISOString(),
+                    latitude: this.latitude,
+                    longitude: this.longitude,
+                    data: JSON.stringify(this.groupedAnswers)
+                  });
+                }
+              },
+              {
+                text: 'Non',
+                handler: () => { }
               }
-            },
-            {
-              text: 'Non',
-              handler: () => { }
-            }
-          ]
-        }).then(alert => alert.present());
-      }
+            ]
+          }).then(alert => alert.present());
+        }
 
       }
 
@@ -487,12 +502,42 @@ export class NewPage implements OnInit {
         }
 
         this.appStorage.set('evaluations', examProblems);
-      }); 
-
-
-       this.appStorage.set('exams', exams).then(() => {
-        this.navController.navigateForward('/tabs/exams');
       });
+
+
+
+      this.exams = exams;
+
+      this.appStorage.set('exams', exams).then(() => {
+        Network.getStatus().then(async status => {
+          this.networkStatus = status;
+          if (this.networkStatus.connected) {
+            if (this.classesToSync.length > 0) {
+              this.storeClassesToAPI().then(() => {
+                if (this.studentsToSync.length > 0) {
+                  this.storeStudentsToAPI().then(() => {
+                    this.examsToSync = [];
+                    if (this.exams) {
+                      for (let exam of this.exams) {
+                        if (!exam.created_at || exam.status === 'updated' || exam.status === 'deleted') {
+                          this.examsToSync.push(exam);
+                        }
+                      }
+
+                      if (this.examsToSync > 0) {
+                        this.storeExamsToAPI();
+                      }
+                    }
+
+                  });
+                }
+              });
+            }
+          }
+        });
+      });
+
+      this.navController.navigateForward('/tabs/exams');
 
 
 
@@ -967,6 +1012,301 @@ export class NewPage implements OnInit {
     }
 
   }
+
+  checkClassesToSync() {
+    this.classesToSync = [];
+    this.appStorage.get('classes').then((data) => {
+      let classes = data || [];
+
+      for (let classe of classes) {
+        if (!classe.created_at || classe.status === 'updated' || classe.status === 'deleted') {
+          this.classesToSync.push(classe);
+        }
+      }
+
+    });
+  }
+
+  checkStudentsToSync() {
+    this.studentsToSync = [];
+    this.appStorage.get('students').then((data) => {
+      let students = data || [];
+
+      for (let student of students) {
+        if (!student.created_at || student.status === 'updated' || student.status === 'deleted') {
+          this.studentsToSync.push(student);
+        }
+      }
+
+    });
+  }
+
+  checkSchoolsToSync() {
+    this.schools = [];
+    this.appStorage.get('schools').then((data) => {
+      let schools = data || [];
+
+      for (let school of schools) {
+        if (!school.created_at || school.status === "updated" || school.status === "deleted") {
+          this.schoolToSync.push(school);
+        }
+      }
+
+    });
+  }
+
+  async storeClassesToAPI() {
+    for (let classe of this.classesToSync) {
+      if (!classe.created_at) {
+        const classPromise = this.apiService.postClass(classe.school_id, classe);
+        const classObservable = await classPromise;
+        const cls = await lastValueFrom(classObservable).then((data: any) => {
+          //
+        });
+      }
+
+      if (classe.status === 'updated') {
+        const schoolPromise = this.apiService.updateSchool(classe);
+        const schoolObservable = await schoolPromise;
+        const school = await lastValueFrom(schoolObservable).then((data: any) => {
+          console.log(data.data);
+        });
+      }
+
+      if (classe.status === 'deleted') {
+        (await this.apiService.deleteSchool(classe.id)).subscribe((data: any) => {
+          if (data) {
+            console.log(data);
+          }
+        });
+      }
+
+    }
+  }
+
+
+  async storeStudentsToAPI() {
+
+    if (this.studentsToSync) {
+      for (let student of this.studentsToSync) {
+        if (!student.created_at) {
+          const studentPromise = this.apiService.postStudent(student);
+          const studentObservable = await studentPromise;
+          const std = await lastValueFrom(studentObservable).then((data: any) => {
+            if (data && data.data) {
+              this.loadStudentsFromAPI().then(() => {
+                this.storeStudentsHistoryToAPI().then(async () => {
+                  let stdsHist: any[] = [];
+
+                  const studentHistoryPromise = this.apiService.getStudentHistory(1);
+                  const studentHistoryObservable = await studentHistoryPromise;
+                  const studentHistory: any = await lastValueFrom(studentHistoryObservable).then((data: any) => {
+                    if (data.data && data.data.length > 0) {
+                      for (let hist of data.data) {
+                        stdsHist.push(hist);
+                      }
+                    }
+
+                  });
+
+                  this.appStorage.set('student-history', stdsHist);
+                });
+              });
+            }
+
+          });
+        }
+
+        if (student.status === 'updated') {
+          const studentPromise = this.apiService.updateStudent(student);
+          const studentObservable = await studentPromise;
+          const std = await lastValueFrom(studentObservable);
+        }
+
+        if (student.status === 'deleted') {
+          (await this.apiService.deleteStudent(student.id)).subscribe((data: any) => {
+            if (data) {
+              console.log(data);
+            }
+          });
+        }
+
+      }
+    }
+
+  }
+
+  
+
+  async loadStudentsFromAPI() {
+
+    let stds: any[] = [];
+    let classes: any[] = await this.appStorage.get('classes') || [];
+    let stdsHist: any[] = [];
+    for (let classe of classes) {
+      const studentsPromise = this.apiService.getStudents();
+      const studentsObservable = await studentsPromise;
+      const students: any = await lastValueFrom(studentsObservable).then((data: any) => {
+        if (data.data && data.data.length > 0) {
+          for (let student of data.data) {
+            if (student.current_class_id == classe.id) {
+              stds.push(student);
+            }
+          }
+        }
+
+      });
+    }
+
+    this.appStorage.set('students', stds);
+
+
+
+  }
+
+  async storeExamsToAPI() {
+
+    if (this.examsToSync > 0) {
+      let counter = 0;
+      for (let exam of this.examsToSync) {
+        if (!exam.created_at) {
+          const examPromise = this.apiService.postStudentExamination(exam.student_id, exam);
+          const examObservable = await examPromise;
+          const exm = await lastValueFrom(examObservable).then((data: any) => {
+            //console.log(data);
+            if (data && data.data) {
+              counter++;
+            }
+          });
+
+
+        }
+
+        if (exam.status === 'updated') {
+          const examPromise = this.apiService.updateStudentExamination(exam.student_id, exam);
+          const examObservable = await examPromise;
+          const exm = await lastValueFrom(examObservable).then((data: any) => {
+            //console.log(data);
+            if (data) {
+              counter++;
+            }
+          });
+        }
+
+        if (exam.status === 'deleted') {
+          const examPromise = this.apiService.deleteExamination(exam.id);
+          const examObservable = await examPromise;
+          const exm = await lastValueFrom(examObservable).then((data: any) => {
+            //console.log(data);
+            if (data) {
+              counter++;
+            }
+          });
+        }
+
+      }
+
+      //if all exams are synced, sync evaluations
+      if (counter == this.examsToSync.length) {
+        this.loadExamsFromAPI().then(() => {
+          this.storeEvaluationToAPI().then(async () => {
+            for (let exam of this.exams) {
+              const evalPromise = this.apiService.getEvaluations(exam.id);
+              const evalObservable = await evalPromise;
+              const ev = await lastValueFrom(evalObservable).then((data: any) => {
+                if (data.data && data.data.length > 0) {
+                  this.appStorage.set('evaluations', data.data);
+                }
+              });
+            }
+
+          });
+        });
+      }
+    }
+
+  }
+
+  async storeEvaluationToAPI() {
+    let evaluations: any[] = await this.appStorage.get('evaluations');
+    if (evaluations) {
+      for (let evaluation of evaluations) {
+        if (!evaluation.created_at) {
+          const evaluationPromise = this.apiService.postEvaluation(evaluation.examination_id, evaluation);
+          const evaluationObservable = await evaluationPromise;
+          const evalu = await lastValueFrom(evaluationObservable).then((data: any) => {
+            if (data && data.data) {
+              console.log(data);
+            }
+          });
+        }
+      }
+    }
+
+  }
+
+  async storeStudentsHistoryToAPI() {
+
+    let studentHistory = await this.appStorage.get('student-history');
+    if (studentHistory) {
+      for (let sth of studentHistory) {
+        if (!sth.created_at && !sth.updated_at) {
+          const studentHistoryPromise = this.apiService.postStudentHistory(sth); // Stockez la Promise
+          const studentHistoryObservable = await studentHistoryPromise; // Récupérez l'Observable
+          const stdHistory = await lastValueFrom(studentHistoryObservable);
+
+        }
+      }
+    }
+  }
+
+  async loadExamsFromAPI() {
+    let exs: any[] = [];
+    let students: any[] = await this.appStorage.get('students');
+    for (let student of students) {
+      const examsPromise = this.apiService.getStudentExaminations(student.id);
+      const examsObservable = await examsPromise;
+      const exams: any = await lastValueFrom(examsObservable).then((data: any) => {
+        if (data.data && data.data.length > 0) {
+          //console.log(data.data);
+          for (let exam of data.data) {
+            exs.push(exam);
+
+          }
+        }
+
+      });
+    }
+
+
+
+    this.appStorage.set('exams', exs).then(() => {
+      this.loadEvaluationsFromAPI();
+    });
+
+  }
+
+  async loadEvaluationsFromAPI() {
+
+    let exams: any[] = await this.appStorage.get('exams');
+    let evaluations: any[] = [];
+
+    for (let exam of exams) {
+      const evaluationsPromise = this.apiService.getEvaluations(exam.id);
+      const evaluationsObservable = await evaluationsPromise;
+      const evals: any = await lastValueFrom(evaluationsObservable).then((data: any) => {
+        if (data.data && data.data.length > 0) {
+          for (let evaluation of data.data) {
+            evaluations.push(evaluation);
+          }
+        }
+      });
+    }
+
+    this.appStorage.set('evaluations', evaluations);
+
+  }
+
 
 }
 

@@ -1,8 +1,9 @@
 <ion-header class="ion-no-border" mode="ios">
   <ion-toolbar style="--background: var(--ion-color-primary)">
-    <ion-buttons slot="start">
-      <ion-back-button color="light"></ion-back-button>
-    </ion-buttons>
+    <ion-button slot="start" (click)="previousState()" style="color: white">
+      <ion-icon name="chevron-back-outline" style="color: white"></ion-icon>
+       <ion-label style="color: white">Back</ion-label> 
+    </ion-button>
     <ion-title style="color: white;letter-spacing: 1px;font-family: 'semi-bold';">Classe</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -50,10 +51,12 @@
           <ion-label>
             <h2>Liste d'élèves</h2>
           </ion-label>
+          <ion-searchbar (ionChange)="search($event.target.value)" debounce="100" animated="true" placeholder="Recherche..."> </ion-searchbar>
         </ion-item-divider>
         <ion-item *ngFor="let student of students" (click)="showStudent(student)">
           <ion-label>{{student.first_name}} {{student.last_name }} {{student.surname}}</ion-label>
         </ion-item>
+        
       </ion-item-group>
 
 

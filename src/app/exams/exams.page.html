@@ -11,6 +11,7 @@
     <ion-refresher [disabled]="plt.is('desktop')" slot="fixed" (ionRefresh)="fetchExams($event)">
       <ion-refresher-content></ion-refresher-content>
     </ion-refresher>
+
   
     <!-- <div class="notification_div">
       <ion-segment value="Unresolved" (ionChange)="segmentChanged($event.target.value)" [(ngModel)]="segment">
@@ -42,7 +43,7 @@
             <ion-badge style="background-color: #b31217;" *ngIf="exam.priority==='HIGH'">HIGH</ion-badge>
           </div>
           <div >
-            <ion-badge  style="background-color : var(--ion-color-primary) ; text-align: right;" ><b>0 problèmes</b><br></ion-badge>
+            <ion-badge  style="background-color : var(--ion-color-primary) ; text-align: right;" *ngIf="exam.hasExamenClinique" ><b>0 problèmes</b><br></ion-badge>
           </div>
           
         </ion-item>

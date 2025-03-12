@@ -93,12 +93,12 @@ export class ShowSchoolPage implements OnInit {
           this.networkStatus = status;
           if (this.networkStatus.connected) {
             this.saveClasseToAPI();
-          } 
+          }
         });
 
 
         this.appStorage.set('classes', classes).then(() => {
-          this.fetchClassesBySchool();
+          this.fetchClassesBySchool(null);
           this.dismissLoading();
         });
 
@@ -140,7 +140,7 @@ export class ShowSchoolPage implements OnInit {
   }
 
   async saveClasseToAPI() {
-    
+
     let data = {
       name: this.className,
       nbr_fille: this.nbr_fille,
@@ -153,10 +153,32 @@ export class ShowSchoolPage implements OnInit {
 
     const classPromise = this.apiService.postClass(data.school_id, data);
     const classObservable = await classPromise;
-    const cls = await lastValueFrom(classObservable).then((data: any) => {
-      
+    const cls = await lastValueFrom(classObservable).then(async (data: any) => {
+      if (data) {
+        let cls: any[] = [];
+
+        const schools = await this.appStorage.get('schools');
+        if (schools) {
+          for (let school of schools) {
+            const classesPromise = this.apiService.getClasses(school.id);
+            const classesObservable = await classesPromise;
+            const classes: any = await lastValueFrom(classesObservable).then((data: any) => {
+              if (data.data && data.data.length > 0) {
+                for (let classe of data.data) {
+                  cls.push(classe);
+                }
+              }
+            });
+          }
+
+          this.classes = cls;
+          this.appStorage.set('classes', cls);
+        }
+
+
+      }
     });
-    
+
 
   }
 
@@ -179,12 +201,12 @@ export class ShowSchoolPage implements OnInit {
       this.school = result.find((sch: any) => sch.id == this.route.snapshot.params['id']);
 
 
-      this.fetchClassesBySchool();
+      this.fetchClassesBySchool(null);
 
     }
   }
 
-  async fetchClassesBySchool() {
+  async fetchClassesBySchool(refresher: any) {
     const result = await this.appStorage.get('classes');
     if (result) {
       this.classes = result.filter((classs: any) => classs.school_id == this.school.id);
@@ -283,6 +305,25 @@ export class ShowSchoolPage implements OnInit {
     if (this.loading) {
       this.loading.dismiss();
     }
+  }
+
+  previousState() {
+    this.router.navigate(['/tabs/schools']);
+  }
+
+  search(query: any, refresher?: any) {
+    if (!query) {
+      this.fetchClassesBySchool(refresher);
+
+    } else {
+      let result: any[] = this.classes.filter((item: any) =>
+        Object.keys(item).some((k: string) => item[k] != null &&
+          item[k].toString().toLowerCase()
+        .includes(query.toLowerCase()))
+      );
+      this.classes = result;
+    }
+
   }
 
 }

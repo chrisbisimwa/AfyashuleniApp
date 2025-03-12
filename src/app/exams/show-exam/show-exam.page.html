@@ -52,19 +52,7 @@
           </ion-item-divider>
 
 
-          <ion-item-sliding  button detail="true" *ngFor="let dx of ex.dt" #slidingItem>
-            <ion-item>
-              <ion-label>{{dx.question.replaceAll("_", " ").charAt(0).toUpperCase() + dx.question.replaceAll("_", " ").slice(1)}}</ion-label>
-              <div item-content>
-                <span>{{dx.answer}}</span>
-              </div>
-            </ion-item>
-           
-            <ion-item-options side="end">
-              <ion-item-option color="primary" > Modifier la classe</ion-item-option>
-              <ion-item-option color="danger" > Supprimer la classe</ion-item-option>
-            </ion-item-options>
-          </ion-item-sliding>
+         
 
           <ion-item-sliding  button detail="true" *ngFor="let dx of ex.dt" #slidingItem>
             <ion-item>
@@ -75,8 +63,8 @@
             </ion-item>
            
             <ion-item-options side="end">
-              <ion-item-option color="primary" > Modifier la classe</ion-item-option>
-              <ion-item-option color="danger" > Supprimer la classe</ion-item-option>
+              <!-- <ion-item-option color="primary" > Modifier la classe</ion-item-option>
+              <ion-item-option color="danger" > Supprimer la classe</ion-item-option> -->
             </ion-item-options>
           </ion-item-sliding>
 
@@ -96,9 +84,9 @@
 
 
 
-    <ion-button expand="block" color="Medium" (click)="new()">Ajouter un examen</ion-button>
-    <ion-button expand="block" color="primary" (click)="open(exam)">Modifier l'examen</ion-button>
-    <ion-button expand="block" color="danger" (click)="deleteModal(exam)">Supprimer l'examen</ion-button>
+    <ion-button expand="block" color="primary" (click)="new()" *ngIf="isMedecin && !hasExamenClinique">Examin clinique</ion-button>
+    <!-- <ion-button expand="block" color="primary" (click)="open(exam)">Modifier l'examen</ion-button>
+    <ion-button expand="block" color="danger" (click)="deleteModal(exam)">Supprimer l'examen</ion-button> -->
   </div>
 
 

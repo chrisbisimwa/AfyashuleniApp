@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute,Router } from '@angular/router';
 import { AlertController, IonModal, NavController } from '@ionic/angular';
 import { OverlayEventDetail } from '@ionic/core/components';
 import { Storage } from '@ionic/storage-angular';
@@ -34,6 +34,7 @@ export class ShowClassePage implements OnInit {
     private navController: NavController,
     private alertController: AlertController,
     private route: ActivatedRoute,
+    private router: Router,
     private appStorage: Storage
   ) { }
 
@@ -245,8 +246,8 @@ export class ShowClassePage implements OnInit {
 
 
 
-  back() {
-    this.navController.navigateBack('tabs/complaint');
+  previousState(){
+    this.router.navigate(['/tabs/schools/'+this.classe.school_id+'/view']);
   }
 
   showStudent(item: any) {
@@ -257,5 +258,22 @@ export class ShowClassePage implements OnInit {
 
     this.navController.navigateForward('/tabs/schools/classe/' + item.id + '/edit');
   }
+
+  search(query: any, refresher?: any) {
+    if (!query) {
+      this.fetchStudentsByClasse();
+
+    } else {
+      let result: any[] = this.students.filter((item: any) =>
+        Object.keys(item).some((k: string) => item[k] != null &&
+          item[k].toString().toLowerCase()
+        .includes(query.toLowerCase()))
+      );
+      this.students = result;
+    }
+
+  }
+
+ 
 
 }

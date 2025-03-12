@@ -16,13 +16,13 @@ export class ExamsPage {
 
 
 
-  constructor(private appStrorage: Storage, 
+  constructor(private appStrorage: Storage,
     private navController: NavController,
     private toastCtrl: ToastController,
     public plt: Platform,
     private datePipe: DatePipe,
     private alertCtrl: AlertController
-  
+
   ) {
     this.fetchUser().then(() => {
       this.fetchExams(null, this.user);
@@ -37,11 +37,11 @@ export class ExamsPage {
 
   reload(refresher: any) {
     this.fetchUser().then(() => {
-      if(this.user){
+      if (this.user) {
         this.fetchExams(refresher, this.user);
       }
 
-      
+
     });
 
     if (refresher) {
@@ -51,45 +51,21 @@ export class ExamsPage {
 
 
   async fetchExams(refresher?: any, user?: any) {
-    
-
-    //fetch exams from local storage
-   /*  const exams = await this.appStrorage.get('exams');
-    const exs = [];
-    if (exams) {
-      for (let exam of exams) {
-        if (this.getExaminerGroupIdByExaminerId(exam.examiner_id) === user.group_id) {
-          exam.studentName = await this.getstudentNameById(exam.student_id);
-          exam.examinerName = await this.getExaminerNameById(exam.examiner_id);
-          let found = exs.find((item: any) => item.student_id === exam.student_id && item.examiner_id === exam.examiner_id && this.datePipe.transform(item.date, 'yyyy-MM-dd') === this.datePipe.transform(exam.date, 'yyyy-MM-dd'));
-
-          if (!found) {
-            exs.push(exam);
-          }
-
-
-        }
-
-      }
-
-      this.exams = exs;
-
-
-    } else {
-      this.exams = []
-    } */
-
-    //fetch exams from local storage
+    if (!user) {
+      user = this.user
+    }
     const exams = await this.appStrorage.get('exams');
     const exs = [];
     if (exams) {
-      for (let exam of exams){
-        if(this.getExaminerGroupIdByExaminerId(exam.examiner_id) === user.group_id && exam.status !== "deleted"){
+      for (let exam of exams) {
+        if (this.getExaminerGroupIdByExaminerId(exam.examiner_id) === user.group_id && exam.status !== "deleted") {
           exam.studentName = await this.getstudentNameById(exam.student_id);
           exam.examinerName = await this.getExaminerNameById(exam.examiner_id);
+          exam.hasExamenClinique = this.hasExamenClinique(exam);
           exs.push(exam);
         }
       }
+
     }
 
     //trier les examens par date
@@ -98,8 +74,12 @@ export class ExamsPage {
     });
     this.exams = exs;
 
-    console.log('exams', this.exams);
-    
+
+    if (refresher) {
+      refresher.target.complete();
+    }
+
+
 
   }
 
@@ -121,9 +101,9 @@ export class ExamsPage {
       examiner = this.users.find((item: any) => item.id === id);
     }
 
-    if(examiner){
-    return examiner.group_id;
-    }else{
+    if (examiner) {
+      return examiner.group_id;
+    } else {
       return 0;
     }
   }
@@ -196,7 +176,7 @@ export class ExamsPage {
         }
       ]
     }).then(alert => alert.present());
-  
+
     /*  this.customerService.delete(customer.id).subscribe(
        async () => {
          const toast = await this.toastCtrl.create({ message: 'Customer deleted successfully.', duration: 3000, position: 'middle' });
@@ -210,9 +190,9 @@ export class ExamsPage {
   deleteExam(examId: any) {
     this.appStrorage.get('exams').then((exams) => {
       let exam = exams.filter((item: any) => item.id == examId)[0];
-      
 
-       exams.splice(exams.indexOf(exam), 1);
+
+      exams.splice(exams.indexOf(exam), 1);
 
       exams.push({
         id: exam.id,
@@ -223,8 +203,8 @@ export class ExamsPage {
         latitude: exam.latitude,
         longitude: exam.longitude,
         data: exam.data,
-        status:"deleted",
-        created_at:exam.created_at,
+        status: "deleted",
+        created_at: exam.created_at,
         updated_at: exam.updated_at
       });
 
@@ -232,10 +212,29 @@ export class ExamsPage {
       this.appStrorage.set('exams', exams).then(() => {
         this.fetchExams(null);
       });
-      
+
     });
   }
 
+  hasExamenClinique(exam: any) {
+    if (exam && exam.data) {
+
+      let data = JSON.parse(exam.data);
+      if (data.examen_clinique && Object.keys(data.examen_clinique).length > 0) {
+        return Object.values(data.examen_clinique).some(value =>
+          value !== "" && value !== null && value !== undefined
+        );
+      }
+      return false;
+    }
+
+    return false;
+  }
+
+  coutProblems(exam: any) {
+    let count = 0;
+   
+  }
 
 
 
