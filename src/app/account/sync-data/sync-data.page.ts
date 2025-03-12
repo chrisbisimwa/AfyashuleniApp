@@ -467,20 +467,23 @@ export class SyncDataPage implements OnInit {
     this.presentLoading('Chargement des examens en cours...');
     let exs: any[] = [];
     let students: any[] = await this.appStorage.get('students');
-    for (let student of students) {
-      const examsPromise = this.apiService.getStudentExaminations(student.id);
-      const examsObservable = await examsPromise;
-      const exams: any = await lastValueFrom(examsObservable).then((data: any) => {
-        if (data.data && data.data.length > 0) {
-          //console.log(data.data);
-          for (let exam of data.data) {
-            exs.push(exam);
-            
+    if(students){
+      for (let student of students) {
+        const examsPromise = this.apiService.getStudentExaminations(student.id);
+        const examsObservable = await examsPromise;
+        const exams: any = await lastValueFrom(examsObservable).then((data: any) => {
+          if (data.data && data.data.length > 0) {
+            //console.log(data.data);
+            for (let exam of data.data) {
+              exs.push(exam);
+              
+            }
           }
-        }
-
-      });
+  
+        });
+      }
     }
+    
 
     
 

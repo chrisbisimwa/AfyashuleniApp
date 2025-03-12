@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { AlertController, NavController, Platform, ToastController } from '@ionic/angular';
+import { AlertController, NavController, Platform, ToastController, LoadingController } from '@ionic/angular';
 import { AuthService } from 'src/app/services/auth.service';
 import { Storage } from '@ionic/storage-angular';
 import { ActivatedRoute } from '@angular/router';
@@ -224,10 +224,11 @@ export class NewPage implements OnInit {
   exams: any = null;
 
   networkStatus: ConnectionStatus;
+  loading: HTMLIonLoadingElement | null = null;
 
 
   constructor(protected fb: FormBuilder, public platform: Platform, private authService: AuthService, private navController: NavController,
-    private toastCtrl: ToastController, private appStorage: Storage, private route: ActivatedRoute, private alertController: AlertController, private apiService: ApiService) {
+    private toastCtrl: ToastController, private appStorage: Storage, private route: ActivatedRoute, private alertController: AlertController, private apiService: ApiService, private loadingCtrl: LoadingController) {
     this.fetchSchoolYears();
     this.fetchProblems();
     this.form = this.fb.group({
@@ -336,10 +337,10 @@ export class NewPage implements OnInit {
 
   }
 
-  save() {
+  async save() {
 
     this.checkSchoolsToSync();
-    this.checkClassesToSync();
+    await this.checkClassesToSync();
     this.checkStudentsToSync();
 
     if (this.userRoles.includes('infirmier')) {
@@ -394,10 +395,11 @@ export class NewPage implements OnInit {
   }
 
   submitExam() {
+    this.presentLoading('Enregistrement de l\'examen en cours...');
     this.save();
 
     let exams = [];
-    this.appStorage.get('exams').then((data) => {
+    this.appStorage.get('exams').then(async (data) => {
       if (data) {
         exams = data;
       } else {
@@ -409,7 +411,7 @@ export class NewPage implements OnInit {
       if (this.userRoles.includes('infirmier')) {
 
         exams.push({
-          id: this.generateExamId(),
+          id: await this.generateExamId(),
           code: this.examCode,
           student_id: this.selectedStudent,
           examiner_id: this.user.id,
@@ -509,7 +511,7 @@ export class NewPage implements OnInit {
       this.exams = exams;
 
       this.appStorage.set('exams', exams).then(() => {
-        Network.getStatus().then(async status => {
+        /* Network.getStatus().then(async status => {
           this.networkStatus = status;
           if (this.networkStatus.connected) {
             if (this.classesToSync.length > 0) {
@@ -525,7 +527,10 @@ export class NewPage implements OnInit {
                       }
 
                       if (this.examsToSync > 0) {
-                        this.storeExamsToAPI();
+                        this.storeExamsToAPI().then(() => {
+                          this.dismissLoading();
+
+                        });
                       }
                     }
 
@@ -534,9 +539,8 @@ export class NewPage implements OnInit {
               });
             }
           }
-        });
+        }); */
       });
-
       this.navController.navigateForward('/tabs/exams');
 
 
@@ -644,6 +648,22 @@ export class NewPage implements OnInit {
 
     }
 
+  }
+
+
+  async presentLoading(msg: string) {
+    this.loading = await this.loadingCtrl.create({
+      message: msg,
+      duration: 5000,
+    });
+
+    this.loading.present();
+  }
+
+  async dismissLoading() {
+    if (this.loading) {
+      this.loading.dismiss();
+    }
   }
 
 
@@ -832,7 +852,7 @@ export class NewPage implements OnInit {
     return problem.name;
   }
 
-  generateExamId() {
+  /* generateExamId() {
 
     this.examId = Math.floor(Math.random() * 1000000000000000000);
     this.appStorage.get('exams').then((result) => {
@@ -845,6 +865,25 @@ export class NewPage implements OnInit {
     });
 
     return this.examId;
+  } */
+
+  async generateExamId(): Promise<number> {
+    // Générer un ID basé sur le timestamp + une partie aléatoire
+    const timestamp = Date.now(); // Timestamp en millisecondes (unique à chaque milliseconde)
+    const randomPart = Math.floor(Math.random() * 10000); // Partie aléatoire (0 à 9999)
+    let examId = Number(`${timestamp}${randomPart}`); // Concaténer et convertir en nombre
+
+    // Vérifier si l'ID existe déjà dans le stockage
+    const result = await this.appStorage.get('exams');
+    if (result) {
+      const exams = result.find((exm: any) => exm.id === examId);
+      if (exams) {
+        // Si l'ID existe déjà, générer un nouvel ID
+        return await this.generateExamId(); // Récursion jusqu'à obtenir un ID unique
+      }
+    }
+
+    return examId; // Retourner l'ID unique
   }
 
   generateDataId() {
@@ -1013,18 +1052,16 @@ export class NewPage implements OnInit {
 
   }
 
-  checkClassesToSync() {
+  async checkClassesToSync() {
     this.classesToSync = [];
-    this.appStorage.get('classes').then((data) => {
-      let classes = data || [];
-
+    let classes = await this.appStorage.get('classes') || [];
+    if (classes) {
       for (let classe of classes) {
         if (!classe.created_at || classe.status === 'updated' || classe.status === 'deleted') {
           this.classesToSync.push(classe);
         }
       }
-
-    });
+    }
   }
 
   checkStudentsToSync() {
@@ -1056,44 +1093,67 @@ export class NewPage implements OnInit {
   }
 
   async storeClassesToAPI() {
-    for (let classe of this.classesToSync) {
-      if (!classe.created_at) {
-        const classPromise = this.apiService.postClass(classe.school_id, classe);
-        const classObservable = await classPromise;
-        const cls = await lastValueFrom(classObservable).then((data: any) => {
-          //
-        });
+    if (this.classesToSync > 0) {
+      let counter = 0;
+      for (let classe of this.classesToSync) {
+        if (!classe.created_at) {
+          const classPromise = this.apiService.postClass(classe.school_id, classe);
+          const classObservable = await classPromise;
+          const cls = await lastValueFrom(classObservable).then((data: any) => {
+            counter++;
+          });
+        }
+
+        if (classe.status === 'updated') {
+          const schoolPromise = this.apiService.updateSchool(classe);
+          const schoolObservable = await schoolPromise;
+          const school = await lastValueFrom(schoolObservable).then((data: any) => {
+            counter++;
+          });
+        }
+
+        if (classe.status === 'deleted') {
+          (await this.apiService.deleteSchool(classe.id)).subscribe((data: any) => {
+            if (data) {
+              counter++;
+            }
+          });
+        }
+
       }
 
-      if (classe.status === 'updated') {
-        const schoolPromise = this.apiService.updateSchool(classe);
-        const schoolObservable = await schoolPromise;
-        const school = await lastValueFrom(schoolObservable).then((data: any) => {
-          console.log(data.data);
-        });
-      }
-
-      if (classe.status === 'deleted') {
-        (await this.apiService.deleteSchool(classe.id)).subscribe((data: any) => {
-          if (data) {
-            console.log(data);
+      if (counter == this.classesToSync.length) {
+        this.loadClassesFromAPI().then(() => {
+          this.checkStudentsToSync();
+          if (this.studentsToSync.length > 0) {
+            this.storeStudentsToAPI().then(() => {
+              this.storeExamsToAPI().then(() => {
+                this.storeEvaluationToAPI().then(() => {
+                  this.dismissLoading();
+                });
+              });
+            });
           }
+          
         });
       }
-
     }
+
   }
 
 
   async storeStudentsToAPI() {
 
-    if (this.studentsToSync) {
+    if (this.studentsToSync > 0) {
+      let counter = 0;
       for (let student of this.studentsToSync) {
         if (!student.created_at) {
           const studentPromise = this.apiService.postStudent(student);
           const studentObservable = await studentPromise;
           const std = await lastValueFrom(studentObservable).then((data: any) => {
-            if (data && data.data) {
+            
+            if (data ) {
+              counter++;
               this.loadStudentsFromAPI().then(() => {
                 this.storeStudentsHistoryToAPI().then(async () => {
                   let stdsHist: any[] = [];
@@ -1132,37 +1192,16 @@ export class NewPage implements OnInit {
         }
 
       }
+      if(this.studentsToSync.length == counter){
+        this.loadStudentsFromAPI().then(() => {
+          //store students history
+        });
+      }
     }
 
   }
 
-  
 
-  async loadStudentsFromAPI() {
-
-    let stds: any[] = [];
-    let classes: any[] = await this.appStorage.get('classes') || [];
-    let stdsHist: any[] = [];
-    for (let classe of classes) {
-      const studentsPromise = this.apiService.getStudents();
-      const studentsObservable = await studentsPromise;
-      const students: any = await lastValueFrom(studentsObservable).then((data: any) => {
-        if (data.data && data.data.length > 0) {
-          for (let student of data.data) {
-            if (student.current_class_id == classe.id) {
-              stds.push(student);
-            }
-          }
-        }
-
-      });
-    }
-
-    this.appStorage.set('students', stds);
-
-
-
-  }
 
   async storeExamsToAPI() {
 
@@ -1307,6 +1346,62 @@ export class NewPage implements OnInit {
 
   }
 
+  async loadStudentsFromAPI() {
+
+    let stds: any[] = [];
+    let classes: any[] = await this.appStorage.get('classes') || [];
+    let stdsHist: any[] = [];
+    for (let classe of classes) {
+      const studentsPromise = this.apiService.getStudents();
+      const studentsObservable = await studentsPromise;
+      const students: any = await lastValueFrom(studentsObservable).then((data: any) => {
+        if (data.data && data.data.length > 0) {
+          for (let student of data.data) {
+            if (student.current_class_id == classe.id) {
+              stds.push(student);
+            }
+          }
+        }
+
+      });
+    }
+
+    this.appStorage.set('students', stds);
+
+
+
+  }
+
+  async loadClassesFromAPI() {
+
+    let cls: any[] = [];
+    this.appStorage.get('schools').then(async (data) => {
+
+      if (data.length > 0) {
+        for (let school of data) {
+          const classesPromise = this.apiService.getClasses(school.id);
+          const classesObservable = await classesPromise;
+          const classes: any = await lastValueFrom(classesObservable).then((data: any) => {
+            if (data.data && data.data.length > 0) {
+              for (let classe of data.data) {
+                cls.push(classe);
+              }
+            }
+          });
+        }
+
+
+        this.classes = cls;
+        this.appStorage.set('classes', cls);
+      }
+
+    });
+
+
+
+
+
+  }
 
 }
 

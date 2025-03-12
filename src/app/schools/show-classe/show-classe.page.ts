@@ -58,7 +58,7 @@ export class ShowClassePage implements OnInit {
     const ev = event as CustomEvent<OverlayEventDetail<string>>;
     if (ev.detail.role === 'Enregistrer') {
       let students = [];
-      this.appStorage.get('students').then((data) => {
+      this.appStorage.get('students').then(async (data) => {
         if (data) {
           students = data;
         } else {
@@ -67,14 +67,14 @@ export class ShowClassePage implements OnInit {
 
         students.push(
           {
-            id: this.generateId(),
+            id: await this.generateId(),
             first_name: this.studentName,
             last_name: this.studentPostName,
             surname: this.studentSurname,
             gender: this.gender,
             date_of_birth: this.birthDate,
             place_of_birth: this.birthPlace,
-            current_class_id: this.route.snapshot.params['id'],
+            current_class_id: Number(this.route.snapshot.params['id']),
           }
         );
 
@@ -95,7 +95,7 @@ export class ShowClassePage implements OnInit {
           studentHistory.push({
             student_id: this.studentId,
             school_year_id: 1,
-            classe_id: this.route.snapshot.params['id']
+            classe_id: Number(this.route.snapshot.params['id'])
           });
           this.appStorage.set('student-history', studentHistory);
         }
@@ -228,18 +228,25 @@ export class ShowClassePage implements OnInit {
 
 
 
-  generateId() {
-    //returner un très très grand nombre
-    this.studentId = Math.floor(Math.random() * 1000000000000000000);
-    this.appStorage.get('students').then((result) => {
-      if (result) {
-        let student = result.find((sch: any) => sch.id == this.studentId);
-        if (student) {
-          this.generateId();
-        }
+  
+
+  async generateId(): Promise<number> {
+    // Générer un ID basé sur le timestamp + une partie aléatoire
+    const timestamp = Date.now(); // Timestamp en millisecondes (unique à chaque milliseconde)
+    const randomPart = Math.floor(Math.random() * 10000); // Partie aléatoire (0 à 9999)
+    this.studentId = Number(`${timestamp}${randomPart}`); // Concaténer et convertir en nombre
+
+    // Vérifier si l'ID existe déjà dans le stockage
+    const result = await this.appStorage.get('students');
+    if (result) {
+      const school = result.find((sdt: any) => sdt.id === this.studentId);
+      if (school) {
+        // Si l'ID existe déjà, générer un nouvel ID
+        return await this.generateId(); // Récursion jusqu'à obtenir un ID unique
       }
-    });
-    return this.studentId;
+    }
+
+    return this.studentId; // Retourner l'ID unique
   }
 
 

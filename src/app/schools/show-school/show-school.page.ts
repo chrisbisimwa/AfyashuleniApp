@@ -71,15 +71,17 @@ export class ShowSchoolPage implements OnInit {
     if (ev.detail.role === 'Enregistrer') {
       this.presentLoading('Enregistrement en cours...');
       let classes = [];
-      this.appStorage.get('classes').then((data) => {
+      this.appStorage.get('classes').then(async (data) => {
         if (data) {
           classes = data;
         } else {
           classes = [];
         }
 
+        
+
         classes.push({
-          id: this.generateId(),
+          id: await this.generateId(),
           name: ev.detail.data,
           nbr_fille: this.nbr_fille,
           nbr_garcon: this.nbr_garcon,
@@ -92,7 +94,7 @@ export class ShowSchoolPage implements OnInit {
         Network.getStatus().then(async status => {
           this.networkStatus = status;
           if (this.networkStatus.connected) {
-            this.saveClasseToAPI();
+            /* this.saveClasseToAPI(); */
           }
         });
 
@@ -139,9 +141,10 @@ export class ShowSchoolPage implements OnInit {
 
   }
 
-  async saveClasseToAPI() {
+  /* async saveClasseToAPI() {
 
     let data = {
+      id: this.classeId,
       name: this.className,
       nbr_fille: this.nbr_fille,
       nbr_garcon: this.nbr_garcon,
@@ -180,7 +183,7 @@ export class ShowSchoolPage implements OnInit {
     });
 
 
-  }
+  } */
 
   getLastSchoolYearId() {
     // schoolYear example: {id: 1, name: '2021-2022', start_date: '2021-09-01', end_date: '2022-06-30'}
@@ -256,21 +259,24 @@ export class ShowSchoolPage implements OnInit {
   }
 
 
-  generateId() {
-    //returner un très très grand nombre
-    this.classeId = Math.floor(Math.random() * 1000000000000000000);
-    this.appStorage.get('classes').then((result) => {
-      if (result) {
-        let school = result.find((sch: any) => sch.id == this.classeId);
-        if (school) {
-          this.generateId();
-        }
+  async generateId(): Promise<number> {
+    // Générer un ID basé sur le timestamp + une partie aléatoire
+    const timestamp = Date.now(); // Timestamp en millisecondes (unique à chaque milliseconde)
+    const randomPart = Math.floor(Math.random() * 10000); // Partie aléatoire (0 à 9999)
+    this.classeId = Number(`${timestamp}${randomPart}`); // Concaténer et convertir en nombre
+
+    // Vérifier si l'ID existe déjà dans le stockage
+    const result = await this.appStorage.get('classes');
+    if (result) {
+      const classe = result.find((sch: any) => sch.id === this.classeId);
+      if (classe) {
+        // Si l'ID existe déjà, générer un nouvel ID
+        return await this.generateId(); // Récursion jusqu'à obtenir un ID unique
       }
-    });
+    }
 
-    return this.classeId;
+    return this.classeId; // Retourner l'ID unique
   }
-
 
 
 
@@ -319,7 +325,7 @@ export class ShowSchoolPage implements OnInit {
       let result: any[] = this.classes.filter((item: any) =>
         Object.keys(item).some((k: string) => item[k] != null &&
           item[k].toString().toLowerCase()
-        .includes(query.toLowerCase()))
+            .includes(query.toLowerCase()))
       );
       this.classes = result;
     }
