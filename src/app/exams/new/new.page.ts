@@ -30,9 +30,12 @@ export class NewPage implements OnInit {
   evaluations: any[] = [];
   user: any;
   selectedExamType: string = '';
-  selectedProblem: number = 0;
+  selectedProblems: number[] = [];
   addedProblems: any[] = [];
-  selectedEvaluation: string = "";
+  suggestedProblems: number[] = [];
+  suggestedEvaluations: { [key: number]: string } = {};
+  /* selectedEvaluation: string = ""; */
+  selectedEvaluation: string | null = null;
   //examTypesInfimier: string[] = ['situation_familiale', 'calendrier_vaccinal', 'deparasitage', 'comportement_langage', 'anamnese'];
   //nom du type d'examen infirmier et son ID
   examTypesInfimier: any[] = [{ 'exam': 'situation_familiale', 'temp_id': null }, { 'exam': 'calendrier_vaccinal', 'temp_id': null }, { 'exam': 'deparasitage', 'temp_id': null }, { 'exam': 'comportement_langage', 'temp_id': null }, { 'exam': 'anamnese', 'temp_id': null }];
@@ -60,8 +63,8 @@ export class NewPage implements OnInit {
   questionsInfirmier: Exam = {
     'situation_familiale': [
       { label: 'Parents_en_vie', options: ['Les deux', 'Mère seulement', 'Père seulement', 'Aucun'], gender: 'both' },
-      { label: 'Elève vit avec', options: ['Les deux parents', 'La mère', 'Le père', 'Famille paternelle', 'Famille maternelle', 'Tuteur'], gender: 'both' },
-      { label: 'Occupation des parents avec qui élève vit', options: null, gender: 'both' },
+      { label: 'Elève_vit_avec', options: ['Les deux parents', 'La mère', 'Le père', 'Famille paternelle', 'Famille maternelle', 'Tuteur'], gender: 'both' },
+      { label: 'Occupation_des_parents_avec_qui_élève_vit', options: null, gender: 'both' },
       { label: 'Nombre_enfants_fratrie', options: null, gender: 'both' },
       { label: 'Rang_dans_la_fratrie', options: null, gender: 'both' },
       { label: 'Nombre_de_filles', options: null, gender: 'both' },
@@ -69,13 +72,13 @@ export class NewPage implements OnInit {
 
     ],
     'calendrier_vaccinal': [
-      { label: 'BCG (tuberculose)', options: ['Lisible', 'Non lisible', 'Douteux'], gender: 'both' },
-      { label: 'VPO (poliomyélite)', options: ['Fait', 'Non fait', 'Inconnu'], gender: 'both' },
+      { label: 'BCG_(tuberculose)', options: ['Lisible', 'Non lisible', 'Douteux'], gender: 'both' },
+      { label: 'VPO_(poliomyélite)', options: ['Fait', 'Non fait', 'Inconnu'], gender: 'both' },
       { label: 'DTCoq-Hép-B-Hib', options: ['Fait', 'Non fait', 'Inconnu'], gender: 'both' },
-      { label: 'PCV-13 (pneumo)', options: ['Fait', 'Non fait', 'Inconnu'], gender: 'both' },
-      { label: 'VAR (rougeole)', options: ['Fait', 'Non fait', 'Inconnu'], gender: 'both' },
-      { label: 'VAA (fièvre jaune)', options: ['Fait', 'Non fait', 'Inconnu'], gender: 'both' },
-      { label: 'DTCoq (diphtérie, tétanos, coqueluce)', options: ['Fait', 'Non fait', 'Inconnu'], gender: 'both' },
+      { label: 'PCV-13_(pneumo)', options: ['Fait', 'Non fait', 'Inconnu'], gender: 'both' },
+      { label: 'VAR_(rougeole)', options: ['Fait', 'Non fait', 'Inconnu'], gender: 'both' },
+      { label: 'VAA_(fièvre jaune)', options: ['Fait', 'Non fait', 'Inconnu'], gender: 'both' },
+      { label: 'DTCoq_(diphtérie,_tétanos,_coqueluce)', options: ['Fait', 'Non fait', 'Inconnu'], gender: 'both' },
     ],
     'deparasitage': [
       { label: 'Deparasité_?', options: ['Oui', 'Non', 'Inconnu'], gender: 'both' },
@@ -106,10 +109,11 @@ export class NewPage implements OnInit {
       { label: 'Poids_(kg)', options: null, gender: 'both' },
       { label: 'Pourcentage', options: null, gender: 'both' },
       { label: 'IMC', options: null, gender: 'both' },
-      { label: 'acuite_visuelle_loin_droite_sans_correction', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both' },
-      { label: 'acuite_visuelle_loin_gauche_sans_correction', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both' },
-      { label: 'acuite_loin_droite_avec_lunettes', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both' },
-      { label: 'acuite_loin_gauche_avec_lunettes', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both' },
+      { label: 'Test_acuité_visuelle', options: ['Sans lunettes', 'Avec lunettes'], gender: 'both' },
+      { label: 'acuite_visuelle_de_loin_droite_sans_correction', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both', parent: 'Test_acuité_visuelle', parentValue: 'Sans lunettes' },
+      { label: 'acuite_visuelle_de_loin_gauche_sans_correction', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both', parent: 'Test_acuité_visuelle', parentValue: 'Sans lunettes' },
+      { label: 'acuite_visuelle_de_loin_droite_avec_lunettes', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both', parent: 'Test_acuité_visuelle', parentValue: 'Avec lunettes' },
+      { label: 'acuite_visuelle_de_loin_gauche_avec_lunettes', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both', parent: 'Test_acuité_visuelle', parentValue: 'Avec lunettes' },
       { label: 'audiometrie_droite_500', options: ['Bon', 'Pas bon'], gender: 'both' },
       { label: 'audiometrie_droite_1000', options: ['Bon', 'Pas bon'], gender: 'both' },
       { label: 'audiometrie_droite_2000', options: ['Bon', 'Pas bon'], gender: 'both' },
@@ -118,10 +122,12 @@ export class NewPage implements OnInit {
       { label: 'audiometrie_gauche_1000', options: ['Bon', 'Pas bon'], gender: 'both' },
       { label: 'audiometrie_gauche_2000', options: ['Bon', 'Pas bon'], gender: 'both' },
       { label: 'audiometrie_gauche_4000', options: ['Bon', 'Pas bon'], gender: 'both' },
-      { label: 'Test de la montre gauche ', options: ['Bon', 'Pas bon'], gender: 'both' },
-      { label: 'Test de la montre droite ', options: ['Bon', 'Pas bon'], gender: 'both' },
-      { label: 'Test du diapason gauche', options: ['Bon', 'Pas bon'], gender: 'both' },
-      { label: 'Test du diapason droite', options: ['Bon', 'Pas bon'], gender: 'both' },
+      { label: 'Test_de_la_montre', options: ['Oui', 'Non'], gender: 'both' },
+      { label: 'Test_de_la_montre_gauche ', options: ['Bon', 'Pas bon'], gender: 'both', parentValue: 'Oui', parent: 'Test_de_la_montre' },
+      { label: 'Test_de_la_montre_droite ', options: ['Bon', 'Pas bon'], gender: 'both', parentValue: 'Oui', parent: 'Test_de_la_montre' },
+      { label: 'Test_du_diapason', options: ['Oui', 'Non'], gender: 'both' },
+      { label: 'Test_du_diapason_gauche', options: ['Bon', 'Pas bon'], gender: 'both', parentValue: 'Oui', parent: 'Test_du_diapason' },
+      { label: 'Test_du_diapason_droite', options: ['Bon', 'Pas bon'], gender: 'both', parentValue: 'Oui', parent: 'Test_du_diapason' },
     ]
   };
 
@@ -131,14 +137,20 @@ export class NewPage implements OnInit {
       { label: "Anamnese", options: null, gender: 'both' },
       { label: "etat_general", options: ['Bon', 'Altéré'], gender: 'both' },
       { label: "etat_general_altéré_par", options: null, gender: 'both', parent: 'etat_general', parentValue: 'Altéré' },
-      { label: "dysmorphie", options: ['Malformation de la gorge', 'Malformation de la bouche', 'Malformation du nez', 'Malformation des oreilles', 'Malformation des yeux', 'Malformation des membres', 'Autres'], gender: 'both' },
-      { label: "Si_autre_dysmorphie,_préciser", options: null, gender: 'both', parent: 'dysmorphie', parentValue: 'Autres' },
-      { label: "Conjonctive", options: ['Palpébrale colorée', 'Palpébrale pâle', 'Bulbaire anicterique', 'Bulbaire ictérique', 'Autres'], gender: 'both' },
-      { label: "Si_autre_conjonctive,_préciser", options: null, gender: 'both', parent: 'Conjonctive', parentValue: 'Autres' },
-      { label: "Brosse_à_dent", options: ['Oui', 'Non'], gender: 'both' },
+      { label: "Dismorphie", options: ['Oui', 'Non'], gender: 'both' },
+      { label: "Type_de_dysmorphie", options: ['Malformation de la gorge', 'Malformation de la bouche', 'Malformation du nez', 'Malformation des oreilles', 'Malformation des yeux', 'Malformation des membres', 'Autres'], gender: 'both', parent: 'Dismorphie', parentValue: 'Oui' },
+      { label: "Si_autre_dysmorphie,_préciser", options: null, gender: 'both', parent: 'Type_de_dysmorphie', parentValue: 'Autres' },
+      { label: "Conjonctive_palpébrale", options: ['Normale', 'Pathologique'], gender: 'both' },
+      { label: "Type_Conjonctive_palpébrale", options: ['Palpébrale colorée', 'Palpébrale pâle', 'Autres'], gender: 'both', parent: 'Conjonctive_palpébrale', parentValue: 'Pathologique' },
+      { label: "Si_autre_conjonctive_palpébrale,_préciser", options: null, gender: 'both', parent: 'Type_Conjonctive_palpébrale', parentValue: 'Autres' },
+      { label: "Conjonctive_bulbaire", options: ['Normale', 'Pathologique'], gender: 'both' },
+      { label: "Type_Conjonctive_bulbaire", options: [ 'Bulbaire anicterique', 'Bulbaire ictérique', 'Autre'], gender: 'both', parent: 'Conjonctive_bulbaire', parentValue: 'Pathologique' },
+      { label: "Si_autre_conjonctive_bulbaire,_préciser", options: null, gender: 'both', parent: 'Type_Conjonctive_bulbaire', parentValue: 'Autre' },
+      { label: "Brosse_à_dent", options: ['Oui', 'Non', 'Autres'], gender: 'both' },
+      { label: "Si_autre_brosse_à_dent,_préciser", options: null, gender: 'both', parent: 'Brosse_à_dent', parentValue: 'Autres' },
       { label: "fréquence_de_brossage", options: null, gender: 'both', parent: 'Brosse_à_dent', parentValue: 'Oui' },
-      { label: "utilisation_du_dentifrice", options: ['Oui', 'Non'], gender: 'both', parent: 'Brosse_à_dent', parentValue: 'Oui' },
-      { label: "Si_non_utilisation_du_dentifrice,_préciser", options: null, gender: 'both', parent: 'utilisation_du_dentifrice', parentValue: 'Non' },
+      { label: "utilisation_du_dentifrice", options: ['Oui', 'Non', 'Autres'], gender: 'both'},
+      { label: "Si_autre_dentifrice,_préciser", options: null, gender: 'both', parent: 'utilisation_du_dentifrice', parentValue: 'Autres' },
       { label: "Dentiste", options: ['Oui', 'Non'], gender: 'both' },
       { label: "frequence_visite_dentiste", options: null, gender: 'both', parent: 'Dentiste', parentValue: 'Oui' },
       { label: "Carie", options: ['Oui', 'Non'], gender: 'both' },
@@ -150,19 +162,21 @@ export class NewPage implements OnInit {
       { label: 'gorge', options: ['Saine', 'Pathologique'], gender: 'both' },
       { label: 'Si_gorge_pathologique,_préciser', options: null, gender: 'both', parent: 'gorge', parentValue: 'Pathologique' },
       { label: 'nez', options: ['Normal', 'Pahtologique'], gender: 'both' },
-      { label: 'Si_nez_pathologique,_préciser', options: null, gender: 'both', parent: 'nez', parentValue: 'Pathologique' },
+      { label: 'Si_nez_pathologique,_préciser', options: null, gender: 'both', parent: 'nez', parentValue: 'Pahtologique' },
       { label: 'oreille_droite', options: ['Normal', 'Pathologique'], gender: 'both' },
       { label: 'Si_oreille_droite_pathologique,_préciser', options: null, gender: 'both', parent: 'oreille_droite', parentValue: 'Pathologique' },
       { label: 'oreille_gauche', options: ['Normal', 'Pathologique'], gender: 'both' },
       { label: 'Si_oreille_gauche_pathologique,_préciser', options: null, gender: 'both', parent: 'oreille_gauche', parentValue: 'Pathologique' },
-      { label: 'thyroide', options: ['normale', 'tuméfiée'], gender: 'both' },
-      { label: 'ganglions', options: null, gender: 'both' },
+      { label: 'thyroide', options: ['Normale', 'Pathologique'], gender: 'both' },
+      { label: 'Si_thyroide_pathologique,_préciser', options:null, gender: 'both', parent: 'thyroide', parentValue: 'Pathologique' },
+      { label: 'ganglions', options: ['Présent', 'Absent'], gender: 'both' },
+      { label: 'Si_ganglions_présents,_préciser', options: null, gender: 'both', parent: 'ganglions', parentValue: 'Présent' },
       { label: 'Coeur', options: ['Normal', 'Pathologique'], gender: 'both' },
-      { label: 'Si_coeur_pathologique,_préciser', options: null, gender: 'both', parent: 'Coeur', parentValue: 'Pathologique' },
+      { label: 'Si_coeur_pathologique,_préciser', options: ['Hypotension', 'Hypertension'], gender: 'both', parent: 'Coeur', parentValue: 'Pathologique' },
       { label: 'Rythme_cardiaque', options: ['Rythme régulier', 'Rythme irrégulier'], gender: 'both' },
       { label: 'Fréquence_cardiaque_(bpm)', options: null, gender: 'both' },
       { label: 'tension_arthérielle', options: null, gender: 'both' },
-      { label: 'poumons', options: ['MVP', 'pathologique'], gender: 'both' },
+      { label: 'poumons', options: ['MVP', 'Pathologique'], gender: 'both' },
       { label: 'Si_poumons_pathologique,_préciser', options: null, gender: 'both', parent: 'poumons', parentValue: 'Pathologique' },
       { label: 'Peau', options: ['Normal', 'Pathologique'], gender: 'both' },
       { label: 'Si_peau_pathologique,_préciser', options: null, gender: 'both', parent: 'Peau', parentValue: 'Pathologique' },
@@ -178,14 +192,18 @@ export class NewPage implements OnInit {
       { label: 'Si_region_inguinale_pathologique,_préciser', options: null, gender: 'both', parent: 'region_inguinale', parentValue: 'Pathologique' },
       { label: 'systeme_uro_genital', options: null, gender: 'both' },
       { label: 'Menarche', options: ['Oui', 'Non'], gender: 'female' },
-      { label: 'Si_non,_averti_?', options: ['Oui', 'Non'], gender: 'female', parent: 'Menarche', parentValue: 'Non' },
+      { label: 'Si_oui_menarche,_préciser', options: null, gender: 'female', parent: 'Menarche', parentValue: 'Non' },
       { label: 'Volume testicule droite', options: null, gender: 'male' },
       { label: 'Volule testicule gauche', options: null, gender: 'male' },
       { label: 'Score_de_Tanner', options: null, gender: 'both' },
-      { label: 'Colonne_vertebrale', options: null, gender: 'both' },
-      { label: 'Bassin', options: null, gender: 'both' },
-      { label: 'Membres_inferieurs', options: null, gender: 'both' },
-      { label: 'Membres_supérieurs', options: null, gender: 'both' },
+      { label: 'Colonne_vertebrale', options: ['Normale', 'Pathologique'], gender: 'both' },
+      { label: 'Si_colonne_vertebrale_pathologique,_préciser', options: null, gender: 'both', parent: 'Colonne_vertebrale', parentValue: 'Pathologique' },
+      { label: 'Bassin', options: ['Normal', 'Pathologique'], gender: 'both' },
+      { label: 'Si_bassin_pathologique,_préciser', options: null, gender: 'both', parent: 'Bassin', parentValue: 'Pathologique' },
+      { label: 'Membres_inferieurs', options: ['Normal', 'Pathologique'], gender: 'both' },
+      { label: 'Si_membres_inferieurs_pathologique,_préciser', options: null, gender: 'both', parent: 'Membres_inferieurs', parentValue: 'Pathologique' },
+      { label: 'Membres_supérieurs', options: ['Normal', 'Pathologique'], gender: 'both' },
+      { label: 'Si_membres_supérieurs_pathologique,_préciser', options: null, gender: 'both', parent: 'Membres_supérieurs', parentValue: 'Pathologique' },
       { label: 'Demarche', options: ['Bonne', 'Pathologique'], gender: 'both' },
       { label: 'Si_démarche_pathologique,_préciser', options: null, gender: 'both', parent: 'Demarche', parentValue: 'Pathologique' },
       { label: 'Equilibre', options: ['Bon', 'Pathologique'], gender: 'both' },
@@ -194,18 +212,20 @@ export class NewPage implements OnInit {
       { label: 'motricité_pathologique,_préciser', options: null, gender: 'both', parent: 'fine_motricite', parentValue: 'Pas bonne' },
       { label: 'coordination_des_mouvemments', options: ['Bonne', 'Pas bonne'], gender: 'both' },
       { label: 'Si_pas_bonne_coordination_des_mouvements,_préciser', options: null, gender: 'both', parent: 'coordination_des_mouvemments', parentValue: 'Pas bonne' },
-      { label: 'reflexe', options: null, gender: 'both' },
+      { label: 'reflexe', options: ['Bon', 'Pas bon'], gender: 'both' },
+      { label: 'Si_pas_bon_reflexe,_préciser', options: null, gender: 'both', parent: 'reflexe', parentValue: 'Pas bon' },
       { label: 'reflet_corneen', options: ['Bon', 'Pas bon'], gender: 'both' },
       { label: 'Si_pas_bon_reflet_corneen,_préciser', options: null, gender: 'both', parent: 'reflet_corneen', parentValue: 'Pas bon' },
       { label: 'test_occlusion', options: ['Bon', 'Pas bon'], gender: 'both' },
       { label: 'Si_pas_bon_test_occlusion,_préciser', options: null, gender: 'both', parent: 'test_occlusion', parentValue: 'Pas bon' },
-      { label: "Aspect de l'urine", options: null, gender: 'both' },
-      { label: "Leucocytes", options: ['-', '±', '+', '++', '+++'], gender: 'both' },
-      { label: "Nitrites", options: ['-', '+'], gender: 'both' },
-      { label: "URO", options: ['0', '1', '2', '4', '8', '12'], gender: 'both' },
+      { label: 'Problème_urinaire', options: ['Oui', 'Non'], gender: 'both' },
+      { label: "Aspect_de_l'urine", options: null, gender: 'both', parent: 'Problème_urinaire', parentValue: 'Oui' },
+      { label: "Leucocytes", options: ['-', '±', '+', '++', '+++'], gender: 'both' , parent: 'Problème_urinaire', parentValue: 'Oui'},
+      { label: "Nitrites", options: ['-', '+'], gender: 'both', parent: 'Problème_urinaire', parentValue: 'Oui' },
+      /* { label: "URO", options: ['0', '1', '2', '4', '8', '12'], gender: 'both' }, */
       { label: "Protéines", options: ['-', '±', '+', '++', '+++', '++++'], gender: 'both' },
       { label: "PH", options: ['5.0', '6.0', '6.5', '7.0', '7.5', '8.0', '8.5'], gender: 'both' },
-      { label: "Sang", options: ['1.00', '1.005', '1.010', '1.015', '1.020', '1.025', '1.030'], gender: 'both' },
+      { label: "Sang_(hermaturie)", options: ['1.00', '1.005', '1.010', '1.015', '1.020', '1.025', '1.030'], gender: 'both' },
       { label: "KET", options: ['-', '±', '+', '++', '+++', '++++'], gender: 'both' },
       { label: "BIL", options: ['-', '+', '++', '+++', '++++'], gender: 'both' },
       { label: "Glucose", options: ['-', '±', '+', '++', '+++', '++++'], gender: 'both' },
@@ -213,7 +233,6 @@ export class NewPage implements OnInit {
       { label: 'Diagnostic', options: null, gender: 'both' },
       { label: 'Traitement', options: null, gender: 'both' },
       { label: 'Examen_supplémentaire', options: null, gender: 'both' },
-      // ... autres propriétés
     ],
   };
 
@@ -423,13 +442,6 @@ export class NewPage implements OnInit {
       } else if (this.userRoles.includes('Medecin')) {
         let exm = exams.find((exam: { student_id: any; }) => exam.student_id == this.selectedStudent);
         if (exm) {
-          let exID = exm.id;
-          let exCode = exm.code;
-          let exStudent = exm.student_id;
-          let exExaminer = exm.examiner_id;
-          let exDate = exm.date;
-          let exLatitude = exm.latitude;
-          let exLongitute = exm.longitude;
 
           let examData = JSON.parse(exm.data);
           let newExamData = this.groupedAnswers;
@@ -511,6 +523,17 @@ export class NewPage implements OnInit {
       this.exams = exams;
 
       this.appStorage.set('exams', exams).then(() => {
+        Network.getStatus().then(async status => {
+          this.networkStatus = status;
+          if(this.networkStatus.connected){
+            if(this.classesToSync.length > 0){
+              this.storeClassesToAPI().then(()=>{
+                //
+              });
+            }
+          }
+
+        });
         /* Network.getStatus().then(async status => {
           this.networkStatus = status;
           if (this.networkStatus.connected) {
@@ -541,115 +564,72 @@ export class NewPage implements OnInit {
           }
         }); */
       });
-      this.navController.navigateForward('/tabs/exams');
-
-
+      await this.navController.navigateForward('/tabs/exams');
 
     })
   }
 
 
-  evaluateAnswers(): void {
-    let evaluations = [];
-    for (const question in this.answers) {
+  detectProblems(): void {
+    this.suggestedProblems = [];
 
-      const reponse = this.answers[question];
-
-
-      // Vérifier si le déparasitage a été fait et si la date du dernier déparasitage est inférieure à 4 mois
-      if (question === 'Deparasite' && reponse === 'Oui') {
-        const dateStr = this.answers['Date du dernier déparasitage'];
-        const date = new Date(dateStr).getTime();
-        const now = Date.now();
-        const diffMonths = (now - date) / (1000 * 60 * 60 * 24 * 30);
-
-        if (diffMonths > 4) {
-          evaluations.push({
-            problem_id: this.getProblemIdByName('Déparasitage préventif insuffisant/inexistant'),
-            problem_name: 'Déparasitage préventif insuffisant/inexistant',
-            evaluation: 'to_follow',
-          });
-        }
-      }
-
-      // Vérifier le calendrier vaccinal
-      if (question === 'BCG (tuberculose)' && reponse === 'Non lisible') {
-        evaluations.push({
-          problem_id: this.getProblemIdByName('Cicatrice BCG non lisible'),
-          problem_name: 'Cicatrice BCG non lisible',
-          evaluation: 'to_follow',
-        });
-      }
-
-      // Évaluer les problèmes d'acuité visuelle (inférieur à 0.8)
-      if (
-        (question === 'acuite_visuelle_loin_droite_sans_correction' || question === 'acuite_visuelle_loin_gauche_sans_correction') &&
-        parseFloat(reponse) < 0.8) {
-        evaluations.push({
-          problem_id: this.getProblemIdByName('Problème d\'acuité visuelle'),
-          problem_name: 'Problème d\'acuité visuelle',
-          evaluation: 'to_follow',
-        });
-      }
-
-      // Évaluer les problèmes d'acuité auditive
-      if (
-        (question === 'audiometrie_droite' || reponse === 'audiometrie_gauche') &&
-        parseFloat(reponse) < 20) {
-        evaluations.push({
-          problem_id: this.getProblemIdByName('Problème d\'acuité auditive'),
-          problem_name: 'Problème d\'acuité auditive',
-          evaluation: 'to_follow',
-        });
-      }
-
-      // Évaluer les problèmes dentaires mineurs
-      if (question === 'Carie' && reponse === 'Oui' &&
-        this.answers['Si oui, stade carie'] === 'Stade 1') {
-        evaluations.push({
-          problem_id: this.getProblemIdByName('Problèmes dentaires mineurs (carie stade 1)'),
-          problem_name: 'Problèmes dentaires mineurs (carie stade 1)',
-          evaluation: 'attention',
-        });
-      }
-
-      // Évaluer les problèmes dentaires majeurs
-      if (
-        ['Plaque', 'Tartre', 'Débri alimentaire', 'Gingivite'].includes(question) &&
-        reponse === '3+') {
-        evaluations.push({
-          problem_id: this.getProblemIdByName('Problèmes dentaires majeurs'),
-          problem_name: 'Problèmes dentaires majeurs',
-          evaluation: 'to_follow',
-        });
-      }
-
-      // Évaluer les caries de stade 2 à 4
-      if (question === 'Carie' && reponse === 'Oui' &&
-        ['Stade 2', 'Stade 3', 'Stade 4'].includes(this.answers['Si oui, stade carie'])) {
-        console.log('Caries (Stade 2 à 4) detected');
-        evaluations.push({
-          problem_id: this.getProblemIdByName('Caries (Stade 2 à 4)'),
-          problem_name: 'Caries (Stade 2 à 4)',
-          evaluation: 'to_follow',
-        });
-      }
-
-      // Évaluer les bouchons de cérumen
-      if (
-        ['Bouchon de cérumen (oreille gauche)', 'Bouchon de cérumen (oreille droite)'].includes(question) &&
-        reponse === 'Oui') {
-        evaluations.push({
-          problem_id: this.getProblemIdByName('Bouchons de cérumen'),
-          problem_name: 'Bouchons de cérumen',
-          evaluation: 'attention',
-        });
-      }
-
+    // Règles de détection
+    if (this.answers['Cicatrice_BCG'] === 'Non lisible') {
+      this.suggestedProblems.push(1);
     }
+    if (this.answers['Deparasité_?'] === 'Non' || 
+        (this.answers['Deparasité_?'] === 'Oui' && this.isDeparasitageOutdated())) {
+      this.suggestedProblems.push(2);
+    }
+    if (this.answers['DIP_1'] === 'Non') this.suggestedProblems.push(3);
+    if (this.answers['DIP_2'] === 'Non') this.suggestedProblems.push(4);
+    if (this.answers['DIP_3'] === 'Non') this.suggestedProblems.push(5);
+    const imc = this.calculateIMC();
+    if (imc > 25 && imc < 30) this.suggestedProblems.push(6);
+    if (imc >= 30) this.suggestedProblems.push(7);
+    if (this.answers['acuite_visuelle_droite'] < 8 / 10 || this.answers['acuite_visuelle_gauche'] < 8 / 10) {
+      this.suggestedProblems.push(8);
+    }
+    if (this.isHearingImpaired()) this.suggestedProblems.push(9);
+    if (this.answers['etat_dentaire'] === 'Carie stade 1') this.suggestedProblems.push(10);
+    if (this.answers['etat_dentaire']?.includes('Carie stade 2-4')) this.suggestedProblems.push(12);
+    if (this.answers['etat_dentaire'] === 'Grave') this.suggestedProblems.push(11);
+    if (this.answers['allergies'] === 'Oui') this.suggestedProblems.push(13);
+    if (this.answers['infections_respiratoires'] === 'Oui') this.suggestedProblems.push(14);
+    if (this.answers['hernies'] === 'Oui') this.suggestedProblems.push(15);
+    if (this.answers['glucosurie'] === 'Positive') this.suggestedProblems.push(16);
+    if (this.answers['systeme_genital'] !== 'Normal') this.suggestedProblems.push(17);
+    if (this.answers['puberte'] !== 'Normale') this.suggestedProblems.push(18);
+    if (this.answers['motricite'] !== 'Normale' || this.answers['orthopedique'] !== 'Normal') {
+      this.suggestedProblems.push(19);
+    }
+    if (this.answers['comportement'] !== 'Normal' || this.answers['langage'] !== 'Normal') {
+      this.suggestedProblems.push(20);
+    }
+    if (this.answers['situation_familiale'] === 'Problèmes graves') this.suggestedProblems.push(21);
 
+    // Pré-remplir selectedProblems avec les suggestions
+    this.selectedProblems = [...this.suggestedProblems];
   }
 
+  // Méthodes utilitaires
+  private calculateIMC(): number {
+    const poids = parseFloat(this.answers['poids'] || 0);
+    const taille = parseFloat(this.answers['taille'] || 0) / 100; // Convertir cm en m
+    return taille > 0 ? poids / (taille * taille) : 0;
+  }
+
+  private isDeparasitageOutdated(): boolean {
+    const lastDeparasitage = this.answers['Date_du_dernier_déparasitage'];
+    if (!lastDeparasitage) return true;
+    const diffMonths = (Date.now() - new Date(lastDeparasitage).getTime()) / (1000 * 60 * 60 * 24 * 30);
+    return diffMonths > 4;
+  }
+
+  private isHearingImpaired(): boolean {
+    const seuil = 20; // Exemple de seuil en dB
+    return (this.answers['audiometrie_droite'] || 0) < seuil || (this.answers['audiometrie_gauche'] || 0) < seuil;
+  }
 
   async presentLoading(msg: string) {
     this.loading = await this.loadingCtrl.create({
@@ -801,6 +781,11 @@ export class NewPage implements OnInit {
     const problems = await this.appStorage.get('problems');
     this.problems = problems || [];
   }
+
+  hasSelectedProblems(): boolean {
+    return this.selectedProblems.length > 0;
+  }
+
 
   readyForNexStep(event: any) {
     if (event.target.value) {
@@ -955,23 +940,87 @@ export class NewPage implements OnInit {
     }
   }
 
-  setOpen(isOpen: boolean) {
+  setOpen(isOpen: boolean): void {
+    if (isOpen) {
+      this.detectProblems();
+    }
     this.isModalOpen = isOpen;
   }
 
-  addProblem() {
-    this.evaluations.push({
-      problem_id: this.selectedProblem,
-      problem_name: this.getProblemNameById(this.selectedProblem),
-      evaluation: this.selectedEvaluation,
+
+  addProblems(): void {
+    if (!this.selectedEvaluation || this.selectedProblems.length === 0) return;
+
+    const newEvaluations = this.selectedProblems.map(problemId => {
+      const problem = this.problems.find(p => p.id === problemId);
+      return {
+        problem_id: problemId,
+        problem_name: problem ? problem.name : 'Problème inconnu',
+        evaluation: this.selectedEvaluation
+      };
     });
 
-    this.selectedProblem = 0;
-    this.selectedEvaluation = "";
+    this.evaluations.push(...newEvaluations);
+    this.selectedProblems = []; // Réinitialise la sélection
+    this.selectedEvaluation = null; // Réinitialise l'évaluation
+    this.updateSuggestedProblems();
+  }
+
+  
+
+  // Ignore un problème suggéré
+  ignoreSuggestedProblem(problemId: number): void {
+    this.suggestedProblems = this.suggestedProblems.filter(id => id !== problemId);
+    delete this.suggestedEvaluations[problemId];
+  }
+
+  // Évalue un problème suggéré individuellement
+  evaluateSuggestedProblem(problemId: number): void {
+    const evaluation = this.suggestedEvaluations[problemId];
+    if (!evaluation) return;
+
+    const problem = this.problems.find(p => p.id === problemId);
+    if (problem) {
+      this.evaluations.push({
+        problem_id: problemId,
+        problem_name: problem.name,
+        evaluation: evaluation
+      });
+      this.ignoreSuggestedProblem(problemId); // Retirer des suggestions après évaluation
+    }
   }
 
   isInArray(problemId: number): boolean {
-    return this.evaluations.find(e => e.problem_id === problemId) !== undefined;
+    return this.evaluations.some(e => e.problem_id === problemId);
+  }
+
+  removeProblem(index: number): void {
+    this.evaluations.splice(index, 1);
+    this.updateSuggestedProblems();
+  }
+
+  private updateSuggestedProblems(): void {
+    this.suggestedProblems = this.suggestedProblems.filter(id => !this.isInArray(id));
+    Object.keys(this.suggestedEvaluations).forEach(id => {
+      if (!this.suggestedProblems.includes(Number(id))) {
+        delete this.suggestedEvaluations[Number(id)];
+      }
+    });
+  }
+
+  getProblemName(problemId: number): string {
+    const problem = this.problems.find(p => p.id === problemId);
+    return problem ? problem.name : 'Problème inconnu';
+  }
+
+  getEvaluationLabel(evaluation: 'to_follow' | 'not_to_follow' | 'attention' | 'identified'): string {
+    const labels: { [key in 'to_follow' | 'not_to_follow' | 'attention' | 'identified']: string } = {
+      'to_follow': 'À suivre',
+      'not_to_follow': 'À ne pas suivre',
+      'attention': 'Attention',
+      'identified': 'Identifié'
+    };
+    return labels[evaluation];
   }
 
   exit() {
@@ -984,70 +1033,143 @@ export class NewPage implements OnInit {
   runTimeChange(event: any) {
 
     if (event.target.name === 'Taille_(cm)' || event.target.name === 'Poids_(kg)') {
-      if (this.answers['Taille_(cm)'] && this.answers['Poids_(kg)']) {
+      const tailleStr = this.answers['Taille_(cm)'];
+      const poidsStr = this.answers['Poids_(kg)'];
 
-        const taille = parseFloat(this.answers['Taille_(cm)']);
-        const poids = parseFloat(this.answers['Poids_(kg)']);
+      if (tailleStr && poidsStr) {
+        const taille = parseFloat(tailleStr);
+        const poids = parseFloat(poidsStr);
+
+        if (isNaN(taille) || isNaN(poids) || taille <= 0 || poids <= 0) {
+          const alert = this.alertController.create({
+            header: 'Valeurs invalides',
+            message: 'La taille et le poids doivent être des nombres positifs.',
+            buttons: [{ text: 'Fermer', role: 'cancel', cssClass: 'secondary' }]
+          });
+          alert.then((al) => al.present());
+          return;
+        }
+
+        // Calcul de l'IMC
         const tailleM = taille / 100;
         const imc = poids / (tailleM * tailleM);
         this.answers['IMC'] = imc.toFixed(2);
 
+        // Calcul du poids idéal
+        let poidsIdeal = 0;
 
-        //calcul du poid idéal selon La formule de Lorentz
-        let poidIdeal = 0;
-        if (this.studentGender === 'male') {
-          poidIdeal = (taille - 100) - ((taille - 150) / 4);
-        } else if (this.studentGender === 'female') {
-          poidIdeal = (taille - 100) - ((taille - 150) / 2.5);
+        // Option 1 : Formule de Lorentz avec âge
+        /* const age = this.studentAge ? parseInt(this.studentAge) : null;
+        if (age === null) {
+          const alert = this.alertController.create({
+            header: 'Âge non spécifié',
+            message: 'Veuillez spécifier l\'âge pour le calcul avec Lorentz ajusté.',
+            buttons: [{ text: 'Fermer', role: 'cancel', cssClass: 'secondary' }]
+          });
+          alert.then((al) => al.present());
+          return;
         }
 
-        const pourcentage = (poids / poidIdeal) * 100;
+        if (this.studentGender === 'male') {
+          poidsIdeal = (taille - 100) - ((taille - 150) / 4) + (age - 20) * 0.1;
+        } else if (this.studentGender === 'female') {
+          poidsIdeal = (taille - 100) - ((taille - 150) / 2.5) + (age - 20) * 0.1;
+        } else {
+          const alert = this.alertController.create({
+            header: 'Genre non spécifié',
+            message: 'Veuillez spécifier le genre pour calculer le poids idéal.',
+            buttons: [{ text: 'Fermer', role: 'cancel', cssClass: 'secondary' }]
+          });
+          alert.then((al) => al.present());
+          return;
+        } */
 
+        // Option 2 : Formule de Devine (commentée, décommentez pour l'utiliser)
+        
+        if (this.studentGender === 'male') {
+          poidsIdeal = 50 + 2.3 * ((taille - 152.4) / 2.54);
+        } else if (this.studentGender === 'female') {
+          poidsIdeal = 45.5 + 2.3 * ((taille - 152.4) / 2.54);
+        } else {
+          const alert = this.alertController.create({
+            header: 'Genre non spécifié',
+            message: 'Veuillez spécifier le genre pour calculer le poids idéal.',
+            buttons: [{ text: 'Fermer', role: 'cancel', cssClass: 'secondary' }]
+          });
+          alert.then((al) => al.present());
+          return;
+        }
+       
+
+        if (poidsIdeal <= 0) {
+          const alert = this.alertController.create({
+            header: 'Erreur de calcul',
+            message: 'Le poids idéal calculé est invalide.',
+            buttons: [{ text: 'Fermer', role: 'cancel', cssClass: 'secondary' }]
+          });
+          alert.then((al) => al.present());
+          return;
+        }
+
+        const pourcentage = (poids / poidsIdeal) * 100;
         this.answers['Pourcentage'] = pourcentage.toFixed(2);
       }
     } else if (event.target.name === 'Rang_dans_la_fratrie') {
 
-      if (this.answers['Rang_dans_la_fratrie'] && this.answers['Nombre_enfants_fratrie']) {
+      const rang = parseInt(this.answers['Rang_dans_la_fratrie']);
+      const nombreEnfants = parseInt(this.answers['Nombre_enfants_fratrie']);
 
-        if (this.answers['Rang_dans_la_fratrie'] > this.answers['Nombre_enfants_fratrie']) {
-          console.log(this.answers['Nombre_enfants_fratrie'])
-          const alert = this.alertController.create({
-            header: 'Rang supérieur au nombre enfants',
-            buttons: [
-              {
-                text: 'Fermer',
-                role: 'cancel',
-                cssClass: 'secondary',
-              },
-            ]
-          });
+      if (rang && nombreEnfants && rang > nombreEnfants) {
+        console.log('Nombre enfants fratrie:', nombreEnfants);
+        const alert = this.alertController.create({
+          header: 'Rang supérieur au nombre enfants',
+          buttons: [{
+            text: 'Fermer',
+            role: 'cancel',
+            cssClass: 'secondary',
+          }]
+        });
 
-          alert.then((al) => {
-            al.present();
-          });
-        }
+        alert.then((al) => al.present());
       }
     } else if (event.target.name === 'Nombre_de_filles' || event.target.name === 'Nombre_de_garçons') {
-      if (this.answers['Nombre_de_filles'] && this.answers['Nombre_de_garçons']) {
-        const total = parseInt(this.answers['Nombre_de_filles']) + parseInt(this.answers['Nombre_de_garçons']);
-        if (this.answers['Nombre_enfants_fratrie'] && this.answers['Nombre_enfants_fratrie'] !== total) {
+      // Utilisation de !== undefined pour vérifier si le champ a été touché
+      const nbFilles = this.answers['Nombre_de_filles'] !== undefined ? parseInt(this.answers['Nombre_de_filles']) : null;
+      const nbGarcons = this.answers['Nombre_de_garçons'] !== undefined ? parseInt(this.answers['Nombre_de_garçons']) : null;
+      const nbEnfantsFratrie = this.answers['Nombre_enfants_fratrie'] !== undefined ? parseInt(this.answers['Nombre_enfants_fratrie']) : null;
+
+      // Vérification uniquement si les deux champs ont été remplis (peuvent être 0)
+      if (nbFilles !== null && nbGarcons !== null && nbEnfantsFratrie !== null) {
+        const totalEnfantsSaisi = nbFilles + nbGarcons;
+
+        if (totalEnfantsSaisi !== nbEnfantsFratrie) {
           const alert = this.alertController.create({
             header: 'Nombre total d\'enfants incorrect',
-            buttons: [
-              {
-                text: 'Fermer',
-                role: 'cancel',
-                cssClass: 'secondary'
-              },
-            ]
+            message: `La somme des filles (${nbFilles}) et garçons (${nbGarcons}) ne correspond pas au total (${nbEnfantsFratrie})`,
+            buttons: [{
+              text: 'Fermer',
+              role: 'cancel',
+              cssClass: 'secondary'
+            }]
           });
 
-          alert.then((al) => {
-            al.present();
-          });
+          alert.then((al) => al.present());
         }
       }
 
+
+    } else if (event.target.name === 'Test_de_la_montre') {
+      if (event.target.value === 'Oui') {
+        this.answers['Test_du_diapason'] = 'Non';
+      } else {
+        this.answers['Test_du_diapason'] = 'Oui';
+      }
+    } else if (event.target.name === 'Test_du_diapason') {
+      if (event.target.value === 'Oui') {
+        this.answers['Test_de_la_montre'] = 'Non';
+      } else {
+        this.answers['Test_de_la_montre'] = 'Oui';
+      }
     }
 
   }
@@ -1124,17 +1246,7 @@ export class NewPage implements OnInit {
 
       if (counter == this.classesToSync.length) {
         this.loadClassesFromAPI().then(() => {
-          this.checkStudentsToSync();
-          if (this.studentsToSync.length > 0) {
-            this.storeStudentsToAPI().then(() => {
-              this.storeExamsToAPI().then(() => {
-                this.storeEvaluationToAPI().then(() => {
-                  this.dismissLoading();
-                });
-              });
-            });
-          }
-          
+          this.classesToSync = [];
         });
       }
     }
@@ -1151,8 +1263,8 @@ export class NewPage implements OnInit {
           const studentPromise = this.apiService.postStudent(student);
           const studentObservable = await studentPromise;
           const std = await lastValueFrom(studentObservable).then((data: any) => {
-            
-            if (data ) {
+
+            if (data) {
               counter++;
               this.loadStudentsFromAPI().then(() => {
                 this.storeStudentsHistoryToAPI().then(async () => {
@@ -1192,7 +1304,7 @@ export class NewPage implements OnInit {
         }
 
       }
-      if(this.studentsToSync.length == counter){
+      if (this.studentsToSync.length == counter) {
         this.loadStudentsFromAPI().then(() => {
           //store students history
         });

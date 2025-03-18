@@ -34,6 +34,7 @@ export class ShowSchoolPage implements OnInit {
   nbr_fille: number = 0;
   nbr_garcon: number = 0;
   nbr_reboublant: number = 0;
+  nbr_reboublant_fille: number = 0;
   classeId: number = 0;
 
   loading: HTMLIonLoadingElement | null = null;
@@ -85,7 +86,8 @@ export class ShowSchoolPage implements OnInit {
           name: ev.detail.data,
           nbr_fille: this.nbr_fille,
           nbr_garcon: this.nbr_garcon,
-          nbr_reboulant: this.nbr_reboublant,
+          nbr_redoublant: this.nbr_reboublant,
+          nbr_redoublant_fille: this.nbr_reboublant_fille,
           school_id: Number(this.route.snapshot.params['id']),
           schoolYear_id: 1,
           created_by: this.user.id

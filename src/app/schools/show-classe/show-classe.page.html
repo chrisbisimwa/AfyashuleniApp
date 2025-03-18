@@ -32,9 +32,15 @@
         </div>
       </ion-item>
       <ion-item>
-        <ion-label>Redoublants</ion-label>
+        <ion-label>Redoublants garçon</ion-label>
         <div item-content>
-          <span>{{classe.nbr_reboulant}}</span>
+          <span>{{classe.nbr_redoublant}}</span>
+        </div>
+      </ion-item>
+      <ion-item>
+        <ion-label>Redoublants fille</ion-label>
+        <div item-content>
+          <span>{{classe.nbr_redoublant_fille}}</span>
         </div>
       </ion-item>
       <ion-item>
@@ -49,7 +55,7 @@
       <ion-item-group>
         <ion-item-divider>
           <ion-label>
-            <h2>Liste d'élèves</h2>
+            <h2>Liste d'élèves ({{students.length}}/{{(classe.nbr_garcon+classe.nbr_fille)-(classe.nbr_redoublant_fille+classe.nbr_redoublant)}})</h2>
           </ion-label>
           <ion-searchbar (ionChange)="search($event.target.value)" debounce="100" animated="true" placeholder="Recherche..."> </ion-searchbar>
         </ion-item-divider>
@@ -130,6 +136,15 @@
             type="text"
             placeholder="Lieu de naissance"
             [(ngModel)]="birthPlace"
+          ></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input
+            label="Place en classe"
+            labelPlacement="stacked"
+            type="text"
+            placeholder="Place en classe"
+            [(ngModel)]="placeInClasse"
           ></ion-input>
         </ion-item>
       </ion-content>

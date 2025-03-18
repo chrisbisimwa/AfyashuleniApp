@@ -27,6 +27,7 @@ export class ShowClassePage implements OnInit {
   birthDate: string = '';
   birthPlace: string = '';
   studentCode: string = '';
+  placeInClasse: string = '';
   studentId: number = 0;
 
 

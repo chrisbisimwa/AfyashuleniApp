@@ -503,50 +503,67 @@
         </ion-toolbar>
       </ion-header>
       <ion-content>
+        <!-- Section de sélection manuelle -->
         <ion-item-group>
           <ion-item>
-            <ion-label>Séléctionner un problème</ion-label>
-            <ion-select [(ngModel)]="selectedProblem">
-              <div *ngFor="let problem of problems">
-                <ion-select-option [value]="problem.id" *ngIf="!isInArray(problem.id)">
-                  {{ problem.name }}
-                </ion-select-option>
-              </div>
-
+            <ion-label position="stacked">Sélectionner les problèmes</ion-label>
+            <ion-select [(ngModel)]="selectedProblems" multiple="true" placeholder="Choisir un ou plusieurs problèmes">
+              <ion-select-option *ngFor="let problem of problems" [value]="problem.id" [disabled]="isInArray(problem.id)">
+                {{ problem.name }}
+              </ion-select-option>
             </ion-select>
           </ion-item>
-
-          <ion-item *ngIf="selectedProblem">
-            <ion-label>Evaluer le problème</ion-label>
-            <ion-select [(ngModel)]="selectedEvaluation">
-              <ion-select-option [value]="'identified'"  *ngIf="userRoles.includes('infirmier')">Identifié</ion-select-option>
-              <ion-select-option [value]="'to_follow'" *ngIf="userRoles.includes('Medecin')">A suivre</ion-select-option>
-              <ion-select-option [value]="'not_to_follow'" *ngIf="userRoles.includes('Medecin')">A ne pas suivre</ion-select-option>
-              <ion-select-option [value]="'attention'" *ngIf="userRoles.includes('Medecin')">Attention</ion-select-option>
+  
+          <ion-item *ngIf="hasSelectedProblems()">
+            <ion-label position="stacked">Évaluer les problèmes sélectionnés</ion-label>
+            <ion-select [(ngModel)]="selectedEvaluation" placeholder="Sélectionnez une évaluation">
+              <ion-select-option value="to_follow">À suivre</ion-select-option>
+              <ion-select-option value="not_to_follow">À ne pas suivre</ion-select-option>
+              <ion-select-option value="attention">Attention</ion-select-option>
             </ion-select>
           </ion-item>
-          <ion-button expand="block" color="medium" *ngIf="selectedEvaluation" (click)="addProblem()">Ajouter</ion-button>
+  
+          <ion-button expand="block" color="medium" [disabled]="!selectedEvaluation || !hasSelectedProblems()" (click)="addProblems()">
+            Ajouter les problèmes sélectionnés
+          </ion-button>
         </ion-item-group>
-
-        <ion-item-group *ngIf="evaluations.length>0">
+  
+        <!-- Section des problèmes identifiés (ajoutés) -->
+        <ion-item-group *ngIf="evaluations.length > 0">
           <ion-item-divider>
-            <ion-label> Problèmes identifiés </ion-label>
+            <ion-label>Problèmes identifiés</ion-label>
           </ion-item-divider>
-          <ion-item *ngFor="let eval of evaluations">
-            <ion-label>{{eval.problem_name}}</ion-label>
+          <ion-item *ngFor="let eval of evaluations; let i = index">
+            <ion-label>{{ eval.problem_name }}</ion-label>
             <div item-content>
-              <span *ngIf="eval.evaluation==='identified'">Identifié</span>
-              <span *ngIf="eval.evaluation==='to_follow'">A suivre</span>
-              <span *ngIf="eval.evaluation==='not_to_follow'">A ne pas suivre</span>
-              <span *ngIf="eval.evaluation==='attention'">Pt d'attention</span>
+              <span>{{ getEvaluationLabel(eval.evaluation) }}</span>
+              <ion-button fill="clear" color="danger" (click)="removeProblem(i)">
+                <ion-icon name="trash-outline"></ion-icon>
+              </ion-button>
             </div>
           </ion-item>
         </ion-item-group>
-
-
+  
+        <!-- Section des problèmes suggérés -->
+        <ion-item-group *ngIf="suggestedProblems.length > 0">
+          <ion-item-divider>
+            <ion-label>Problèmes suggérés par l'application ({{ suggestedProblems.length }})</ion-label>
+          </ion-item-divider>
+          <ion-item *ngFor="let problemId of suggestedProblems">
+            <ion-label>{{ getProblemName(problemId) }}</ion-label>
+            <ion-buttons slot="end">
+              <ion-button color="warning" (click)="ignoreSuggestedProblem(problemId)">
+                Ignorer
+              </ion-button>
+              <ion-select [(ngModel)]="suggestedEvaluations[problemId]" placeholder="Évaluer" (ionChange)="evaluateSuggestedProblem(problemId)">
+                <ion-select-option value="to_follow">À suivre</ion-select-option>
+                <ion-select-option value="not_to_follow">À ne pas suivre</ion-select-option>
+                <ion-select-option value="attention">Attention</ion-select-option>
+              </ion-select>
+            </ion-buttons>
+          </ion-item>
+        </ion-item-group>
       </ion-content>
-
-
     </ng-template>
   </ion-modal>
 
