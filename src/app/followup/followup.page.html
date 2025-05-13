@@ -1,70 +1,81 @@
-<ion-header class="ion-no-border" mode="ios">
-  <ion-toolbar style="--background: var(--ion-color-primary)">
-    <ion-title style="color: white;letter-spacing: 1px;font-family: 'semi-bold';">Suivi de problèmes</ion-title>
+<ion-header>
+  <ion-toolbar style="--background: #3880ff; --color: white;">
+    <!-- <ion-buttons slot="start">
+      <ion-back-button defaultHref="/"></ion-back-button>
+    </ion-buttons> -->
+    <ion-title>Suivi des examens</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<!-- todo: add elasticsearch support -->
-<ion-content  >
+<ion-content>
   <div class="main_content_div">
-    <ion-label class="title_lbl">Tous les problèmes</ion-label>
-    <ion-refresher [disabled]="plt.is('desktop')" slot="fixed" (ionRefresh)="fetchFollowups($event)">
-      <ion-refresher-content></ion-refresher-content>
-    </ion-refresher>
-  
-    <!-- <div class="notification_div">
-      <ion-segment value="Unresolved" (ionChange)="segmentChanged($event.target.value)" [(ngModel)]="segment">
-        <ion-segment-button value="Unresolved">
-          <ion-label>Unresolved</ion-label>
-        </ion-segment-button>
-        <ion-segment-button value="Resolved">
-          <ion-label>Resolved</ion-label>
-        </ion-segment-button>
-      </ion-segment>
-    </div> -->
- 
-    <ion-searchbar  (ionChange)="search($event.target.value)" debounce="100" animated="true" placeholder="Recherche..."></ion-searchbar>
-  
-    <ion-list>
-      <ion-item-sliding button detail="true" *ngFor="let exam of followups;" #slidingItem>
-        <ion-item button (click)="view(exam.id)">
-          <ion-label>
-            <h3>Elève: {{exam.studentName}}</h3>
-            <p>Medecin/infirmier: {{exam.examinerName}}</p>
-            <p><b>Date: {{exam.date | date :  "dd.MM.y"}}</b></p>
-          </ion-label>
-          <div *ngIf="!exam.resolved">
-            <ion-badge style="background-color: #02AAB0;" *ngIf="exam.priority==='LOW'">LOW </ion-badge>
-            <ion-badge color="warning" *ngIf="exam.priority==='MEDIUM'">MEDIUM</ion-badge>
-            <ion-badge style="background-color: #b31217;" *ngIf="exam.priority==='HIGH'">HIGH</ion-badge>
-          </div>
-          <div *ngIf="exam.resolved">
-            <ion-badge  style="background-color : var(--ion-color-primary) ; text-align: right;" ><b>Resolved in</b><br> xxxx</ion-badge>
-          </div>
-          
-        </ion-item>
-        <ion-item-options side="end">
-          <ion-item-option  color="primary" >
-            Evaluer
-          </ion-item-option>
-          <ion-item-option  color="primary" (click)="edit(slidingItem, exam)">
-            Modifier
-          </ion-item-option>
-          <ion-item-option  color="danger" (click)="delete(exam)"> Supprimer </ion-item-option>
-        </ion-item-options>
-      </ion-item-sliding>
-    </ion-list>
-    <ion-item *ngIf="!followups?.length">
-      <ion-label> Aucun suivi de problème réalisé. </ion-label>
-    </ion-item>
-  
-    
-  </div>
-  
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button (click)="new()">
-      <ion-icon name="add"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
-</ion-content>
+    <h1>Suivi des élèves</h1>
 
+    <!-- Sélection de l'école -->
+    <ion-list>
+      <ion-item>
+        <ion-label position="stacked">École</ion-label>
+        <ion-select [(ngModel)]="selectedSchool" (ionChange)="fetchClasses($event)" placeholder="Sélectionnez une école">
+          <ion-select-option *ngFor="let school of schools" [value]="school.id">
+            {{ school.name }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <!-- Sélection de la classe -->
+      <ion-item *ngIf="selectedSchool">
+        <ion-label position="stacked">Classe</ion-label>
+        <ion-select [(ngModel)]="selectedClasse" (ionChange)="fetchStudents($event)" placeholder="Sélectionnez une classe">
+          <ion-select-option *ngFor="let classe of classes" [value]="classe.id">
+            {{ classe.name }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <!-- Recherche et sélection de l'élève -->
+      <ion-item *ngIf="selectedClasse">
+        <ion-label position="stacked">Rechercher un élève</ion-label>
+        <ion-searchbar [(ngModel)]="searchQuery" (ionInput)="filterStudents()" placeholder="Rechercher par nom ou prénom" debounce="300"></ion-searchbar>
+      </ion-item>
+
+      <!-- Liste des élèves filtrés -->
+      <ion-list *ngIf="selectedClasse && filteredStudents.length > 0">
+        <ion-item *ngFor="let student of filteredStudents" (click)="selectStudent(student)">
+          <ion-label [class.selected]="selectedStudent?.id === student.id">
+            {{ student.first_name }} {{ student.last_name }}
+          </ion-label>
+        </ion-item>
+      </ion-list>
+
+      <!-- Message si aucun élève n'est trouvé -->
+      <ion-item *ngIf="selectedClasse && filteredStudents.length === 0 && searchQuery">
+        <ion-label>Aucun élève trouvé pour "{{ searchQuery }}"</ion-label>
+      </ion-item>
+    </ion-list>
+
+    <!-- Liste des problèmes identifiés pour l'élève -->
+    <ion-item-group *ngIf="evaluations.length > 0">
+      <ion-item-divider>
+        <ion-label>Problèmes identifiés ({{ evaluations.length }})</ion-label>
+      </ion-item-divider>
+      <ion-item *ngFor="let evaluation of evaluations; let i = index">
+        <ion-label>
+          <h2>{{ evaluation.problemName }}</h2>
+          <p>Date de l'examen : {{ evaluation.examDate | date:'mediumDate' }}</p>
+          <p>Évaluation initiale : {{ getEvaluationLabel(evaluation.status) }}</p>
+          <p>Statut actuel : {{ getFollowUpStatusLabel(followUpStatuses[i]) }}</p>
+        </ion-label>
+        <ion-select slot="end" [(ngModel)]="followUpStatuses[i]" (ionChange)="updateFollowUpStatus(i, $event.detail.value)" placeholder="Statut du suivi">
+          <ion-select-option value="fully_solved">Solutionné</ion-select-option>
+          <ion-select-option value="partially_solved">Partiellement solutionné</ion-select-option>
+          <ion-select-option value="not_solved">Non solutionné</ion-select-option>
+        </ion-select>
+      </ion-item>
+    </ion-item-group>
+
+    <!-- Bouton pour enregistrer le suivi -->
+    <ion-button *ngIf="evaluations.length > 0" expand="block" color="primary" (click)="saveFollowUp()">
+      Enregistrer le suivi
+    </ion-button>
+  </div>
+</ion-content>

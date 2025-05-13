@@ -25,9 +25,15 @@
         </div>
       </ion-item>
       <ion-item>
-        <ion-label>Medecin</ion-label>
+        <ion-label>Infirmière</ion-label>
         <div item-content>
           <span id="designation-content">{{exam.examinerName}}</span>
+        </div>
+      </ion-item>
+      <ion-item *ngIf="exam.doctorName != 'Unknown'">
+        <ion-label>Médecin</ion-label>
+        <div item-content>
+          <span id="designation-content">{{exam.doctorName}}</span>
         </div>
       </ion-item>
 

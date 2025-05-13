@@ -52,6 +52,7 @@ export class ShowExamPage implements OnInit {
       if (this.exam) {
         this.exam.studentName = await this.getstudentNameById(this.exam.student_id);
         this.exam.examinerName = await this.getExaminerNameById(this.exam.examiner_id);
+        this.exam.doctorName = await this.getExaminerNameById(this.exam.doctor_id);
         let xx = JSON.parse(this.exam.data);
         let data = [];
         for (let i in xx) {

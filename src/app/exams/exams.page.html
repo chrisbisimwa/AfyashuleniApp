@@ -1,72 +1,88 @@
 <ion-header class="ion-no-border" mode="ios">
   <ion-toolbar style="--background: var(--ion-color-primary)">
-    <ion-title style="color: white;letter-spacing: 1px;font-family: 'semi-bold';">Examens</ion-title>
+    <ion-title style="color: white; letter-spacing: 1px; font-family: 'semi-bold';">Examens</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<!-- todo: add elasticsearch support -->
-<ion-content  >
+<ion-content>
   <div class="main_content_div">
     <ion-label class="title_lbl">Tous les examens</ion-label>
+
+    <!-- Rafraîchissement -->
     <ion-refresher [disabled]="plt.is('desktop')" slot="fixed" (ionRefresh)="fetchExams($event)">
       <ion-refresher-content></ion-refresher-content>
     </ion-refresher>
 
-  
-    <!-- <div class="notification_div">
-      <ion-segment value="Unresolved" (ionChange)="segmentChanged($event.target.value)" [(ngModel)]="segment">
-        <ion-segment-button value="Unresolved">
-          <ion-label>Unresolved</ion-label>
-        </ion-segment-button>
-        <ion-segment-button value="Resolved">
-          <ion-label>Resolved</ion-label>
-        </ion-segment-button>
-      </ion-segment>
-    </div> -->
-    
-    
-  
-  
-    <ion-searchbar  (ionChange)="search($event.target.value)" debounce="100" animated="true" placeholder="Recherche..."></ion-searchbar>
-  
-    <ion-list>
-      <ion-item-sliding button detail="true" *ngFor="let exam of exams;" #slidingItem>
-        <ion-item button (click)="view(exam.id)">
+    <!-- Barre de recherche -->
+    <ion-searchbar
+      
+      (ionChange)="search($event.target.value)"
+      debounce="100"
+      animated="true"
+      placeholder="Rechercher un élève..."
+      showClearButton="always"
+      class="custom-searchbar"
+    ></ion-searchbar>
+
+    <!-- Liste des examens -->
+    <ion-list class="exam-list">
+      <ion-item-sliding *ngFor="let exam of exams" #slidingItem>
+        <ion-item
+          button
+          (click)="view(exam.id)"
+          class="exam-item"
+          lines="none"
+        >
           <ion-label>
-            <h3>Elève: {{exam.studentName}}</h3>
-            <p>Medecin {{exam.examinerName}}</p>
-            <p><b>Date: {{exam.date | date :  "dd.MM.y"}}</b></p>
+            <!-- Première ligne : Nom de l'élève et badges -->
+            <h3>
+              {{ exam.studentName }}
+              <ion-badge
+                [color]="getPriorityColor(exam.priority)"
+                class="priority-badge"
+                *ngIf="!exam.resolved"
+              >
+                {{ exam.priority }}
+              </ion-badge>
+              <ion-badge
+                class="problem-badge"
+                *ngIf="exam.hasExamenClinique"
+              >
+                {{ exam.problems?.length || 0 }} {{ (exam.problems?.length || 0) === 1 ? 'problème' : 'problèmes' }}
+              </ion-badge>
+            </h3>
+            <!-- Deuxième ligne : Médecin et date -->
+            <p>
+              <span class="doctor">Examiné par: <span>{{ exam.examinerName }}</span> <span *ngIf="exam.doctor!='Unknown'">, {{exam.doctor }}</span></span>
+              <span class="date">Date: {{ exam.date | date:'dd.MM.yyyy' }}</span>
+            </p>
           </ion-label>
-          <div *ngIf="!exam.resolved">
-            <ion-badge style="background-color: #02AAB0;" *ngIf="exam.priority==='LOW'">LOW </ion-badge>
-            <ion-badge color="warning" *ngIf="exam.priority==='MEDIUM'">MEDIUM</ion-badge>
-            <ion-badge style="background-color: #b31217;" *ngIf="exam.priority==='HIGH'">HIGH</ion-badge>
-          </div>
-          <div >
-            <ion-badge  style="background-color : var(--ion-color-primary) ; text-align: right;" *ngIf="exam.hasExamenClinique" ><b>0 problèmes</b><br></ion-badge>
-          </div>
-          
         </ion-item>
+
+        <!-- Actions contextuelles -->
         <ion-item-options side="end">
-          <ion-item-option *ngIf="exam.status==='Unresolved'" color="primary" (click)="resolve(slidingItem, exam)">
-            Evaluer
-          </ion-item-option>
-          <ion-item-option  color="primary" (click)="edit(slidingItem, exam)">
+          <!-- <ion-item-option *ngIf="exam.status === 'Unresolved'" color="primary" (click)="resolve(slidingItem, exam)">
+            Évaluer
+          </ion-item-option> -->
+          <ion-item-option color="primary" (click)="edit(slidingItem, exam)">
             Modifier
           </ion-item-option>
-          <ion-item-option  color="danger" (click)="delete(exam.id)"> Supprimer </ion-item-option>
+          <ion-item-option color="danger" (click)="delete(exam.id)">
+            Supprimer
+          </ion-item-option>
         </ion-item-options>
       </ion-item-sliding>
+
+      <!-- Message si aucun examen n'est trouvé -->
+      <ion-item *ngIf="!exams?.length" lines="none">
+        <ion-label class="no-results">Aucun examen trouvé.</ion-label>
+      </ion-item>
     </ion-list>
-    <ion-item *ngIf="!exams?.length">
-      <ion-label> Aucun examen trouvé. </ion-label>
-    </ion-item>
-  
-    
   </div>
-  
+
+  <!-- Bouton flottant pour ajouter un nouvel examen -->
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button (click)="new()">
+    <ion-fab-button color="primary" (click)="new()">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
   </ion-fab>

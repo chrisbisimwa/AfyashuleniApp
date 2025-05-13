@@ -81,7 +81,7 @@ export class NewPage implements OnInit {
       { label: 'DTCoq_(diphtérie,_tétanos,_coqueluce)', options: ['Fait', 'Non fait', 'Inconnu'], gender: 'both' },
     ],
     'deparasitage': [
-      { label: 'Deparasité_?', options: ['Oui', 'Non', 'Inconnu'], gender: 'both' },
+      { label: 'Déparasité_?', options: ['Oui', 'Non', 'Inconnu'], gender: 'both' },
       { label: 'Date_du_dernier_déparasitage', options: null, gender: 'both', parent: 'Deparasité_?', parentValue: 'Oui' },
       { label: 'Médicament_de_déparasitage', options: ['Albendazole 100mg', 'Albendazole 500mg', 'Mebendazole 100mg', 'Mebendazole 500mg'], gender: 'both', parent: 'Deparasité_?', parentValue: 'Oui' },
       { label: 'Fréquence', options: ['Après 1 mois', 'Après 2 mois', 'Après 3 mois', 'Après 4 mois'], gender: 'both', parent: 'Deparasité_?', parentValue: 'Oui' },
@@ -110,10 +110,10 @@ export class NewPage implements OnInit {
       { label: 'Pourcentage', options: null, gender: 'both' },
       { label: 'IMC', options: null, gender: 'both' },
       { label: 'Test_acuité_visuelle', options: ['Sans lunettes', 'Avec lunettes'], gender: 'both' },
-      { label: 'acuite_visuelle_de_loin_droite_sans_correction', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both', parent: 'Test_acuité_visuelle', parentValue: 'Sans lunettes' },
-      { label: 'acuite_visuelle_de_loin_gauche_sans_correction', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both', parent: 'Test_acuité_visuelle', parentValue: 'Sans lunettes' },
-      { label: 'acuite_visuelle_de_loin_droite_avec_lunettes', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both', parent: 'Test_acuité_visuelle', parentValue: 'Avec lunettes' },
-      { label: 'acuite_visuelle_de_loin_gauche_avec_lunettes', options: ['1,00', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0'], gender: 'both', parent: 'Test_acuité_visuelle', parentValue: 'Avec lunettes' },
+      { label: 'acuite_visuelle_de_loin_droite_sans_correction', options: ['1.00', '0.9', '0.8', '0.7', '0.6', '0.5', '0.4', '0.3', '0.2', '0.1', '0.0'], gender: 'both', parent: 'Test_acuité_visuelle', parentValue: 'Sans lunettes' },
+      { label: 'acuite_visuelle_de_loin_gauche_sans_correction', options: ['1.00', '0.9', '0.8', '0.7', '0.6', '0.5', '0.4', '0.3', '0.2', '0.1', '0.0'], gender: 'both', parent: 'Test_acuité_visuelle', parentValue: 'Sans lunettes' },
+      { label: 'acuite_visuelle_de_loin_droite_avec_lunettes', options: ['1.00', '0.9', '0.8', '0.7', '0.6', '0.5', '0.4', '0.3', '0.2', '0.1', '0.0'], gender: 'both', parent: 'Test_acuité_visuelle', parentValue: 'Avec lunettes' },
+      { label: 'acuite_visuelle_de_loin_gauche_avec_lunettes', options: ['1.00', '0.9', '0.8', '0.7', '0.6', '0.5', '0.4', '0.3', '0.2', '0.1', '0.0'], gender: 'both', parent: 'Test_acuité_visuelle', parentValue: 'Avec lunettes' },
       { label: 'audiometrie_droite_500', options: ['Bon', 'Pas bon'], gender: 'both' },
       { label: 'audiometrie_droite_1000', options: ['Bon', 'Pas bon'], gender: 'both' },
       { label: 'audiometrie_droite_2000', options: ['Bon', 'Pas bon'], gender: 'both' },
@@ -154,7 +154,7 @@ export class NewPage implements OnInit {
       { label: "Dentiste", options: ['Oui', 'Non'], gender: 'both' },
       { label: "frequence_visite_dentiste", options: null, gender: 'both', parent: 'Dentiste', parentValue: 'Oui' },
       { label: "Carie", options: ['Oui', 'Non'], gender: 'both' },
-      { label: "Si oui, stade carie", options: ['Stade 1', 'Stade 2', 'Stade 3', 'Stade 4'], gender: 'both', parent: 'Carie', parentValue: 'Oui' },
+      { label: "Si_oui,_stade_carie", options: ['Stade 1', 'Stade 2', 'Stade 3', 'Stade 4'], gender: 'both', parent: 'Carie', parentValue: 'Oui' },
       { label: "Débris_alimentaires", options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
       { label: 'Plaque', options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
       { label: 'Tartre', options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
@@ -193,8 +193,8 @@ export class NewPage implements OnInit {
       { label: 'systeme_uro_genital', options: null, gender: 'both' },
       { label: 'Menarche', options: ['Oui', 'Non'], gender: 'female' },
       { label: 'Si_oui_menarche,_préciser', options: null, gender: 'female', parent: 'Menarche', parentValue: 'Non' },
-      { label: 'Volume testicule droite', options: null, gender: 'male' },
-      { label: 'Volule testicule gauche', options: null, gender: 'male' },
+      { label: 'Volume_testicule_droite', options: null, gender: 'male' },
+      { label: 'Volule_testicule_gauche', options: null, gender: 'male' },
       { label: 'Score_de_Tanner', options: null, gender: 'both' },
       { label: 'Colonne_vertebrale', options: ['Normale', 'Pathologique'], gender: 'both' },
       { label: 'Si_colonne_vertebrale_pathologique,_préciser', options: null, gender: 'both', parent: 'Colonne_vertebrale', parentValue: 'Pathologique' },
@@ -458,6 +458,7 @@ export class NewPage implements OnInit {
             code: exm.code,
             student_id: exm.student_id,
             examiner_id: exm.examiner_id,
+            doctor_id: this.user.id,
             date: exm.date,
             latitude: exm.latitude,
             longitude: exm.longitude,
@@ -479,7 +480,7 @@ export class NewPage implements OnInit {
                     id: this.generateExamId(),
                     code: this.examCode,
                     student_id: this.selectedStudent,
-                    examiner_id: this.user.id,
+                    doctor_id: this.user.id,
                     date: new Date().toISOString(),
                     latitude: this.latitude,
                     longitude: this.longitude,
@@ -573,57 +574,170 @@ export class NewPage implements OnInit {
   detectProblems(): void {
     this.suggestedProblems = [];
 
-    // Règles de détection
-    if (this.answers['Cicatrice_BCG'] === 'Non lisible') {
+
+    const age = this.calculateAge();
+    // 1. Cicatrice BCG non lisible
+    if ( age <= 7 && (this.answers['Cicatrice_BCG'] === 'Non lisible') || this.answers['Cicatrice_BCG'] === 'Douteux') {
       this.suggestedProblems.push(1);
     }
-    if (this.answers['Deparasité_?'] === 'Non' || 
-        (this.answers['Deparasité_?'] === 'Oui' && this.isDeparasitageOutdated())) {
+
+    // 2. Déparasitage préventif insuffisant
+    if (this.answers['Déparasité_?'] === 'Non' || 
+        (this.answers['Déparasité_?'] === 'Oui' && this.isDeparasitageOutdated())) {
       this.suggestedProblems.push(2);
     }
-    if (this.answers['DIP_1'] === 'Non') this.suggestedProblems.push(3);
-    if (this.answers['DIP_2'] === 'Non') this.suggestedProblems.push(4);
-    if (this.answers['DIP_3'] === 'Non') this.suggestedProblems.push(5);
+
+    // 3, 4, 5. DIP 1/2/3
+    const imcPercent = this.calculateIMCPercent();
+    //DIP 1 si imcPercent est de 90 à 81
+    if (imcPercent > 80 && imcPercent <= 90) this.suggestedProblems.push(3);
+
+    //DIP 2 si imcPercent est de 80 à 71
+    if (imcPercent > 70 && imcPercent <= 80) this.suggestedProblems.push(4);
+    // DIP 3 si imcPercent est inférieur ou égal à 70
+    if (imcPercent <= 70) this.suggestedProblems.push(5);
+   
+    // 6, 7. Surcharge pondérale et Obésité
     const imc = this.calculateIMC();
-    if (imc > 25 && imc < 30) this.suggestedProblems.push(6);
-    if (imc >= 30) this.suggestedProblems.push(7);
-    if (this.answers['acuite_visuelle_droite'] < 8 / 10 || this.answers['acuite_visuelle_gauche'] < 8 / 10) {
-      this.suggestedProblems.push(8);
+    if (imcPercent >= 120 || (imc >= 25 && imc < 29.9)) this.suggestedProblems.push(6); // Surcharge pondérale
+    if (imc > 30) this.suggestedProblems.push(7); // Obésité
+
+    // 8. Problème d'acuité visuelle
+    const testE5m = parseFloat(this.answers['acuite_visuelle_de_loin_droite_sans_correction'] || 0);
+    const testE5p = parseFloat(this.answers['acuite_visuelle_de_loin_gauche_sans_correction'] || 0);
+    const testE4m = parseFloat(this.answers['acuite_visuelle_de_loin_droite_avec_lunettes'] || 0);
+    const testE4p = parseFloat(this.answers['acuite_visuelle_de_loin_gauche_avec_lunettes'] || 0);
+    if( this.answers['Test_acuité_visuelle']==="Avec lunettes"){
+      if(age < 7 && (testE4m <= 0.6 || testE4p <= 0.6)) this.suggestedProblems.push(8);
+      if(age >= 7 && (testE4m <= 0.7 || testE4p < 0.7)) this.suggestedProblems.push(8);
+    }else if(this.answers['Test_acuité_visuelle']==="Sans lunettes"){
+      if(age < 7 && (testE5m <= 0.6 || testE5p <= 0.6)) this.suggestedProblems.push(8);
+      if(age >= 7 && (testE5m <= 0.7 || testE5p < 0.7)) this.suggestedProblems.push(8);
     }
-    if (this.isHearingImpaired()) this.suggestedProblems.push(9);
-    if (this.answers['etat_dentaire'] === 'Carie stade 1') this.suggestedProblems.push(10);
-    if (this.answers['etat_dentaire']?.includes('Carie stade 2-4')) this.suggestedProblems.push(12);
-    if (this.answers['etat_dentaire'] === 'Grave') this.suggestedProblems.push(11);
-    if (this.answers['allergies'] === 'Oui') this.suggestedProblems.push(13);
-    if (this.answers['infections_respiratoires'] === 'Oui') this.suggestedProblems.push(14);
-    if (this.answers['hernies'] === 'Oui') this.suggestedProblems.push(15);
-    if (this.answers['glucosurie'] === 'Positive') this.suggestedProblems.push(16);
+
+    // 9. Problème d'acuité auditive
+    /* if (this.answers['bouchon_cerumen'] === 'Oui' || 
+        this.answers['infection_oreille_moyenne'] === 'Oui' || 
+        this.answers['perforation_tympanique'] === 'Oui') {
+      this.suggestedProblems.push(9);
+    }
+ */
+    // 10. Problèmes dentaires mineurs (carie stade 1)
+    if ((this.answers['Plaque'] === '±' || this.answers['Plaque'] ==='+') || 
+        this.answers['Tartre'] === '±' || 
+        (this.answers['Carie'] === 'Oui') && (this.answers['Si_oui,_stade_carie'] === 'Stade 1')) {
+      this.suggestedProblems.push(10);
+    }
+
+    // 11. Problèmes dentaires majeurs
+    if (this.answers['Plaque'] === '2+' || this.answers['Plaque'] === '3+' ||
+        this.answers['Tartre'] === '2+' || this.answers['Tartre'] === '3+' || this.answers['Tartre'] ==='+' ||
+        this.answers['Gingivite'] === '+') {
+      this.suggestedProblems.push(11);
+    }
+
+    // 12. Caries (Stade 2 à 4)
+    if (this.answers['Carie'] === 'Oui' && (this.answers['Si_oui,_stade_carie']=== 'Stade 2' || this.answers['Si_oui,_stade_carie']=== 'Stade 3' || this.answers['Si_oui,_stade_carie']=== 'Stade 4')) {
+      this.suggestedProblems.push(12);
+    }
+
+    // 13. Allergies
+    /* if (this.answers['allergies'] === 'Oui') this.suggestedProblems.push(13); */
+
+    // 14. Infections respiratoires
+    /* if (this.answers['infections_respiratoires'] === 'Oui') this.suggestedProblems.push(14); */
+
+    // 15. Hernies
+    /* if (this.answers['hernies'] === 'Oui') this.suggestedProblems.push(15); */
+
+    // 16. Glucosurie
+    if (this.answers['Glucose'] === '+' || this.answers['Glucose']==='++') this.suggestedProblems.push(16);
+
+    // 17. Problèmes du système génital
     if (this.answers['systeme_genital'] !== 'Normal') this.suggestedProblems.push(17);
+
+    // 18. Problème de puberté
     if (this.answers['puberte'] !== 'Normale') this.suggestedProblems.push(18);
+
+    // 19. Problème de motricité/orthopédique
     if (this.answers['motricite'] !== 'Normale' || this.answers['orthopedique'] !== 'Normal') {
       this.suggestedProblems.push(19);
     }
+
+    // 20. Autres problèmes (troubles comportement/langage)
     if (this.answers['comportement'] !== 'Normal' || this.answers['langage'] !== 'Normal') {
       this.suggestedProblems.push(20);
     }
+
+    // 21. Problèmes psycho-sociaux graves
     if (this.answers['situation_familiale'] === 'Problèmes graves') this.suggestedProblems.push(21);
 
+    this.updateSuggestedProblems(); // Filtrer les suggestions déjà évaluées
+  
+
     // Pré-remplir selectedProblems avec les suggestions
-    this.selectedProblems = [...this.suggestedProblems];
+    //this.selectedProblems = [...this.suggestedProblems];
   }
 
   // Méthodes utilitaires
+  private calculateIMCPercent(): number {
+    const poids = parseFloat(this.answers['poids'] || 0);
+    const taille = parseFloat(this.answers['taille'] || 0); // Taille en cm
+
+    if (poids <= 0 || taille <= 0) {
+      return 0; // Retourne 0 si les données sont invalides
+    }
+
+    // Calcul du poids idéal avec la formule de Devine
+    let poidsIdeal = 0;
+    if (this.studentGender === 'male') {
+      poidsIdeal = 50 + 2.3 * ((taille - 152.4) / 2.54);
+    } else if (this.studentGender === 'female') {
+      poidsIdeal = 45.5 + 2.3 * ((taille - 152.4) / 2.54);
+    } else {
+      return 0; // Retourne 0 si le sexe n'est pas défini
+    }
+
+    if (poidsIdeal <= 0) {
+      return 0; // Retourne 0 si le poids idéal est invalide
+    }
+
+    // Calcul du pourcentage par rapport au poids idéal
+    const pourcentage = (poids / poidsIdeal) * 100;
+    return pourcentage;
+  }
+
+  private calculateAge(): number {
+    if (!this.selectedStudent?.date_of_birth) return 0;
+    const birthDate = new Date(this.selectedStudent.date_of_birth);
+    const today = new Date();
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      return age - 1;
+    }
+    return age;
+  }
+
   private calculateIMC(): number {
     const poids = parseFloat(this.answers['poids'] || 0);
     const taille = parseFloat(this.answers['taille'] || 0) / 100; // Convertir cm en m
-    return taille > 0 ? poids / (taille * taille) : 0;
+    const imc = taille > 0 ? poids / (taille * taille) : 0;
+
+    return imc;
   }
 
   private isDeparasitageOutdated(): boolean {
-    const lastDeparasitage = this.answers['Date_du_dernier_déparasitage'];
+    /* const lastDeparasitage = this.answers['Fréquence'];
     if (!lastDeparasitage) return true;
     const diffMonths = (Date.now() - new Date(lastDeparasitage).getTime()) / (1000 * 60 * 60 * 24 * 30);
-    return diffMonths > 4;
+    return diffMonths > 4; */
+
+    const frequence = this.answers['Fréquence'];
+    if(frequence==='Après 4 mois'){
+      return true;
+    }
+    return false;
   }
 
   private isHearingImpaired(): boolean {

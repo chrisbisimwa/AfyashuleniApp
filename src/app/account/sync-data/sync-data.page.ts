@@ -127,8 +127,8 @@ export class SyncDataPage implements OnInit {
     this.appStorage.get('schools').then((data) => {
       this.schools = data || [];
 
-      for(let school of this.schools){
-        if(!school.created_at || school.status==="updated" || school.status==="deleted"){
+      for (let school of this.schools) {
+        if (!school.created_at || school.status === "updated" || school.status === "deleted") {
           this.schoolToSync.push(school);
         }
       }
@@ -150,14 +150,14 @@ export class SyncDataPage implements OnInit {
     });
   }
 
- 
+
 
 
 
   syncClasses() {
     this.presentLoading('Synchronisation des classes en cours...');
     setTimeout(() => {
-      this.dismissLoading();
+      //this.dismissLoading();
     }, 60000);
 
 
@@ -206,7 +206,7 @@ export class SyncDataPage implements OnInit {
   syncStudents() {
     this.presentLoading('Synchronisation des élèves en cours...');
     setTimeout(() => {
-      this.dismissLoading();
+      //this.dismissLoading();
     }, 60000);
 
 
@@ -300,7 +300,7 @@ export class SyncDataPage implements OnInit {
   syncExams() {
     this.presentLoading('Synchronisation des examens en cours...');
     setTimeout(() => {
-      this.dismissLoading();
+      //this.dismissLoading();
     }, 60000);
 
 
@@ -327,7 +327,7 @@ export class SyncDataPage implements OnInit {
             const examObservable = await examPromise;
             const exm = await lastValueFrom(examObservable).then((data: any) => {
               //console.log(data);
-              if (data ) {
+              if (data) {
                 counter++;
               }
             });
@@ -359,14 +359,14 @@ export class SyncDataPage implements OnInit {
                   }
                 });
               }
-              this.dismissLoading();
+              //this.dismissLoading();
             });
           });
         }
 
 
 
-      }else{
+      } else {
         this.presentAlert('Veuillez vérifier votre connexion internet');
       }
 
@@ -396,245 +396,448 @@ export class SyncDataPage implements OnInit {
 
 
   async loadClassesFromAPI() {
-    this.presentLoading('Chargement des classes en cours...');
-    /* setTimeout(() => {
-      this.dismissLoading();
-    }, 60000); */
+    let loading: HTMLIonLoadingElement | null = null;
+    try {
+      // Afficher l'indicateur de chargement
+      loading = await this.presentLoading('Chargement des classes en cours...');
 
-    let cls: any[] = [];
-    this.appStorage.get('schools').then(async (data) => {
-
-      if (data.length > 0) {
-        for (let school of data) {
-          const classesPromise = this.apiService.getClasses(school.id);
-          const classesObservable = await classesPromise;
-          const classes: any = await lastValueFrom(classesObservable).then((data: any) => {
-            if (data.data && data.data.length > 0) {
-              for (let classe of data.data) {
-                cls.push(classe);
-              }
-            }
-          });
-        }
-
-
-        this.classes = cls;
-        this.appStorage.set('classes', cls);
-        this.refreshData();
-        this.dismissLoading();
+      // Récupérer les écoles depuis appStorage
+      const schools = (await this.appStorage.get('schools')) || [];
+      if (!Array.isArray(schools) || schools.length === 0) {
+        console.warn('Aucune école trouvée dans le stockage.');
+        this.classes = [];
+        await this.appStorage.set('classes', []);
+        return;
       }
 
-    });
+      // Paralléliser les requêtes API pour toutes les écoles
+      const classPromises = schools.map(async (school: any) => {
+        try {
+          const classesObservable = await this.apiService.getClasses(school.id);
+          const data: any = await lastValueFrom(classesObservable);
+          if (data?.data && Array.isArray(data.data) && data.data.length > 0) {
+            console.log(`Classes récupérées pour l'école ${school.id}:`, data.data);
+            return data.data; // Retourner les classes
+          } else {
+            console.warn(`Aucune classe trouvée pour l'école ${school.id}`);
+            return [];
+          }
+        } catch (error) {
+          console.error(`Erreur lors de la récupération des classes pour l'école ${school.id}:`, error);
+          return []; // Retourner un tableau vide en cas d'erreur
+        }
+      });
 
+      // Attendre que toutes les requêtes soient terminées
+      const classesArrays = await Promise.all(classPromises);
 
+      // Aplatir les tableaux de classes en une seule liste
+      const cls: any[] = classesArrays.flat();
 
+      // Mettre à jour la propriété classes et sauvegarder dans appStorage
+      this.classes = cls;
+      await this.appStorage.set('classes', cls);
+      console.log('Classes sauvegardées avec succès:', cls);
+
+      // Rafraîchir les données
+      await this.refreshData();
+    } catch (error) {
+      console.error('Erreur lors du chargement des classes depuis l\'API:', error);
+      this.classes = [];
+      await this.appStorage.set('classes', []); // Sauvegarder un tableau vide en cas d'erreur
+      // Afficher une notification à l'utilisateur (facultatif)
+    } finally {
+      // S'assurer que l'indicateur de chargement est toujours fermé, même en cas d'erreur
+      if (loading) {
+        await this.dismissLoading(loading);
+      }
+    }
 
 
   }
 
   async loadStudentsFromAPI() {
-    this.presentLoading('Chargement des élèves en cours...');
-    /* setTimeout(() => {
-      this.dismissLoading();
-    }, 60000); */
+    let loading: HTMLIonLoadingElement | null = null;
+    try {
+      // Afficher l'indicateur de chargement
+      loading = await this.presentLoading('Chargement des élèves en cours...');
 
-    let stds: any[] = [];
-    let classes: any[] = await this.appStorage.get('classes') || [];
-    let stdsHist: any[] = [];
-    for (let classe of classes) {
-      const studentsPromise = this.apiService.getStudents();
-      const studentsObservable = await studentsPromise;
-      const students: any = await lastValueFrom(studentsObservable).then((data: any) => {
-        if (data.data && data.data.length > 0) {
-          for (let student of data.data) {
-            if (student.current_class_id == classe.id) {
-              stds.push(student);
-            }
-          }
-        }
+      // Récupérer les classes depuis appStorage
+      const classes = (await this.appStorage.get('classes')) || [];
+      if (!Array.isArray(classes) || classes.length === 0) {
+        console.warn('Aucune classe trouvée dans le stockage.');
+        await this.appStorage.set('students', []); // Sauvegarder un tableau vide par sécurité
+        return;
+      }
 
-      });
+      // Récupérer tous les étudiants depuis l'API (une seule requête)
+      const studentsObservable = await this.apiService.getStudents();
+      const data: any = await lastValueFrom(studentsObservable);
+
+      // Vérifier que les données sont valides
+      if (!data?.data || !Array.isArray(data.data)) {
+        console.warn('Aucune donnée d\'étudiants valide trouvée dans la réponse de l\'API:', data);
+        await this.appStorage.set('students', []);
+        return;
+      }
+
+      // Filtrer les étudiants pour chaque classe
+      const stds: any[] = [];
+      const allStudents = data.data;
+
+      for (const classe of classes) {
+        const classStudents = allStudents.filter(
+          (student: any) => student.current_class_id === classe.id
+        );
+        stds.push(...classStudents);
+      }
+
+      // Sauvegarder les étudiants dans appStorage
+      await this.appStorage.set('students', stds);
+      console.log('Étudiants sauvegardés avec succès:', stds);
+    } catch (error) {
+      console.error('Erreur lors du chargement des étudiants depuis l\'API:', error);
+      // Sauvegarder un tableau vide en cas d'erreur pour éviter des problèmes ultérieurs
+      await this.appStorage.set('students', []);
+      // Afficher une notification à l'utilisateur (facultatif)
+    } finally {
+      // S'assurer que l'indicateur de chargement est toujours fermé, même en cas d'erreur
+      if (loading) {
+        await this.dismissLoading(loading);
+      }
     }
-
-    this.appStorage.set('students', stds);
-
-
-    this.dismissLoading();
 
   }
 
   async loadExamsFromAPI() {
-    this.presentLoading('Chargement des examens en cours...');
-    let exs: any[] = [];
-    let students: any[] = await this.appStorage.get('students');
-    if(students){
-      for (let student of students) {
-        const examsPromise = this.apiService.getStudentExaminations(student.id);
-        const examsObservable = await examsPromise;
-        const exams: any = await lastValueFrom(examsObservable).then((data: any) => {
-          if (data.data && data.data.length > 0) {
-            //console.log(data.data);
-            for (let exam of data.data) {
-              exs.push(exam);
-              
-            }
+    let loading: HTMLIonLoadingElement | null = null;
+    try {
+      // Afficher l'indicateur de chargement
+      loading = await this.presentLoading('Chargement des examens en cours...');
+
+      // Récupérer les étudiants depuis le stockage
+      const students = await this.appStorage.get('students');
+      if (!students || !Array.isArray(students) || students.length === 0) {
+        console.warn('Aucun étudiant trouvé dans le stockage.');
+        await this.dismissLoading(loading);
+        await this.loadEvaluationsFromAPI(); // Continuer même si aucun étudiant
+        return;
+      }
+
+      // Paralléliser les requêtes API pour tous les étudiants
+      const examPromises = students.map(async (student: any) => {
+        try {
+          const examsObservable = await this.apiService.getStudentExaminations(student.id);
+          const data: any = await lastValueFrom(examsObservable);
+          if (data?.data && Array.isArray(data.data) && data.data.length > 0) {
+            console.log(`Examens récupérés pour l'étudiant ${student.id}:`, data.data);
+            return data.data; // Retourner les examens
+          } else {
+            console.warn(`Aucun examen trouvé pour l'étudiant ${student.id}`);
+            return [];
           }
-  
-        });
+        } catch (error) {
+          console.error(`Erreur lors de la récupération des examens pour l'étudiant ${student.id}:`, error);
+          return []; // Retourner un tableau vide en cas d'erreur
+        }
+      });
+
+      // Attendre que toutes les requêtes soient terminées
+      const examsArrays = await Promise.all(examPromises);
+
+      // Aplatir les tableaux d'examens en une seule liste
+      const exs: any[] = examsArrays.flat();
+
+      // Sauvegarder les examens dans le stockage
+      await this.appStorage.set('exams', exs);
+      console.log('Examens sauvegardés avec succès:', exs);
+
+      // Charger les évaluations après avoir sauvegardé les examens
+      await this.loadEvaluationsFromAPI();
+    } catch (error) {
+      console.error('Erreur lors du chargement des examens depuis le serveur:', error);
+      // Afficher une notification à l'utilisateur (facultatif)
+      // Vous pouvez utiliser un ToastController pour informer l'utilisateur
+    } finally {
+      // S'assurer que l'indicateur de chargement est toujours fermé, même en cas d'erreur
+      if (loading) {
+        await this.dismissLoading(loading);
       }
     }
-    
 
-    
-
-    this.appStorage.set('exams', exs).then(() => {
-      this.loadEvaluationsFromAPI();
-    });
-    this.dismissLoading();
 
   }
 
   async loadSchoolsFormAPI() {
-    this.presentLoading('Chargement des écoles en cours...');
-    /* setTimeout(() => {
-      this.dismissLoading();
-    }, 60000); */
+    let loading: HTMLIonLoadingElement | null = null;
+    try {
+      // Afficher l'indicateur de chargement
+      loading = await this.presentLoading('Chargement des écoles en cours...');
 
+      // Paralléliser les requêtes API initiales
+      const [schoolYearsData, schoolsData, usersData] = await Promise.all([
+        this.fetchSchoolYears(),
+        this.fetchSchools(),
+        this.fetchUsers(),
+      ]);
 
-
-    const schoolYearsPromise = this.apiService.getSchoolYears(); // Stockez la Promise
-    const schoolYearsObservable = await schoolYearsPromise; // Récupérez l'Observable
-    const schoolYears: any = await lastValueFrom(schoolYearsObservable).then((data: any) => {
-      if (data.data) {
-        this.appStorage.set('schoolYears', data.data);
-      }
-    });
-
-    const schoolsPromise = this.apiService.getSchools(); // Stockez la Promise
-    const schoolsObservable = await schoolsPromise; // Récupérez l'Observable
-    const schools: any = await lastValueFrom(schoolsObservable).then((data: any) => {
-
-      if (data.data) {
-        this.appStorage.set('schools', data.data.filter((item: any) => item.group_id == this.user.group_id));
-
-      }
-    });
-
-
-    const usersPromise = this.apiService.getUsers();
-    const usersObservable = await usersPromise;
-    const users: any = await lastValueFrom(usersObservable).then((data: any) => {
-      this.appStorage.set('users', data.data);
-      
-    });
-
-
-    //check if there is classes to sync
-    this.classesToSync = [];
-    this.appStorage.get('classes').then((data) => {
-      this.classes = data || [];
-
-      for (let classe of this.classes) {
-        if (!classe.created_at || classe.status === 'updated' || classe.status === 'deleted') {
-          this.classesToSync.push(classe);
-        }
+      // Sauvegarder les données dans appStorage
+      if (schoolYearsData) {
+        await this.appStorage.set('schoolYears', schoolYearsData);
+        console.log('Années scolaires sauvegardées:', schoolYearsData);
       }
 
-    });
+      if (schoolsData) {
+        const filteredSchools = schoolsData.filter((item: any) => item.group_id === this.user.group_id);
+        await this.appStorage.set('schools', filteredSchools);
+        console.log('Écoles sauvegardées:', filteredSchools);
+      }
 
+      if (usersData) {
+        await this.appStorage.set('users', usersData);
+        console.log('Utilisateurs sauvegardés:', usersData);
+      }
 
-    if (this.classesToSync.length == 0) {
-      console.log('Classes to sync', this.classesToSync);
-      this.loadClassesFromAPI();
+      // Charger les classes à synchroniser
+      await this.loadClassesToSync();
+
+      // Charger les classes depuis l'API si aucune classe à synchroniser
+      if (this.classesToSync.length === 0) {
+        await this.loadClassesFromAPI();
+      }
+
+      // Charger les étudiants à synchroniser
+      await this.loadStudentsToSync();
+
+      // Charger les étudiants depuis l'API si aucun étudiant à synchroniser
+      if (this.studentsToSync.length === 0) {
+        await this.loadStudentsFromAPI();
+      }
+
+      // Charger les examens à synchroniser
+      await this.loadExamsToSync();
+
+      // Charger les examens depuis l'API si aucun examen à synchroniser
+      if (this.examsToSync.length === 0) {
+        await this.loadExamsFromAPI();
+      }
+
+      // Charger les problèmes
+      await this.loadProblemsFromAPI();
+
+      // Rafraîchir les données
+      await this.refreshData();
+    } catch (error) {
+      console.error('Erreur lors du chargement des écoles depuis l\'API:', error);
+      // Afficher une notification à l'utilisateur (facultatif)
+    } finally {
+      // S'assurer que l'indicateur de chargement est toujours fermé, même en cas d'erreur
+      if (loading) {
+        await this.dismissLoading(loading);
+      }
     }
-
-    //check if there is students to sync
-    this.studentsToSync = [];
-    this.appStorage.get('students').then((data) => {
-      this.students = data || [];
-
-      for (let student of this.students) {
-        if (!student.created_at || student.status === 'updated' || student.status === 'deleted') {
-          this.studentsToSync.push(student);
-        }
-      }
-
-    });
-
-    if (this.studentsToSync.length == 0) {
-      this.loadStudentsFromAPI();
-    }
-
-    //check if there is exams to sync
-    this.examsToSync = [];
-    this.appStorage.get('exams').then((data) => {
-      this.exams = data || [];
-
-      for (let exam of this.exams) {
-        if (!exam.created_at || exam.status === 'updated' || exam.status === 'deleted') {
-          this.examsToSync.push(exam);
-        }
-      }
-
-    });
-
-    if (this.examsToSync.length == 0) {
-      this.loadExamsFromAPI();
-    }
-
-    this.loadProblemsFromAPI();
-
-    this.refreshData();
-
-    this.dismissLoading();
 
   }
 
-  async loadEvaluationsFromAPI(){
-    this.presentLoading('Chargement des évaluations en cours...');
+  async fetchSchools(): Promise<any> {
+    try {
+      const schoolsObservable = await this.apiService.getSchools();
+      const data: any = await lastValueFrom(schoolsObservable);
+      return data?.data && Array.isArray(data.data) ? data.data : [];
+    } catch (error) {
+      console.error('Erreur lors de la récupération des écoles:', error);
+      return [];
+    }
+  }
 
-    let exams: any[] = await this.appStorage.get('exams');
-    let evaluations:any[] = [];
+  async fetchUsers(): Promise<any> {
+    try {
+      const usersObservable = await this.apiService.getUsers();
+      const data: any = await lastValueFrom(usersObservable);
+      return data?.data && Array.isArray(data.data) ? data.data : [];
+    } catch (error) {
+      console.error('Erreur lors de la récupération des utilisateurs:', error);
+      return [];
+    }
+  }
 
-    for(let exam of exams){
-      const evaluationsPromise = this.apiService.getEvaluations(exam.id);
-      const evaluationsObservable = await evaluationsPromise;
-      const evals: any = await lastValueFrom(evaluationsObservable).then((data: any) => {
-        if (data.data && data.data.length > 0) {
-          for (let evaluation of data.data) {
-            evaluations.push(evaluation);
+  // Charger les classes à synchroniser
+  async loadClassesToSync(): Promise<void> {
+    this.classesToSync = [];
+    this.classes = (await this.appStorage.get('classes')) || [];
+
+    for (const classe of this.classes) {
+      if (!classe.created_at || classe.status === 'updated' || classe.status === 'deleted') {
+        this.classesToSync.push(classe);
+      }
+    }
+    console.log('Classes à synchroniser:', this.classesToSync);
+  }
+
+  // Charger les étudiants à synchroniser
+  async loadStudentsToSync(): Promise<void> {
+    this.studentsToSync = [];
+    this.students = (await this.appStorage.get('students')) || [];
+
+    for (const student of this.students) {
+      if (!student.created_at || student.status === 'updated' || student.status === 'deleted') {
+        this.studentsToSync.push(student);
+      }
+    }
+    console.log('Étudiants à synchroniser:', this.studentsToSync);
+  }
+
+  // Charger les examens à synchroniser
+  async loadExamsToSync(): Promise<void> {
+    this.examsToSync = [];
+    this.exams = (await this.appStorage.get('exams')) || [];
+
+    for (const exam of this.exams) {
+      if (!exam.created_at || exam.status === 'updated' || exam.status === 'deleted') {
+        this.examsToSync.push(exam);
+      }
+    }
+    console.log('Examens à synchroniser:', this.examsToSync);
+  }
+
+  async fetchSchoolYears(): Promise<any> {
+    try {
+      const schoolYearsObservable = await this.apiService.getSchoolYears();
+      const data: any = await lastValueFrom(schoolYearsObservable);
+      return data?.data && Array.isArray(data.data) ? data.data : [];
+    } catch (error) {
+      console.error('Erreur lors de la récupération des années scolaires:', error);
+      return [];
+    }
+  }
+
+  async loadEvaluationsFromAPI() {
+    let loading: HTMLIonLoadingElement | null = null;
+    try {
+      // Afficher l'indicateur de chargement
+      loading = await this.presentLoading('Chargement des évaluations en cours...');
+
+      // Récupérer les examens depuis le stockage
+      const exams = await this.appStorage.get('exams');
+      if (!exams || !Array.isArray(exams) || exams.length === 0) {
+        console.warn('Aucun examen trouvé dans le stockage.');
+        return; // Sortir de la fonction si aucun examen
+      }
+
+      // Paralléliser les requêtes API pour tous les examens
+      const evaluationPromises = exams.map(async (exam: any) => {
+        try {
+          const evaluationsObservable = await this.apiService.getEvaluations(exam.id);
+          const data: any = await lastValueFrom(evaluationsObservable);
+          if (data?.data && Array.isArray(data.data) && data.data.length > 0) {
+            console.log(`Évaluations récupérées pour l'examen ${exam.id}:`, data.data);
+            return data.data; // Retourner les évaluations
+          } else {
+            console.warn(`Aucune évaluation trouvée pour l'examen ${exam.id}`);
+            return [];
           }
+        } catch (error) {
+          console.error(`Erreur lors de la récupération des évaluations pour l'examen ${exam.id}:`, error);
+          return []; // Retourner un tableau vide en cas d'erreur
         }
       });
+
+      // Attendre que toutes les requêtes soient terminées
+      const evaluationsArrays = await Promise.all(evaluationPromises);
+
+      // Aplatir les tableaux d'évaluations en une seule liste
+      const evaluations: any[] = evaluationsArrays.flat();
+
+      // Sauvegarder les évaluations dans le stockage
+      await this.appStorage.set('evaluations', evaluations);
+      console.log('Évaluations sauvegardées avec succès:', evaluations);
+    } catch (error) {
+      console.error('Erreur lors du chargement des évaluations depuis l\'API:', error);
+      // Afficher une notification à l'utilisateur (facultatif)
+      // Vous pouvez utiliser un ToastController pour informer l'utilisateur
+    } finally {
+      // S'assurer que l'indicateur de chargement est toujours fermé, même en cas d'erreur
+      if (loading) {
+        await this.dismissLoading(loading);
+      }
     }
 
-    this.appStorage.set('evaluations', evaluations);
-    this.dismissLoading();
-
   }
 
-  async loadProblemsFromAPI(){
-    this.presentLoading('Chargement des problèmes en cours...');
+  async loadProblemsFromAPI() {
+    let loading: HTMLIonLoadingElement | null = null;
+    try {
+      // Afficher l'indicateur de chargement
+      loading = await this.presentLoading('Chargement des problèmes en cours...');
 
-    const problemsPromise = this.apiService.getProblems();
-    const problemsObservable = await problemsPromise;
-    const problems: any = await lastValueFrom(problemsObservable).then((data: any) => {
-      if (data.data) {
-        this.appStorage.set('problems', data.data);
+      // Récupérer les problèmes depuis l'API
+      const problemsObservable = await this.apiService.getProblems();
+      const data: any = await lastValueFrom(problemsObservable);
+
+      // Vérifier que les données sont valides
+      if (data?.data && Array.isArray(data.data)) {
+        // Sauvegarder les problèmes dans appStorage
+        await this.appStorage.set('problems', data.data);
+        console.log('Problèmes sauvegardés avec succès:', data.data);
+      } else {
+        console.warn('Aucune donnée de problèmes valide trouvée dans la réponse de l\'API:', data);
+        await this.appStorage.set('problems', []); // Sauvegarder un tableau vide par sécurité
       }
-    });
-
-    this.dismissLoading();
+    } catch (error) {
+      console.error('Erreur lors du chargement des problèmes depuis l\'API:', error);
+      // Sauvegarder un tableau vide en cas d'erreur pour éviter des problèmes ultérieurs
+      await this.appStorage.set('problems', []);
+      // Afficher une notification à l'utilisateur (facultatif)
+    } finally {
+      // S'assurer que l'indicateur de chargement est toujours fermé, même en cas d'erreur
+      if (loading) {
+        await this.dismissLoading(loading);
+      }
+    }
   }
 
-  refreshData() {
-    this.loadSchoolsFromStorage();
-    this.loadClassesFromStorage();
-    this.loadStudentsFromStorage();
+  async refreshData() {
+    try {
+      // Charger les écoles depuis le stockage
+      try {
+        await this.loadSchoolsFromStorage();
+      } catch (error) {
+        console.error('Échec du chargement des écoles:', error);
+        // Continuer malgré l'erreur pour ne pas bloquer le reste
+      }
 
-    this.loadExamsFromStorage();
+      // Charger les classes depuis le stockage
+      try {
+        await this.loadClassesFromStorage();
+      } catch (error) {
+        console.error('Échec du chargement des classes:', error);
+        // Continuer malgré l'erreur
+      }
 
-    //this.loadClassesFromAPI();
+      // Charger les étudiants depuis le stockage
+      try {
+        await this.loadStudentsFromStorage();
+      } catch (error) {
+        console.error('Échec du chargement des étudiants:', error);
+        // Continuer malgré l'erreur
+      }
+
+      // Charger les examens depuis le stockage
+      try {
+        await this.loadExamsFromStorage();
+      } catch (error) {
+        console.error('Échec du chargement des examens:', error);
+        // Continuer malgré l'erreur
+      }
+
+      
+
+      console.log('Rafraîchissement des données terminé avec succès.');
+    } catch (error) {
+      console.error('Erreur inattendue lors du rafraîchissement des données:', error);
+      // Afficher une notification à l'utilisateur (facultatif)
+    }
+  
 
 
   }
@@ -645,18 +848,34 @@ export class SyncDataPage implements OnInit {
     });
   }
 
-  async presentLoading(msg: string) {
+  /* async presentLoading(msg: string) {
     this.loading = await this.loadingCtrl.create({
       message: msg,
       duration: 5000,
     });
 
     this.loading.present();
+  } */
+
+  async presentLoading(message: string): Promise<HTMLIonLoadingElement> {
+    const loading = await this.loadingCtrl.create({
+      message,
+      spinner: 'crescent',
+    });
+    await loading.present();
+    return loading;
   }
 
-  async dismissLoading() {
+
+  /* async dismissLoading() {
     if (this.loading) {
       this.loading.dismiss();
+    }
+  } */
+
+  async dismissLoading(loading: HTMLIonLoadingElement | null): Promise<void> {
+    if (loading) {
+      await loading.dismiss();
     }
   }
 
@@ -677,7 +896,7 @@ export class SyncDataPage implements OnInit {
     await alert.present();
   }
 
-  previousState(){
+  previousState() {
     this.router.navigate(['/tabs/account']);
   }
 
