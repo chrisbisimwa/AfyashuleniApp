@@ -134,22 +134,29 @@ export class NewPage implements OnInit {
       { label: 'Test_du_diapason_droite', options: ['Bon', 'Pas bon'], gender: 'both', parentValue: 'Oui', parent: 'Test_du_diapason' },
     ]
   };
-
+  examTypes: string[] = ["Anamnèse", "Aspect_gén./Dysmorphie","Yeux_/_Conjoctives","Bouche_/_Dents", "ORL_/_Cou", "Cardiorespiratoire","Peau_/_Cheveux_/_Ongles", "Abdomen", "(Pré)puberté", "Appareil_locomoteur", "Examen neurologique", "Examen_clinique"];
   questionsMedecin: Exam = {
     // ...
-    "examen_clinique": [
-      { label: "Anamnese", options: null, gender: 'both' },
+    'Anamnèse': [
+      { label: 'Anamnese', options: null, gender: 'both' },
+
+    ],
+    "Aspect_gén./Dysmorphie": [
       { label: "etat_general", options: ['Bon', 'Altéré'], gender: 'both' },
       { label: "etat_general_altéré_par", options: null, gender: 'both', parent: 'etat_general', parentValue: 'Altéré' },
       { label: "Dismorphie", options: ['Oui', 'Non'], gender: 'both' },
       { label: "Type_de_dysmorphie", options: ['Malformation de la gorge', 'Malformation de la bouche', 'Malformation du nez', 'Malformation des oreilles', 'Malformation des yeux', 'Malformation des membres', 'Autres'], gender: 'both', parent: 'Dismorphie', parentValue: 'Oui' },
       { label: "Si_autre_dysmorphie,_préciser", options: null, gender: 'both', parent: 'Type_de_dysmorphie', parentValue: 'Autres' },
+    ],
+    "Yeux_/_Conjoctives": [
       { label: "Conjonctive_palpébrale", options: ['Normale', 'Pathologique'], gender: 'both' },
       { label: "Type_Conjonctive_palpébrale", options: ['Palpébrale colorée', 'Palpébrale pâle', 'Autres'], gender: 'both', parent: 'Conjonctive_palpébrale', parentValue: 'Pathologique' },
       { label: "Si_autre_conjonctive_palpébrale,_préciser", options: null, gender: 'both', parent: 'Type_Conjonctive_palpébrale', parentValue: 'Autres' },
       { label: "Conjonctive_bulbaire", options: ['Normale', 'Pathologique'], gender: 'both' },
       { label: "Type_Conjonctive_bulbaire", options: [ 'Bulbaire anicterique', 'Bulbaire ictérique', 'Autre'], gender: 'both', parent: 'Conjonctive_bulbaire', parentValue: 'Pathologique' },
       { label: "Si_autre_conjonctive_bulbaire,_préciser", options: null, gender: 'both', parent: 'Type_Conjonctive_bulbaire', parentValue: 'Autre' },
+    ],
+    "Bouche_/_Dents": [
       { label: "Brosse_à_dent", options: ['Oui', 'Non', 'Autres'], gender: 'both' },
       { label: "Si_autre_brosse_à_dent,_préciser", options: null, gender: 'both', parent: 'Brosse_à_dent', parentValue: 'Autres' },
       { label: "fréquence_de_brossage", options: null, gender: 'both', parent: 'Brosse_à_dent', parentValue: 'Oui' },
@@ -163,6 +170,8 @@ export class NewPage implements OnInit {
       { label: 'Plaque', options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
       { label: 'Tartre', options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
       { label: 'Gingivite', options: ['-', '+'], gender: 'both' },
+    ],
+    "ORL_/_Cou": [
       { label: 'gorge', options: ['Saine', 'Pathologique'], gender: 'both' },
       { label: 'Si_gorge_pathologique,_préciser', options: null, gender: 'both', parent: 'gorge', parentValue: 'Pathologique' },
       { label: 'nez', options: ['Normal', 'Pahtologique'], gender: 'both' },
@@ -175,6 +184,8 @@ export class NewPage implements OnInit {
       { label: 'Si_thyroide_pathologique,_préciser', options:null, gender: 'both', parent: 'thyroide', parentValue: 'Pathologique' },
       { label: 'ganglions', options: ['Présent', 'Absent'], gender: 'both' },
       { label: 'Si_ganglions_présents,_préciser', options: null, gender: 'both', parent: 'ganglions', parentValue: 'Présent' },
+    ],
+    "Cardiorespiratoire": [
       { label: 'Coeur', options: ['Normal', 'Pathologique'], gender: 'both' },
       { label: 'Si_coeur_pathologique,_préciser', options: ['Hypotension', 'Hypertension'], gender: 'both', parent: 'Coeur', parentValue: 'Pathologique' },
       { label: 'Rythme_cardiaque', options: ['Rythme régulier', 'Rythme irrégulier'], gender: 'both' },
@@ -182,24 +193,32 @@ export class NewPage implements OnInit {
       { label: 'tension_arthérielle', options: null, gender: 'both' },
       { label: 'poumons', options: ['MVP', 'Pathologique'], gender: 'both' },
       { label: 'Si_poumons_pathologique,_préciser', options: null, gender: 'both', parent: 'poumons', parentValue: 'Pathologique' },
+    ],
+    "Peau_/_Cheveux_/_Ongles": [
       { label: 'Peau', options: ['Normal', 'Pathologique'], gender: 'both' },
       { label: 'Si_peau_pathologique,_préciser', options: null, gender: 'both', parent: 'Peau', parentValue: 'Pathologique' },
       { label: 'Cheveux', options: ['Normal', 'Pathologique'], gender: 'both' },
       { label: 'Si_cheveux_pathologique,_préciser', options: null, gender: 'both', parent: 'Cheveux', parentValue: 'Pathologique' },
       { label: 'ongles', options: ['Rien à signaler', 'Pied athlète', 'Onycho-mycose', 'Autres'], gender: 'both' },
       { label: 'Si_autre_problème_ongles,_préciser', options: null, gender: 'both', parent: 'ongles', parentValue: 'Autres' },
-      { label: 'Inspection_de_abdomen', options: ['Normal', 'Pathologique'], gender: 'both' },
+    ],
+    "Abdomen": [
+      { label: 'Inspection_de_l\'abdomen', options: ['Normal', 'Pathologique'], gender: 'both' },
       { label: 'Si_abdomen_pathologique,_préciser', options: null, gender: 'both', parent: 'Inspection_de_abdomen', parentValue: 'Pathologique' },
       { label: 'Palpation_de_abdomen', options: ['Normal', 'Pathologique'], gender: 'both' },
       { label: 'Si_abdomen_palpation_pathologique,_préciser', options: null, gender: 'both', parent: 'Palpation_de_abdomen', parentValue: 'Pathologique' },
       { label: 'region_inguinale', options: ['Normal', 'Pathologique'], gender: 'both' },
       { label: 'Si_region_inguinale_pathologique,_préciser', options: null, gender: 'both', parent: 'region_inguinale', parentValue: 'Pathologique' },
+    ],
+    "(Pré)puberté": [
       { label: 'systeme_uro_genital', options: null, gender: 'both' },
       { label: 'Menarche', options: ['Oui', 'Non'], gender: 'female' },
       { label: 'Si_oui_menarche,_préciser', options: null, gender: 'female', parent: 'Menarche', parentValue: 'Non' },
       { label: 'Volume_testicule_droite', options: null, gender: 'male' },
       { label: 'Volule_testicule_gauche', options: null, gender: 'male' },
       { label: 'Score_de_Tanner', options: null, gender: 'both' },
+    ],
+    "Appareil_locomoteur": [
       { label: 'Colonne_vertebrale', options: ['Normale', 'Pathologique'], gender: 'both' },
       { label: 'Si_colonne_vertebrale_pathologique,_préciser', options: null, gender: 'both', parent: 'Colonne_vertebrale', parentValue: 'Pathologique' },
       { label: 'Bassin', options: ['Normal', 'Pathologique'], gender: 'both' },
@@ -212,6 +231,8 @@ export class NewPage implements OnInit {
       { label: 'Si_démarche_pathologique,_préciser', options: null, gender: 'both', parent: 'Demarche', parentValue: 'Pathologique' },
       { label: 'Equilibre', options: ['Bon', 'Pathologique'], gender: 'both' },
       { label: 'Si_equilibre_pathologique,_préciser', options: null, gender: 'both', parent: 'Equilibre', parentValue: 'Pathologique' },
+    ],
+    "Examen neurologique": [
       { label: 'fine_motricite', options: ['Bonne', 'Pas bonne'], gender: 'both' },
       { label: 'motricité_pathologique,_préciser', options: null, gender: 'both', parent: 'fine_motricite', parentValue: 'Pas bonne' },
       { label: 'coordination_des_mouvemments', options: ['Bonne', 'Pas bonne'], gender: 'both' },
@@ -233,6 +254,8 @@ export class NewPage implements OnInit {
       { label: "KET", options: ['-', '±', '+', '++', '+++', '++++'], gender: 'both' },
       { label: "BIL", options: ['-', '+', '++', '+++', '++++'], gender: 'both' },
       { label: "Glucose", options: ['-', '±', '+', '++', '+++', '++++'], gender: 'both' },
+    ],
+    "Examen_clinique": [
       { label: 'Points_attention_et_conseils', options: null, gender: 'both' },
       { label: 'Diagnostic', options: null, gender: 'both' },
       { label: 'Traitement', options: null, gender: 'both' },

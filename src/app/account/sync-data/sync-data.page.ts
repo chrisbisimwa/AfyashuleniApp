@@ -20,6 +20,8 @@ export class SyncDataPage implements OnInit {
   schoolToSync: any = [];
   students: any = null;
   studentsToSync: any = [];
+  evaluations: any = null;
+  evaluationsToSync: any = [];
   exams: any = null;
   examsToSync: any = [];
   schools: any = [];
@@ -571,7 +573,6 @@ export class SyncDataPage implements OnInit {
   async loadSchoolsFormAPI() {
     let loading: HTMLIonLoadingElement | null = null;
     try {
-      // Afficher l'indicateur de chargement
       loading = await this.presentLoading('Chargement des écoles en cours...');
 
       // Paralléliser les requêtes API initiales
@@ -620,6 +621,14 @@ export class SyncDataPage implements OnInit {
       // Charger les examens depuis l'API si aucun examen à synchroniser
       if (this.examsToSync.length === 0) {
         await this.loadExamsFromAPI();
+      }
+
+      // charger les évaluations à synchroniser
+      await this.loadEvaluationsToSync();
+
+      // Charger les évaluations depuis l'API si aucune évaluation à synchroniser
+      if (this.evaluationsToSync.length === 0) {
+        await this.loadEvaluationsFromAPI();
       }
 
       // Charger les problèmes
@@ -698,6 +707,19 @@ export class SyncDataPage implements OnInit {
       }
     }
     console.log('Examens à synchroniser:', this.examsToSync);
+  }
+
+  // Charger les évaluations à synchroniser
+  async loadEvaluationsToSync(): Promise<void> {
+    this.evaluationsToSync = [];
+    this.evaluations = (await this.appStorage.get('evaluations')) || [];
+
+    for (const evaluation of this.evaluations) {
+      if (!evaluation.created_at || evaluation.status === 'updated' || evaluation.status === 'deleted') {
+        this.evaluationsToSync.push(evaluation);
+      }
+    }
+    console.log('Évaluations à synchroniser:', this.evaluationsToSync);
   }
 
   async fetchSchoolYears(): Promise<any> {
