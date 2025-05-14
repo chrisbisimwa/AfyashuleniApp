@@ -317,8 +317,7 @@
               <div *ngFor="let question of questionsMedecin['examen_clinique']">
                 <ion-item *ngIf="question.parent && answers[question.parent]===question.parentValue">
                   <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both') ">
-                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
-                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                    <ion-textarea [autoGrow]="true" [(ngModel)]="answers[question.label]" label="{{ucfirst(question.label.replaceAll('_', ' '))}}" labelPlacement="stacked"></ion-textarea>
                   </div>
 
                   <div
@@ -333,8 +332,7 @@
                 </ion-item>
                 <ion-item *ngIf="!question.parent">
                   <div *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')">
-                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
-                    <ion-input [(ngModel)]="answers[question.label]" placeholder="Entrez la réponse"></ion-input>
+                    <ion-textarea [autoGrow]="true" [(ngModel)]="answers[question.label]" label="{{ucfirst(question.label.replaceAll('_', ' '))}}" labelPlacement="stacked"></ion-textarea>
                   </div>
 
                   <div *ngIf="question.options && (question.gender===studentGender || question.gender==='both')">
@@ -354,7 +352,71 @@
           <ion-button expand="block" color="danger" (click)="exit()" >Annuler</ion-button>
         </div>
         <div *ngIf="step==7">
-          <ion-button *ngIf="userRoles.includes('Medecin')" expand="block" color="primary" (click)="setOpen(true)">Problèmes de stanté ({{evaluations.length}})</ion-button>
+
+          <ion-item-group>
+            <ion-item-divider>
+              <ion-label color="primary"> Résumé de l'examen </ion-label>
+            </ion-item-divider>
+
+            <div *ngFor="let question of questionsInfirmier['situation_familiale']">
+              <ion-item>
+                <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
+                <div item-content>
+                  <span>{{ answers[question.label] }}</span>
+                </div>
+              </ion-item>
+            </div>
+
+            <div *ngFor="let question of questionsInfirmier['calendrier_vaccinal']">
+              <ion-item>
+                <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
+                <div item-content>
+                  <span>{{ answers[question.label] }}</span>
+                </div>
+              </ion-item>
+            </div>
+
+            <div *ngFor="let question of questionsInfirmier['deparasitage']">
+              <ion-item>
+                <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
+                <div item-content>
+                  <span>{{ answers[question.label] }}</span>
+                </div>
+              </ion-item>
+            </div>
+
+            <div *ngFor="let question of questionsInfirmier['comportement_langage']">
+              <ion-item>
+                <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
+                <div item-content>
+                  <span>{{ answers[question.label] }}</span>
+                </div>
+              </ion-item>
+            </div>
+
+            <div *ngFor="let question of questionsInfirmier['anamnese']">
+              <ion-item>
+                <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
+                <div item-content>
+                  <span>{{ answers[question.label] }}</span>
+                </div>
+              </ion-item>
+            </div>
+
+            <div *ngIf="userRoles.includes('Medecin')">
+              <div *ngFor="let question of questionsMedecin['examen_clinique']" >
+                <ion-item>
+                  <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
+                  <div item-content>
+                    <span>{{ answers[question.label] }}</span>
+                  </div>
+                </ion-item>
+              </div>
+            </div>
+            
+          </ion-item-group>
+
+          <ion-button *ngIf="userRoles.includes('Medecin')" expand="block" color="primary" (click)="setOpen(true)">Problèmes de stanté (<span *ngIf="suggestedProblems.length == 0">{{evaluations.length}} confirmés</span> <span *ngIf="suggestedProblems.length > 0">{{suggestedProblems.length}} détectés</span>) </ion-button>
           <ion-button expand="block" color="primary" (click)="submitExam()">Soumettre</ion-button>
           <ion-button expand="block" color="primary" (click)="retour()">Retour</ion-button>
           <ion-button expand="block" color="danger" (click)="exit()" >Annuler</ion-button>

@@ -65,7 +65,7 @@ export class ExamsPage {
         if (this.getExaminerGroupIdByExaminerId(exam.examiner_id) === user.group_id && exam.status !== "deleted") {
           exam.studentName = await this.getstudentNameById(exam.student_id);
           exam.examinerName = await this.getExaminerNameById(exam.examiner_id);
-          exam.doctor = await this.getDoctorNameById(exam.doctor_id);
+          exam.doctor = await this.getExaminerNameById(exam.doctor_id);
           exam.hasExamenClinique = this.hasExamenClinique(exam);
           exs.push(exam);
         }
@@ -124,15 +124,7 @@ export class ExamsPage {
     return examiner ? examiner.name : 'Unknown';
   }
 
-  async getDoctorNameById(id: any) {
-    let examiners = await this.appStrorage.get('users');
-    let examiner = null;
-    
-    if (examiners) {
-      examiner = examiners.find((item: any) => item.id === id);
-    }
-    return examiner ? examiner.name : 'Unknown';
-  }
+  
 
   segmentChanged(event: any) {
     this.fetchExams(null);

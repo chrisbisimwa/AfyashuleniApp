@@ -69,6 +69,8 @@ export class NewPage implements OnInit {
       { label: 'Rang_dans_la_fratrie', options: null, gender: 'both' },
       { label: 'Nombre_de_filles', options: null, gender: 'both' },
       { label: 'Nombre_de_garçons', options: null, gender: 'both' },
+      { label: 'L\'enfant_vit_bien_à_l\'école_et_à_la_maison', options: ['Oui', 'Non'], gender: 'both' },
+      { label: 'Si_non,_pourquoi_?', options: null, gender: 'both', parent: 'L\'enfant vit bien à l\'école et à la maison', parentValue: 'Non' }, 
 
     ],
     'calendrier_vaccinal': [
@@ -82,9 +84,11 @@ export class NewPage implements OnInit {
     ],
     'deparasitage': [
       { label: 'Déparasité_?', options: ['Oui', 'Non', 'Inconnu'], gender: 'both' },
-      { label: 'Date_du_dernier_déparasitage', options: null, gender: 'both', parent: 'Deparasité_?', parentValue: 'Oui' },
-      { label: 'Médicament_de_déparasitage', options: ['Albendazole 100mg', 'Albendazole 500mg', 'Mebendazole 100mg', 'Mebendazole 500mg'], gender: 'both', parent: 'Deparasité_?', parentValue: 'Oui' },
-      { label: 'Fréquence', options: ['Après 1 mois', 'Après 2 mois', 'Après 3 mois', 'Après 4 mois'], gender: 'both', parent: 'Deparasité_?', parentValue: 'Oui' },
+      /* { label: 'Date_du_dernier_déparasitage', options: null, gender: 'both', parent: 'Deparasité_?', parentValue: 'Oui' }, */
+      
+      { label: 'Fréquence', options: ['Inconnu', 'Suffisant', 'Insuffisant', 'Excédent'], gender: 'both', parent: 'Deparasité_?', parentValue: 'Oui' },
+      { label: 'Médicament_de_déparasitage', options: ['Vermox 500mg', 'Vermox 100mg', 'Autres'], gender: 'both', parent: 'Deparasité_?', parentValue: 'Oui' },
+      { label: 'Si_autre_médicament_de_déparasitage,_préciser', options: null, gender: 'both', parent: 'Médicament_de_déparasitage', parentValue: 'Autres' },
     ],
     'comportement_langage': [
       { label: 'Comportement', options: ['Calme', 'Agité', 'Distrait', 'Peureux', 'Curieux', 'Autres'], gender: 'both' },
@@ -110,10 +114,10 @@ export class NewPage implements OnInit {
       { label: 'Pourcentage', options: null, gender: 'both' },
       { label: 'IMC', options: null, gender: 'both' },
       { label: 'Test_acuité_visuelle', options: ['Sans lunettes', 'Avec lunettes'], gender: 'both' },
-      { label: 'acuite_visuelle_de_loin_droite_sans_correction', options: ['1.00', '0.9', '0.8', '0.7', '0.6', '0.5', '0.4', '0.3', '0.2', '0.1', '0.0'], gender: 'both', parent: 'Test_acuité_visuelle', parentValue: 'Sans lunettes' },
-      { label: 'acuite_visuelle_de_loin_gauche_sans_correction', options: ['1.00', '0.9', '0.8', '0.7', '0.6', '0.5', '0.4', '0.3', '0.2', '0.1', '0.0'], gender: 'both', parent: 'Test_acuité_visuelle', parentValue: 'Sans lunettes' },
-      { label: 'acuite_visuelle_de_loin_droite_avec_lunettes', options: ['1.00', '0.9', '0.8', '0.7', '0.6', '0.5', '0.4', '0.3', '0.2', '0.1', '0.0'], gender: 'both', parent: 'Test_acuité_visuelle', parentValue: 'Avec lunettes' },
-      { label: 'acuite_visuelle_de_loin_gauche_avec_lunettes', options: ['1.00', '0.9', '0.8', '0.7', '0.6', '0.5', '0.4', '0.3', '0.2', '0.1', '0.0'], gender: 'both', parent: 'Test_acuité_visuelle', parentValue: 'Avec lunettes' },
+      { label: 'acuite_visuelle_oeil_droite_sans_correction', options: ['1.00', '0.9', '0.8', '0.7', '0.6', '0.5', '0.4', '0.3', '0.2', '0.1', '0.0'], gender: 'both', parent: 'Test_acuité_visuelle', parentValue: 'Sans lunettes' },
+      { label: 'acuite_visuelle_oeil_gauche_sans_correction', options: ['1.00', '0.9', '0.8', '0.7', '0.6', '0.5', '0.4', '0.3', '0.2', '0.1', '0.0'], gender: 'both', parent: 'Test_acuité_visuelle', parentValue: 'Sans lunettes' },
+      { label: 'acuite_visuelle_oeil_droite_avec_lunettes', options: ['1.00', '0.9', '0.8', '0.7', '0.6', '0.5', '0.4', '0.3', '0.2', '0.1', '0.0'], gender: 'both', parent: 'Test_acuité_visuelle', parentValue: 'Avec lunettes' },
+      { label: 'acuite_visuelle_oeil_gauche_avec_lunettes', options: ['1.00', '0.9', '0.8', '0.7', '0.6', '0.5', '0.4', '0.3', '0.2', '0.1', '0.0'], gender: 'both', parent: 'Test_acuité_visuelle', parentValue: 'Avec lunettes' },
       { label: 'audiometrie_droite_500', options: ['Bon', 'Pas bon'], gender: 'both' },
       { label: 'audiometrie_droite_1000', options: ['Bon', 'Pas bon'], gender: 'both' },
       { label: 'audiometrie_droite_2000', options: ['Bon', 'Pas bon'], gender: 'both' },
@@ -158,7 +162,7 @@ export class NewPage implements OnInit {
       { label: "Débris_alimentaires", options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
       { label: 'Plaque', options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
       { label: 'Tartre', options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
-      { label: 'Gingivite', options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
+      { label: 'Gingivite', options: ['-', '+'], gender: 'both' },
       { label: 'gorge', options: ['Saine', 'Pathologique'], gender: 'both' },
       { label: 'Si_gorge_pathologique,_préciser', options: null, gender: 'both', parent: 'gorge', parentValue: 'Pathologique' },
       { label: 'nez', options: ['Normal', 'Pahtologique'], gender: 'both' },
@@ -535,35 +539,7 @@ export class NewPage implements OnInit {
           }
 
         });
-        /* Network.getStatus().then(async status => {
-          this.networkStatus = status;
-          if (this.networkStatus.connected) {
-            if (this.classesToSync.length > 0) {
-              this.storeClassesToAPI().then(() => {
-                if (this.studentsToSync.length > 0) {
-                  this.storeStudentsToAPI().then(() => {
-                    this.examsToSync = [];
-                    if (this.exams) {
-                      for (let exam of this.exams) {
-                        if (!exam.created_at || exam.status === 'updated' || exam.status === 'deleted') {
-                          this.examsToSync.push(exam);
-                        }
-                      }
-
-                      if (this.examsToSync > 0) {
-                        this.storeExamsToAPI().then(() => {
-                          this.dismissLoading();
-
-                        });
-                      }
-                    }
-
-                  });
-                }
-              });
-            }
-          }
-        }); */
+       
       });
       await this.navController.navigateForward('/tabs/exams');
 
@@ -734,7 +710,7 @@ export class NewPage implements OnInit {
     return diffMonths > 4; */
 
     const frequence = this.answers['Fréquence'];
-    if(frequence==='Après 4 mois'){
+    if(frequence==='Insuffisant'){
       return true;
     }
     return false;
@@ -1039,6 +1015,7 @@ export class NewPage implements OnInit {
 
   goToStep7() {
     this.step = 7;
+    this.detectProblems();
   }
 
 
@@ -1056,7 +1033,7 @@ export class NewPage implements OnInit {
 
   setOpen(isOpen: boolean): void {
     if (isOpen) {
-      this.detectProblems();
+      //this.detectProblems();
     }
     this.isModalOpen = isOpen;
   }
