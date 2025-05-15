@@ -558,7 +558,7 @@
         </div>
         <div *ngIf="step==6">
           <div *ngIf="userRoles.includes('Medecin')">
-            <div *ngFor="let type of examTypes">
+            <div *ngFor="let type of examTypesMedecin">
               <ion-item-divider>
                 <ion-label color="primary">
                   <b>{{ ucfirst(type.replaceAll('_', ' ')) }}</b>
@@ -716,7 +716,7 @@
 
             <div *ngIf="userRoles.includes('Medecin')">
               
-              <div *ngFor="let type of examTypes">
+              <div *ngFor="let type of examTypesMedecin">
                 <ion-item-divider>
                   <ion-label color="primary">
                     <b>{{ ucfirst(type.replaceAll('_', ' ')) }}</b>

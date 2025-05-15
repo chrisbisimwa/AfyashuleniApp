@@ -41,6 +41,7 @@ export class ShowExamPage implements OnInit {
   ngOnInit() {
     this.fetchExam().then(() => {
       //this.fetchExamData();
+      //console.log(this.hasExamenClinique);
     });
   }
 
@@ -67,6 +68,7 @@ export class ShowExamPage implements OnInit {
         this.exam.data = data;
       }
     }
+
 
   }
 
