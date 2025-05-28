@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { LoadingController, AlertController } from '@ionic/angular';
+import { LoadingController, AlertController, ToastController } from '@ionic/angular';
 import { Storage } from '@ionic/storage-angular';
 import { ApiService } from 'src/app/services/api.service';
 import { Router } from '@angular/router';
@@ -34,7 +34,8 @@ export class SyncDataPage implements OnInit {
     private loadingCtrl: LoadingController,
     private apiService: ApiService,
     private router: Router,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private toastController: ToastController
   ) {
   }
 
@@ -152,28 +153,47 @@ export class SyncDataPage implements OnInit {
     });
   }
 
+  loadEvaluationsFromStorage() {
+    this.evaluationsToSync = [];
+    this.appStorage.get('evaluations').then((data) => {
+      this.evaluations = data || [];
 
-
-
-
-  syncClasses() {
-    this.presentLoading('Synchronisation des classes en cours...');
-    setTimeout(() => {
-      //this.dismissLoading();
-    }, 60000);
-
-
-    Network.getStatus().then(async status => {
-      this.networkStatus = status;
-      if (this.networkStatus.connected) {
-        this.storeClasses().then(() => {
-          console.log('Classes synchronisées');
-          this.loadClassesFromAPI();
-        });
-      } else {
-        this.presentAlert('Veuillez vérifier votre connexion internet');
+      for (let evaluation of this.evaluations) {
+        if (!evaluation.created_at || evaluation.status === 'updated' || evaluation.status === 'deleted') {
+          this.evaluationsToSync.push(evaluation);
+        }
       }
+
     });
+  }
+
+
+
+
+  async syncClasses(): Promise<void> {
+    let loading: HTMLIonLoadingElement | null = null;
+    try {
+      loading = await this.presentLoading('Synchronisation des classes en cours...');
+      this.networkStatus = await Network.getStatus();
+      if (!this.networkStatus.connected) {
+        await this.presentAlert('Veuillez vérifier votre connexion internet');
+        await this.showToast('Aucune connexion réseau disponible.', 'warning');
+        return;
+      }
+
+      await this.storeClasses();
+      await this.loadClassesFromAPI();
+      await this.refreshData();
+
+      await this.showToast('Synchronisation des classes terminée avec succès.', 'success');
+    } catch (error) {
+      console.error('Erreur inattendue lors de la synchronisation des classes:', error);
+      await this.showToast('Erreur lors de la synchronisation des classes.', 'danger');
+    } finally {
+      if (loading) {
+        await this.dismissLoading(loading);
+      }
+    }
   }
 
   async storeClasses() {
@@ -205,194 +225,319 @@ export class SyncDataPage implements OnInit {
     }
   }
 
-  syncStudents() {
-    this.presentLoading('Synchronisation des élèves en cours...');
-    setTimeout(() => {
-      //this.dismissLoading();
-    }, 60000);
-
-
-    Network.getStatus().then(async status => {
-      this.networkStatus = status;
-      if (this.networkStatus.connected) {
-        for (let student of this.studentsToSync) {
+  async syncStudents(): Promise<void> {
+    let loading: HTMLIonLoadingElement | null = null;
+    try {
+      loading = await this.presentLoading('Synchronisation des élèves en cours...');
+      this.networkStatus = await Network.getStatus();
+      if (!this.networkStatus.connected) {
+        await this.showToast('Aucune connexion réseau disponible. Synchronisation annulée.', 'warning');
+        return;
+      }
+      if (!Array.isArray(this.studentsToSync) || this.studentsToSync.length === 0) {
+        await this.showToast('Aucun étudiant à synchroniser.', 'warning');
+        return;
+      }
+      const syncPromises = this.studentsToSync.map(async (student: any) => {
+        try {
           if (!student.created_at) {
-            const studentPromise = this.apiService.postStudent(student);
-            const studentObservable = await studentPromise;
-            const std = await lastValueFrom(studentObservable).then((data: any) => {
-              if (data && data.data) {
-                this.loadStudentsFromAPI().then(() => {
-                  this.syncStudentsHistory().then(async () => {
-                    let stdsHist: any[] = [];
-                    /* let classes: any[] = await this.appStorage.get('classes');
-                    let stdsHist: any[] = [];
-                    let classId = student.current_class_id;
-                    if (classId) {
-                      if (classes) {
-                        let schoolYearId = classes.find((item: any) => item.id === classId).schoolYear_id;
-                        if (schoolYearId) {
-                          const studentHistPromise = this.apiService.getStudentHistory(schoolYearId);
-                          const studentHistObservable = await studentHistPromise;
-                          const studentHist: any = await lastValueFrom(studentHistObservable).then((data: any) => {
-                            if (data.data && data.data.length > 0) {
-                              for (let hist of data.data) {
-                                stdsHist.push(hist);
-                              }
-                            }
-
-                          });
-                        }
-                      }
-
-                    } */
-
-                    const studentHistoryPromise = this.apiService.getStudentHistory(1);
-                    const studentHistoryObservable = await studentHistoryPromise;
-                    const studentHistory: any = await lastValueFrom(studentHistoryObservable).then((data: any) => {
-                      if (data.data && data.data.length > 0) {
-                        for (let hist of data.data) {
-                          stdsHist.push(hist);
-                        }
-                      }
-
-                    });
-
-                    this.appStorage.set('student-history', stdsHist);
-                  });
-                });
+            const studentObservable = await this.apiService.postStudent(student);
+            const data: any = await lastValueFrom(studentObservable);
+            if (data?.data) {
+              console.log(`Étudiant créé avec succès:`, data.data);
+              await this.loadStudentsFromAPI();
+              await this.syncStudentsHistory();
+              const studentId = data.data.id;
+              const studentHistoryObservable = await this.apiService.getStudentHistory(studentId);
+              const historyData: any = await lastValueFrom(studentHistoryObservable);
+              const stdsHist: any[] = [];
+              if (historyData?.data && Array.isArray(historyData.data) && historyData.data.length > 0) {
+                stdsHist.push(...historyData.data);
+                console.log(`Historique de l'étudiant ${studentId} récupéré:`, stdsHist);
+              } else {
+                console.warn(`Aucun historique trouvé pour l'étudiant ${studentId}`);
               }
+              await this.appStorage.set('student-history', stdsHist);
+              console.log('Historique des étudiants sauvegardé:', stdsHist);
 
-            });
-          }
-
-          if (student.status === 'updated') {
-            const studentPromise = this.apiService.updateStudent(student);
-            const studentObservable = await studentPromise;
-            const std = await lastValueFrom(studentObservable);
-          }
-
-          if (student.status === 'deleted') {
-            (await this.apiService.deleteStudent(student.id)).subscribe((data: any) => {
-              if (data) {
-                console.log(data);
-              }
-            });
-          }
-
-        }
-      }
-    });
-  }
-
-  async syncStudentsHistory() {
-
-    let studentHistory = await this.appStorage.get('student-history');
-    if (studentHistory) {
-      for (let sth of studentHistory) {
-        if (!sth.created_at && !sth.updated_at) {
-          const studentHistoryPromise = this.apiService.postStudentHistory(sth); // Stockez la Promise
-          const studentHistoryObservable = await studentHistoryPromise; // Récupérez l'Observable
-          const stdHistory = await lastValueFrom(studentHistoryObservable);
-
-        }
-      }
-    }
-  }
-
-  syncExams() {
-    this.presentLoading('Synchronisation des examens en cours...');
-    setTimeout(() => {
-      //this.dismissLoading();
-    }, 60000);
-
-
-    Network.getStatus().then(async status => {
-      this.networkStatus = status;
-      if (this.networkStatus.connected) {
-        let counter = 0;
-        for (let exam of this.examsToSync) {
-          if (!exam.created_at) {
-            const examPromise = this.apiService.postStudentExamination(exam.student_id, exam);
-            const examObservable = await examPromise;
-            const exm = await lastValueFrom(examObservable).then((data: any) => {
-              //console.log(data);
-              if (data && data.data) {
-                counter++;
-              }
-            });
-
-
-          }
-
-          if (exam.status === 'updated') {
-            const examPromise = this.apiService.updateStudentExamination(exam.student_id, exam);
-            const examObservable = await examPromise;
-            const exm = await lastValueFrom(examObservable).then((data: any) => {
-              //console.log(data);
-              if (data) {
-                counter++;
-              }
-            });
-          }
-
-          if (exam.status === 'deleted') {
-            const examPromise = this.apiService.deleteExamination(exam.id);
-            const examObservable = await examPromise;
-            const exm = await lastValueFrom(examObservable).then((data: any) => {
-              //console.log(data);
-              if (data) {
-                counter++;
-              }
-            });
-          }
-
-        }
-
-        //if all exams are synced, sync evaluations
-        if (counter == this.examsToSync.length) {
-          this.loadExamsFromAPI().then(() => {
-            this.syncEvaluation().then(async () => {
-              for (let exam of this.exams) {
-                const evalPromise = this.apiService.getEvaluations(exam.id);
-                const evalObservable = await evalPromise;
-                const ev = await lastValueFrom(evalObservable).then((data: any) => {
-                  if (data.data && data.data.length > 0) {
-                    this.appStorage.set('evaluations', data.data);
-                  }
-                });
-              }
-              //this.dismissLoading();
-            });
-          });
-        }
-
-
-
-      } else {
-        this.presentAlert('Veuillez vérifier votre connexion internet');
-      }
-
-    });
-  }
-
-  async syncEvaluation() {
-    let evaluations: any[] = await this.appStorage.get('evaluations');
-    if (evaluations) {
-      for (let evaluation of evaluations) {
-        if (!evaluation.created_at) {
-          const evaluationPromise = this.apiService.postEvaluation(evaluation.examination_id, evaluation);
-          const evaluationObservable = await evaluationPromise;
-          const evalu = await lastValueFrom(evaluationObservable).then((data: any) => {
-            if (data && data.data) {
-              console.log(data);
+              await this.refreshData();
+            } else {
+              console.warn('Échec de la création de l\'étudiant, aucune donnée valide:', data);
             }
-          });
+          }
+          if (student.status === 'updated') {
+            const studentObservable = await this.apiService.updateStudent(student);
+            const data: any = await lastValueFrom(studentObservable);
+            console.log(`Étudiant mis à jour avec succès:`, data);
+          }
+          if (student.status === 'deleted') {
+            const deleteObservable = await this.apiService.deleteStudent(student.id);
+            const data: any = await lastValueFrom(deleteObservable);
+            console.log(`Étudiant supprimé avec succès:`, data);
+          }
+        } catch (error) {
+          console.error(`Erreur lors de la synchronisation de l'étudiant ${student.id || 'nouveau'}:`, error);
         }
+      });
+      await Promise.all(syncPromises);
+      await this.showToast('Synchronisation des étudiants terminée avec succès.', 'success');
+      await this.refreshData();
+    } catch (error) {
+      console.error('Erreur inattendue lors de la synchronisation des étudiants:', error);
+      await this.showToast('Erreur lors de la synchronisation des étudiants. Veuillez réessayer.', 'danger');
+    } finally {
+      if (loading) {
+        await this.dismissLoading(loading);
       }
     }
+  }
+
+  async syncStudentsHistory(): Promise<void> {
+    let loading: HTMLIonLoadingElement | null = null;
+    try {
+      // Afficher l'indicateur de chargement
+      loading = await this.presentLoading('Synchronisation de l\'historique des étudiants...');
+
+      // Vérifier l'état du réseau
+      this.networkStatus = await Network.getStatus();
+      if (!this.networkStatus.connected) {
+        console.warn('Aucune connexion réseau disponible. Synchronisation de l\'historique annulée.');
+        return;
+      }
+
+      // Récupérer l'historique des étudiants depuis appStorage
+      const studentHistory = (await this.appStorage.get('student-history')) || [];
+      if (!Array.isArray(studentHistory)) {
+        console.warn('L\'historique des étudiants n\'est pas un tableau valide:', studentHistory);
+        await this.appStorage.set('student-history', []); // Réinitialiser par sécurité
+        return;
+      }
+
+      if (studentHistory.length === 0) {
+        console.log('Aucun historique d\'étudiant à synchroniser.');
+        return;
+      }
+
+      // Filtrer les entrées à synchroniser
+      const historiesToSync = studentHistory.filter(
+        (sth: any) => !sth.created_at && !sth.updated_at
+      );
+
+      if (historiesToSync.length === 0) {
+        console.log('Aucune entrée d\'historique à synchroniser.');
+        return;
+      }
+
+      // Paralléliser les requêtes API pour chaque entrée d'historique
+      const syncPromises = historiesToSync.map(async (sth: any, index: number) => {
+        try {
+          const studentHistoryObservable = await this.apiService.postStudentHistory(sth);
+          const stdHistory: any = await lastValueFrom(studentHistoryObservable);
+          if (stdHistory?.success || stdHistory?.data) { // Vérifier selon la structure de votre API
+            console.log(`Historique de l'étudiant ${sth.student_id || index} synchronisé avec succès:`, stdHistory);
+            // Marquer l'entrée comme synchronisée (ajouter created_at/updated_at ou la supprimer)
+            sth.created_at = new Date().toISOString(); // Exemple
+            sth.updated_at = new Date().toISOString(); // Exemple
+          } else {
+            console.warn(`Échec de la synchronisation de l'historique ${sth.student_id || index}, réponse invalide:`, stdHistory);
+          }
+        } catch (error) {
+          console.error(`Erreur lors de la synchronisation de l'historique ${sth.student_id || index}:`, error);
+          // Continuer malgré l'erreur pour ne pas bloquer les autres entrées
+        }
+      });
+
+      // Attendre que toutes les opérations de synchronisation soient terminées
+      await Promise.all(syncPromises);
 
 
 
+
+      console.log('Synchronisation de l\'historique des étudiants terminée avec succès.');
+    } catch (error) {
+      console.error('Erreur inattendue lors de la synchronisation de l\'historique des étudiants:', error);
+      // Afficher une notification à l'utilisateur (facultatif)
+    } finally {
+      // S'assurer que l'indicateur de chargement est toujours fermé, même en cas d'erreur
+      if (loading) {
+        await this.dismissLoading(loading);
+      }
+    }
+  }
+
+  async syncExams(): Promise<void> {
+    let loading: HTMLIonLoadingElement | null = null;
+    try {
+      // Afficher l'indicateur de chargement
+      loading = await this.presentLoading('Synchronisation des examens en cours...');
+
+      // Vérifier l'état du réseau
+      this.networkStatus = await Network.getStatus();
+      if (!this.networkStatus.connected) {
+        await this.presentAlert('Veuillez vérifier votre connexion internet');
+        return;
+      }
+
+      // Vérifier que examsToSync existe et est un tableau
+      if (!Array.isArray(this.examsToSync) || this.examsToSync.length === 0) {
+        console.warn('Aucun examen à synchroniser.');
+        return;
+      }
+
+      let counter = 0;
+      // Paralléliser les opérations de synchronisation pour chaque examen
+      const syncPromises = this.examsToSync.map(async (exam: any) => {
+        try {
+          // Création d'un nouvel examen
+          if (!exam.created_at) {
+            const examObservable = await this.apiService.postStudentExamination(exam.student_id, exam);
+            const data: any = await lastValueFrom(examObservable);
+            if (data?.data) {
+              console.log(`Examen créé avec succès pour l'étudiant ${exam.student_id}:`, data.data);
+              counter++;
+              await this.loadExamsFromAPI();
+              await this.refreshData();
+            } else {
+              console.warn('Échec de la création de l\'examen, aucune donnée valide:', data);
+            }
+          }
+
+          // Mise à jour d'un examen existant
+          if (exam.status === 'updated') {
+            const examObservable = await this.apiService.updateExamination(exam.id, exam);
+            const data: any = await lastValueFrom(examObservable);
+            if (data) {
+              console.log(`Examen mis à jour avec succès pour l'étudiant ${exam.student_id}:`, data);
+              counter++;
+            } else {
+              console.warn('Échec de la mise à jour de l\'examen, aucune donnée valide:', data);
+            }
+          }
+
+          // Suppression d'un examen
+          if (exam.status === 'deleted') {
+            const examObservable = await this.apiService.deleteExamination(exam.id);
+            const data: any = await lastValueFrom(examObservable);
+            if (data) {
+              console.log(`Examen supprimé avec succès:`, data);
+              counter++;
+            } else {
+              console.warn('Échec de la suppression de l\'examen, aucune donnée valide:', data);
+            }
+          }
+        } catch (error) {
+          console.error(`Erreur lors de la synchronisation de l'examen ${exam.id || 'nouveau'}:`, error);
+          // Continuer malgré l'erreur pour ne pas bloquer les autres examens
+        }
+      });
+
+      // Attendre que toutes les opérations de synchronisation soient terminées
+      await Promise.all(syncPromises);
+
+      // Si tous les examens sont synchronisés, synchroniser les évaluations
+      if (counter === this.examsToSync.length) {
+        console.log('Tous les examens ont été synchronisés avec succès. Synchronisation des évaluations...');
+        await this.loadExamsFromAPI();
+
+        await this.syncEvaluation();
+
+        // Vérifier que exams existe et est un tableau
+        if (!Array.isArray(this.exams) || this.exams.length === 0) {
+          console.warn('Aucun examen disponible pour récupérer les évaluations.');
+          return;
+        }
+
+        // Paralléliser la récupération des évaluations pour chaque examen
+        const evalPromises = this.exams.map(async (exam: any) => {
+          try {
+            const evalObservable = await this.apiService.getEvaluations(exam.id);
+            const data: any = await lastValueFrom(evalObservable);
+            if (data?.data && Array.isArray(data.data) && data.data.length > 0) {
+              console.log(`Évaluations récupérées pour l'examen ${exam.id}:`, data.data);
+              await this.appStorage.set('evaluations', data.data);
+            } else {
+              console.warn(`Aucune évaluation trouvée pour l'examen ${exam.id}:`, data);
+            }
+          } catch (error) {
+            console.error(`Erreur lors de la récupération des évaluations pour l'examen ${exam.id}:`, error);
+          }
+        });
+
+        await Promise.all(evalPromises);
+        console.log('Récupération des évaluations terminée.');
+      } else {
+        console.warn(`Seuls ${counter} examens sur ${this.examsToSync.length} ont été synchronisés.`);
+      }
+
+      console.log('Synchronisation des examens terminée avec succès.');
+    } catch (error) {
+      console.error('Erreur inattendue lors de la synchronisation des examens:', error);
+    } finally {
+      if (loading) {
+        await this.dismissLoading(loading);
+      }
+    }
+  }
+
+  async syncEvaluation(): Promise<void> {
+    try {
+      // Vérifier l'état du réseau
+      this.networkStatus = await Network.getStatus();
+      if (!this.networkStatus.connected) {
+        console.warn('Aucune connexion réseau disponible. Synchronisation des évaluations annulée.');
+        return;
+      }
+
+      // Récupérer les évaluations depuis appStorage
+      const evaluations = (await this.appStorage.get('evaluations')) || [];
+      if (!Array.isArray(evaluations)) {
+        console.warn('Les évaluations ne sont pas un tableau valide:', evaluations);
+        await this.appStorage.set('evaluations', []); // Réinitialiser par sécurité
+        return;
+      }
+
+      if (evaluations.length === 0) {
+        console.log('Aucune évaluation à synchroniser.');
+        return;
+      }
+
+      // Filtrer les évaluations à synchroniser
+      const evaluationsToSync = evaluations.filter(
+        (evaluation: any) => !evaluation.created_at
+      );
+
+      if (evaluationsToSync.length === 0) {
+        console.log('Aucune évaluation à synchroniser.');
+        return;
+      }
+
+      // Paralléliser les requêtes API pour chaque évaluation
+      const syncPromises = evaluationsToSync.map(async (evaluation: any, index: number) => {
+        try {
+          const evaluationObservable = await this.apiService.postEvaluation(evaluation.examination_id, evaluation);
+          const data: any = await lastValueFrom(evaluationObservable);
+          if (data?.data) {
+            console.log(`Évaluation synchronisée avec succès pour l'examen ${evaluation.examination_id}:`, data.data);
+            // Marquer l'évaluation comme synchronisée
+          } else {
+            console.warn(`Échec de la synchronisation de l'évaluation ${index}, réponse invalide:`, data);
+          }
+        } catch (error) {
+          console.error(`Erreur lors de la synchronisation de l'évaluation ${index}:`, error);
+        }
+      });
+
+      // Attendre que toutes les opérations de synchronisation soient terminées
+      await Promise.all(syncPromises);
+
+      // Mettre à jour les évaluations dans appStorage
+      await this.appStorage.set('evaluations', evaluations);
+      console.log('Évaluations mises à jour dans le stockage:', evaluations);
+
+      console.log('Synchronisation des évaluations terminée avec succès.');
+    } catch (error) {
+      console.error('Erreur inattendue lors de la synchronisation des évaluations:', error);
+    }
   }
 
 
@@ -852,14 +997,22 @@ export class SyncDataPage implements OnInit {
         // Continuer malgré l'erreur
       }
 
-      
+      //charger les évaluations depuis le stockage
+      try {
+        await this.loadEvaluationsFromStorage();
+      } catch (error) {
+        console.error('Échec du chargement des évaluations:', error);
+        // Continuer malgré l'erreur
+      }
+
+
 
       console.log('Rafraîchissement des données terminé avec succès.');
     } catch (error) {
       console.error('Erreur inattendue lors du rafraîchissement des données:', error);
       // Afficher une notification à l'utilisateur (facultatif)
     }
-  
+
 
 
   }
@@ -886,6 +1039,16 @@ export class SyncDataPage implements OnInit {
     });
     await loading.present();
     return loading;
+  }
+
+  async showToast(message: string, color: string): Promise<void> {
+    const toast = await this.toastController.create({
+      message,
+      duration: 3000,
+      color,
+      position: 'bottom',
+    });
+    await toast.present();
   }
 
 

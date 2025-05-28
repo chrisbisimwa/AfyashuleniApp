@@ -46,7 +46,7 @@
               </ion-badge>
               <ion-badge
                 class="problem-badge"
-                *ngIf="exam.hasExamenClinique"
+                *ngIf="exam.hasDoctor"
               >
                 {{ exam.problems?.length || 0 }} {{ (exam.problems?.length || 0) === 1 ? 'problème' : 'problèmes' }}
               </ion-badge>

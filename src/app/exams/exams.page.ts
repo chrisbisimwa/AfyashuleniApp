@@ -66,7 +66,8 @@ export class ExamsPage {
           exam.studentName = await this.getstudentNameById(exam.student_id);
           exam.examinerName = await this.getExaminerNameById(exam.examiner_id);
           exam.doctor = await this.getExaminerNameById(exam.doctor_id);
-          exam.hasExamenClinique = this.hasExamenClinique(exam);
+          exam.hasDoctor = await this.hasDoctor(exam);
+          exam.problems = await this.loadExamProblems(exam);
           exs.push(exam);
         }
       }
@@ -124,7 +125,7 @@ export class ExamsPage {
     return examiner ? examiner.name : 'Unknown';
   }
 
-  
+
 
   segmentChanged(event: any) {
     this.fetchExams(null);
@@ -240,20 +241,54 @@ export class ExamsPage {
     if (exam && exam.data) {
 
       let data = JSON.parse(exam.data);
+      console.log('Exam data:', data);
       if (data.examen_clinique && Object.keys(data.examen_clinique).length > 0) {
         return Object.values(data.examen_clinique).some(value =>
           value !== "" && value !== null && value !== undefined
         );
       }
+
+      console.log('No examen clinique data found for exam:', exam.id);
       return false;
     }
 
     return false;
   }
 
+  hasDoctor(exam: any) {
+    if (exam && exam.doctor_id && exam.doctor_id !== 0) {
+      return true;
+    }
+
+    return false;
+  }
+
+  async loadExamProblems(exam: any) {
+    // Vérifie si 'exam' et 'exam.id' existent pour éviter les erreurs
+    if (!exam || !exam.id) {
+      console.error('Exam or Exam ID is undefined');
+      return []; // Retourne un tableau vide si l'examen n'est pas valide
+    }
+
+    try {
+      const evaluations = await this.appStrorage.get('evaluations');
+
+      if (evaluations && Array.isArray(evaluations)) {
+        const problems = evaluations.filter((item: any) => item.examination_id === exam.id);
+        return problems;
+      } else {
+        console.log('No evaluations found or evaluations is not an array for exam:', exam.id);
+        return []; // Retourne un tableau vide si pas d'évaluations
+      }
+    } catch (error) {
+      console.error('Error loading problems for exam:', exam.id, error);
+      return []; // Retourne un tableau vide en cas d'erreur
+    }
+  }
+
   coutProblems(exam: any) {
     let count = 0;
-   
+
   }
 
 

@@ -128,9 +128,9 @@ export class ApiService {
     return this.http.post(`${this.apiUrl}/students/${studentId}/examinations`, data, headers);
   }
 
-  async updateStudentExamination(studentId: number, data: any) {
+  async updateExamination(examId: number, data: any) {
     const headers = await this.getHeaders();
-    return this.http.put(`${this.apiUrl}/students/${studentId}/examinations`, data, headers);
+    return this.http.post(`${this.apiUrl}/examinations/${examId}`, data, headers);
   }
 
   async deleteExamination(examId:number){
