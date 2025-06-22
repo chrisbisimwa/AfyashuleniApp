@@ -1,12 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { Storage } from '@ionic/storage-angular';
 import { Network, ConnectionStatus } from '@capacitor/network';
 import { environment } from '../../environments/environment';
-
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -19,71 +18,70 @@ export class LoginPage implements OnInit {
 
   networkStatus: ConnectionStatus;
 
-  private apiUrl = environment.apiUrl; // URL de l'API
+  private apiUrl = environment.apiUrl;
   private readonly STORAGE_KEY = 'authToken';
   private isLoggedInSubject = new BehaviorSubject<boolean>(false);
   isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
 
-
-  constructor(private authService: AuthService, private router: Router, private http: HttpClient, private appStorage: Storage) { }
+  constructor(
+    private router: Router,
+    private http: HttpClient,
+    private appStorage: Storage,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit() {
     if (Network) {
       Network.getStatus().then(status => {
         this.networkStatus = status;
       });
-
       Network.addListener('networkStatusChange', (status) => {
         this.networkStatus = status;
       });
     }
-
   }
 
   async login() {
+    const credentials = { email: this.email, password: this.password };
 
-    const credentials = { "email": this.email, "password": this.password };
-
-    console.log(JSON.stringify(this.networkStatus));
-    if (this.networkStatus.connected) {
-      let rs = this.http.post(`${this.apiUrl}/login`, credentials).subscribe((response: any) => {
-        if (response.token) {
-          this.appStorage.set(this.STORAGE_KEY, response.token).then(async () => {
-            const headers = await this.getHeaders();
-            this.http.get(`${this.apiUrl}/user`, headers)
-              .subscribe((user: any) => {
-                this.appStorage.set('user', user);
-
-                //fetch user roles
-                this.http.get(`${this.apiUrl}/users/`+user.id+'/roles', headers)
-                  .subscribe((roles: any) => {
-                    
-                    this.appStorage.set('roles', roles.data);
-                  }, error => {
-                    alert(error.error.message);
-                  }
-                );
-                
-
-                this.router.navigate(['/tabs/home']);
-              });
-
-
-          }
-
-          );
-        }
-
-      }, error => {
-        alert(error.error.message);
-      });
-    } else {
-      alert('Vous n\'êtes pas connecté à internet');
+    if (!this.networkStatus?.connected) {
+      this.toastService.showError("Vous n'êtes pas connecté à internet");
+      return;
     }
 
+    this.http.post(`${this.apiUrl}/login`, credentials).subscribe({
+      next: async (response: any) => {
+        if (response.token) {
+          await this.appStorage.set(this.STORAGE_KEY, response.token);
+          const headers = await this.getHeaders();
+          this.http.get(`${this.apiUrl}/user`, headers).subscribe({
+            next: async (user: any) => {
+              await this.appStorage.set('user', user);
 
+              this.http.get(`${this.apiUrl}/users/${user.id}/roles`, headers).subscribe({
+                next: async (roles: any) => {
+                  await this.appStorage.set('roles', roles.data);
+                  this.toastService.showSuccess('Connexion réussie !');
+                },
+                error: async (error) => {
+                  this.toastService.showError(error.error?.message || "Erreur lors du chargement des rôles");
+                }
+              });
 
-
+              this.router.navigate(['/tabs/home']);
+            },
+            error: async (error) => {
+              this.toastService.showError(error.error?.message || "Erreur lors de la récupération de l'utilisateur");
+            }
+          });
+        } else {
+          this.toastService.showError("La réponse du serveur ne contient pas de token.");
+        }
+      },
+      error: async (error) => {
+        this.toastService.showError(error.error?.message || "Identifiants incorrects");
+      }
+    });
   }
 
   private async getHeaders() {
@@ -98,5 +96,4 @@ export class LoginPage implements OnInit {
   forgotPassword() {
     this.router.navigate(['password-reset']);
   }
-
 }
