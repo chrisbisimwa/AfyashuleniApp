@@ -263,7 +263,7 @@ export class ExamsPage {
     return false;
   }
 
-  async loadExamProblems(exam: any) {
+  async loadExamProblems(exam: any) : Promise<any[]>{
     // Vérifie si 'exam' et 'exam.id' existent pour éviter les erreurs
     if (!exam || !exam.id) {
       console.error('Exam or Exam ID is undefined');

@@ -3,13 +3,14 @@ import { HttpClient , HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { DataService } from './data.service';
+import { environment } from '../../environments/environment';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'https://afiashuleni.kivutech.net/api';
+  private apiUrl = environment.apiUrl; // URL de l'API
   private readonly STORAGE_KEY = 'authToken'; 
   private isLoggedInSubject = new BehaviorSubject<boolean>(false);
   isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();

@@ -5,6 +5,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Storage } from '@ionic/storage-angular';
 import { Network, ConnectionStatus } from '@capacitor/network';
+import { environment } from '../../environments/environment';
+
 
 @Component({
   selector: 'app-login',
@@ -17,7 +19,7 @@ export class LoginPage implements OnInit {
 
   networkStatus: ConnectionStatus;
 
-  private apiUrl = 'https://afiashuleni.net/api';
+  private apiUrl = environment.apiUrl; // URL de l'API
   private readonly STORAGE_KEY = 'authToken';
   private isLoggedInSubject = new BehaviorSubject<boolean>(false);
   isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();

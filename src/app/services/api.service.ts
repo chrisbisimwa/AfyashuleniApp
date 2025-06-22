@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { DataService } from './data.service';
 import { Storage } from '@ionic/storage-angular';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
-  private apiUrl = 'https://afiashuleni.net/api';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient, private appStorage: Storage) {}
 

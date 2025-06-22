@@ -14,6 +14,7 @@ export class SchoolsPage {
 
   myKey:any = 'schools';
   myValue: any;
+  isLoading: HTMLIonLoadingElement | null = null;
 
   constructor(  private navController: NavController,
     private toastCtrl: ToastController,
