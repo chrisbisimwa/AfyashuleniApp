@@ -398,9 +398,17 @@ export class AccountPage implements OnInit {
   }
 
   async logOut() {
-    const result = await this.appStorage.remove('authToken');
+    await this.appStorage.remove('authToken');
+    await this.appStorage.remove('user');
+    await this.appStorage.remove('roles');
+    await this.appStorage.remove('classes');
+    await this.appStorage.remove('students');
+    await this.appStorage.remove('schools');
+    await this.appStorage.remove('schoolYears');
+    await this.appStorage.remove('exams');
+    await this.appStorage.remove('evaluations');
 
-    this.router.navigate(['/login']);
+    this.router.navigate(['/login'], { replaceUrl: true });
 
 
   }

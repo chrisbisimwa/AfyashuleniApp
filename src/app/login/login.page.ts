@@ -15,6 +15,7 @@ import { ToastService } from '../services/toast.service';
 export class LoginPage implements OnInit {
   email = '';
   password = '';
+  loginInProgress = false;
 
   networkStatus: ConnectionStatus;
 
@@ -51,6 +52,7 @@ export class LoginPage implements OnInit {
 
     this.http.post(`${this.apiUrl}/login`, credentials).subscribe({
       next: async (response: any) => {
+        this.loginInProgress = true;
         if (response.token) {
           await this.appStorage.set(this.STORAGE_KEY, response.token);
           const headers = await this.getHeaders();
@@ -61,12 +63,15 @@ export class LoginPage implements OnInit {
               this.http.get(`${this.apiUrl}/users/${user.id}/roles`, headers).subscribe({
                 next: async (roles: any) => {
                   await this.appStorage.set('roles', roles.data);
+                  
                   this.toastService.showSuccess('Connexion réussie !');
                 },
                 error: async (error) => {
                   this.toastService.showError(error.error?.message || "Erreur lors du chargement des rôles");
                 }
               });
+
+              this.loginInProgress = false;
 
               this.router.navigate(['/tabs/home']);
             },

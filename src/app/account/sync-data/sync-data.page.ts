@@ -5,6 +5,7 @@ import { ApiService } from 'src/app/services/api.service';
 import { Router } from '@angular/router';
 import { Network, ConnectionStatus } from '@capacitor/network';
 import { lastValueFrom } from 'rxjs';
+import { ToastService } from 'src/app/services/toast.service';
 
 @Component({
   selector: 'app-sync-data',
@@ -35,7 +36,8 @@ export class SyncDataPage implements OnInit {
     private apiService: ApiService,
     private router: Router,
     private alertController: AlertController,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private toastService: ToastService
   ) {
   }
 
@@ -62,10 +64,13 @@ export class SyncDataPage implements OnInit {
         if (tokenData) {
 
         } else {
+          this.toastService.showError('Votre session a expiré. Veuillez vous reconnecter.');
           this.router.navigate(['/login']);
         }
 
       } else {
+        this.toastService.showError('Vous devez vous connecter pour accéder à cette page.');
+         this.router.navigate(['/login']);
         this.router.navigate(['/login']);
       }
     });

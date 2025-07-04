@@ -1,50 +1,59 @@
-
-<ion-content >
-
+<ion-content>
   <div class="main_content_div">
-
     <ion-grid fixed>
       <div class="logo">
-        <img src="../../../../assets/images/logo-large.jpg">
+        <ion-img src="../../../../assets/images/logo-large.jpg" alt="Logo Afyashuleni"></ion-img>
       </div>
-        <!-- <ion-row>
-            <ion-col size="6">
-                <div class="btn_div">
-                    <img src="assets/imgs/facebook.png">
-                </div>
-            </ion-col>
-            <ion-col size="6">
-                <div class="btn_div" (click)="authService.GoogleAuth()">
-                    <img src="assets/imgs/google.png">
-                </div>
-            </ion-col>
-        </ion-row> -->
     </ion-grid>
 
-    <ion-item>
-        <ion-label position="floating">Email Adress</ion-label>
-        <ion-input type="mail" required [(ngModel)]="email"></ion-input>
-    </ion-item>
+    <form (ngSubmit)="login()" #loginForm="ngForm" autocomplete="off">
+      <ion-item>
+        <ion-label position="floating" for="email">Adresse Email</ion-label>
+        <ion-input
+          id="email"
+          type="email"
+          required
+          minlength="5"
+          [(ngModel)]="email"
+          name="email"
+          aria-label="Adresse Email"
+        ></ion-input>
+      </ion-item>
 
-    <ion-item>
-        <ion-label position="floating">Password</ion-label>
-        <ion-input type="password" [(ngModel)]="password" required></ion-input>
-    </ion-item>
+      <ion-item>
+        <ion-label position="floating" for="password">Mot de passe</ion-label>
+        <ion-input
+          id="password"
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          required
+          minlength="4"
+          aria-label="Mot de passe"
+        ></ion-input>
+      </ion-item>
 
-    <div class="flex_div">
+      <div class="flex_div">
         <div class="check_flex">
-            <ion-checkbox></ion-checkbox>
-            <ion-label>Remember me</ion-label>
+          <ion-checkbox aria-label="Se souvenir de moi"></ion-checkbox>
+          <ion-label>Se souvenir de moi</ion-label>
         </div>
-        <ion-label class="flex_lbl" (click)="forgotPassword()" >Forgot password ?</ion-label>
-    </div>
+        <ion-label class="flex_lbl" (click)="forgotPassword()" tabindex="0">Mot de passe oublié ?</ion-label>
+      </div>
 
-    <ion-button expand="block" (click)="login()">
-        Login
-    </ion-button>
+      <ion-button
+        expand="block"
+        type="submit"
+        [disabled]="loginInProgress || !email || !password || !loginForm.form.valid"
+      >
+        <ion-spinner *ngIf="loginInProgress" name="crescent"></ion-spinner>
+        <span *ngIf="!loginInProgress">Connexion</span>
+      </ion-button>
 
-    <ion-label class="last_lbl">Don't have an account ? <a href="mailto:info@kivutech.net"><span >Contacter le developpeur</span></a> </ion-label>
-
-</div>
-
+      <ion-label class="last_lbl">
+        Vous n’avez pas de compte ?
+        <a href="mailto:info@kivutech.net"><span>Contacter le développeur</span></a>
+      </ion-label>
+    </form>
+  </div>
 </ion-content>
