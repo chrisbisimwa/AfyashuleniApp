@@ -69,8 +69,10 @@ export class NewPage implements OnInit {
       { label: 'Rang_dans_la_fratrie', options: null, gender: 'both' },
       { label: 'Nombre_de_filles', options: null, gender: 'both' },
       { label: 'Nombre_de_garçons', options: null, gender: 'both' },
-      { label: 'L\'enfant_vit_bien_à_l\'école_et_à_la_maison', options: ['Oui', 'Non'], gender: 'both' },
-      { label: 'Si_non,_pourquoi_?', options: null, gender: 'both', parent: 'L\'enfant vit bien à l\'école et à la maison', parentValue: 'Non' },
+      { label: 'L\'enfant_vit_bien_à_l\'école', options: ['Oui', 'Non'], gender: 'both' },
+      { label: 'L\'enfant_vit_bien_à_la_maison', options: ['Oui', 'Non'], gender: 'both' },
+      { label: 'Si_non,_pourquoi_?', options: null, gender: 'both', parent: 'L\'enfant_vit_bien_à_l\'école', parentValue: 'Non' },
+      { label: 'Si_non,_pourquoi_?', options: null, gender: 'both', parent: 'L\'enfant_vit_bien_à_la_maison', parentValue: 'Non' },
 
     ],
     'calendrier_vaccinal': [
@@ -86,8 +88,8 @@ export class NewPage implements OnInit {
       { label: 'Déparasité_?', options: ['Oui', 'Non', 'Inconnu'], gender: 'both' },
       /* { label: 'Date_du_dernier_déparasitage', options: null, gender: 'both', parent: 'Deparasité_?', parentValue: 'Oui' }, */
 
-      { label: 'Fréquence', options: ['Inconnu', 'Suffisant', 'Insuffisant', 'Excédent'], gender: 'both', parent: 'Deparasité_?', parentValue: 'Oui' },
-      { label: 'Médicament_de_déparasitage', options: ['Vermox 500mg', 'Vermox 100mg', 'Autres'], gender: 'both', parent: 'Deparasité_?', parentValue: 'Oui' },
+      { label: 'Fréquence', options: ['Inconnu', 'Suffisant', 'Insuffisant', 'Excédent'], gender: 'both', parent: 'Déparasité_?', parentValue: 'Oui' },
+      { label: 'Médicament_de_déparasitage', options: ['Vermox 500mg', 'Vermox 100mg', 'Autres'], gender: 'both', parent: 'Déparasité_?', parentValue: 'Oui' },
       { label: 'Si_autre_médicament_de_déparasitage,_préciser', options: null, gender: 'both', parent: 'Médicament_de_déparasitage', parentValue: 'Autres' },
     ],
     'comportement_langage': [
@@ -97,18 +99,30 @@ export class NewPage implements OnInit {
       { label: 'Si_autre_language,_préciser', options: null, gender: 'both', parent: 'Langage', parentValue: 'Autres' },
     ],
     'anamnese': [
-      { label: 'Nutrition', options: null, gender: 'both' },
-      { label: 'Sommeil', options: null, gender: 'both' },
-      { label: 'Exercice_physique', options: null, gender: 'both' },
-      { label: 'Hygiènne_corporelle', options: null, gender: 'both' },
-      { label: 'Hygiènne_vestimentaire', options: null, gender: 'both' },
-      { label: 'Antecedents_personnels', options: null, gender: 'both' },
-      { label: 'Antecedents_familiaux', options: null, gender: 'both' },
-      { label: 'Allergies', options: null, gender: 'both' },
-      { label: 'Traitements_chroniques', options: null, gender: 'both' },
+      { label: 'Nutrition', options: ['Insuffisante', 'Bonne'], gender: 'both' },
+      { label: 'Préciser_nutrition', options: null, gender: 'both' },
+      { label: 'Sommeil', options: ['Bon', 'Pas bon'], gender: 'both' },
+      { label: 'Préciser_sommeil', options: null, gender: 'both' },
+      { label: 'Exercice_physique', options: ['Présent', 'Absent'], gender: 'both' },
+      { label: 'Préciser_exercice_physique', options:null, gender: 'both' },
+      { label: 'Hygiènne_corporelle', options: ['Bonne', 'Pas bonne'], gender: 'both' },
+      { label: 'Préciser_hygiènne_corporelle', options: null, gender: 'both' },
+      { label: 'Hygiènne_vestimentaire', options: ['Bonne', 'Pas bonne'], gender: 'both' },
+      { label: 'Préciser_hygiènne_vestimentaire', options: null, gender: 'both' },
+      { label: 'Antecedents_personnels', options: ['Aucun', 'Mineur', 'Majeur'], gender: 'both' },
+      { label: 'Si_mineur,_préciser', options: null, gender: 'both', parent: 'Antecedents_personnels', parentValue: 'Mineur' },
+      { label: 'Si_majeur,_préciser', options: null, gender: 'both', parent: 'Antecedents_personnels', parentValue: 'Majeur' },
+      { label: 'Antecedents_familiaux', options: ['Aucun', 'Présents'], gender: 'both' },
+      { label: 'Si_antécédents_familiaux_présents,_préciser', options: null, gender: 'both', parent: 'Antecedents_familiaux', parentValue: 'Présents'},
+      { label: 'Allergies', options: ['Présente', 'Absente'], gender: 'both' },
+      { label: 'Si_allergie_présente,_préciser', options: null, gender: 'both', parent: 'Allergies', parentValue: 'Présente'},
+      { label: 'Traitements_chroniques', options: ['Oui', 'Non'], gender: 'both' },
+      { label: 'Si_traitements_chroniques,_préciser', options: null, gender: 'both', parent: 'Traitements_chroniques', parentValue: 'Oui' },
       { label: 'Place_en_classe', options: null, gender: 'both' },
-      { label: 'Plaintes_visuelles', options: null, gender: 'both' },
-      { label: 'Plaintes_auditives', options: null, gender: 'both' },
+      { label: 'Plaintes_visuelles', options: ['Oui', 'Non'], gender: 'both' },
+      { label: 'Si_plaintes_visuelles,_préciser', options: null, gender: 'both', parent: 'Plaintes_visuelles', parentValue: 'Oui'},
+      { label: 'Plaintes_auditives', options: ['Oui', 'Non'], gender: 'both' },
+      { label: 'Si_plaintes_auditives,_préciser', options: null, gender: 'both', parent: 'Plaintes_auditives', parentValue: 'Oui'},
       { label: 'Taille_(cm)', options: null, gender: 'both' },
       { label: 'Poids_(kg)', options: null, gender: 'both' },
       { label: 'Pourcentage', options: null, gender: 'both' },
@@ -129,7 +143,7 @@ export class NewPage implements OnInit {
       { label: 'Test_de_la_montre', options: ['Oui', 'Non'], gender: 'both' },
       { label: 'Test_de_la_montre_gauche ', options: ['Bon', 'Pas bon'], gender: 'both', parentValue: 'Oui', parent: 'Test_de_la_montre' },
       { label: 'Test_de_la_montre_droite ', options: ['Bon', 'Pas bon'], gender: 'both', parentValue: 'Oui', parent: 'Test_de_la_montre' },
-      { label: 'Test_du_diapason', options: ['Oui', 'Non'], gender: 'both' },
+      { label: 'Test_du_diapason', options: ['Oui', 'Non'], gender: 'both', parent: 'Test_de_la_montre', parentValue: 'Non' },
       { label: 'Test_du_diapason_gauche', options: ['Bon', 'Pas bon'], gender: 'both', parentValue: 'Oui', parent: 'Test_du_diapason' },
       { label: 'Test_du_diapason_droite', options: ['Bon', 'Pas bon'], gender: 'both', parentValue: 'Oui', parent: 'Test_du_diapason' },
     ]
@@ -138,12 +152,13 @@ export class NewPage implements OnInit {
   questionsMedecin: Exam = {
     // ...
     'Anamnèse': [
-      { label: 'Anamnese', options: null, gender: 'both' },
+      { label: 'Anamnese', options: ['Sans particularité', 'Plainte'], gender: 'both' },
+      { label: 'Plainte_d\'anemnèse', options: null, gender: 'both', parent: 'Anamnese', parentValue: 'Plainte'}
 
     ],
     "Aspect_gén./Dysmorphie": [
-      { label: "etat_general", options: ['Bon', 'Altéré'], gender: 'both' },
-      { label: "etat_general_altéré_par", options: null, gender: 'both', parent: 'etat_general', parentValue: 'Altéré' },
+      { label: "Aspect_general", options: ['Bon', 'Altéré'], gender: 'both' },
+      { label: "Aspect_general_altéré_par", options: null, gender: 'both', parent: 'Aspect_general', parentValue: 'Altéré' },
       { label: "Dismorphie", options: ['Oui', 'Non'], gender: 'both' },
       { label: "Type_de_dysmorphie", options: ['Malformation de la gorge', 'Malformation de la bouche', 'Malformation du nez', 'Malformation des oreilles', 'Malformation des yeux', 'Malformation des membres', 'Autres'], gender: 'both', parent: 'Dismorphie', parentValue: 'Oui' },
       { label: "Si_autre_dysmorphie,_préciser", options: null, gender: 'both', parent: 'Type_de_dysmorphie', parentValue: 'Autres' },
