@@ -391,7 +391,7 @@ export class SyncDataPage implements OnInit {
 
       let counter = 0;
       // Paralléliser les opérations de synchronisation pour chaque examen
-      const syncPromises = this.examsToSync.map(async (exam: any) => {
+      const examSyncPromises = this.examsToSync.map(async (exam: any) => {
         try {
           // Création d'un nouvel examen
           if (!exam.created_at) {
@@ -437,7 +437,7 @@ export class SyncDataPage implements OnInit {
       });
 
       // Attendre que toutes les opérations de synchronisation soient terminées
-      await Promise.all(syncPromises);
+      await Promise.all(examSyncPromises);
 
       // Si tous les examens sont synchronisés, synchroniser les évaluations
       if (counter === this.examsToSync.length) {

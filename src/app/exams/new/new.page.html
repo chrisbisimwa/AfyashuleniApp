@@ -69,7 +69,7 @@
           <ion-label>Elève</ion-label>
           <ion-select
             [(ngModel)]="selectedStudent"
-            (ionChange)="readyForNexStep($event)"
+            (ionChange)="readyForNextStep($event)"
           >
             <ion-select-option
               *ngFor="let student of students"
@@ -680,23 +680,17 @@
             </div>
 
             <div *ngFor="let question of questionsInfirmier['deparasitage']">
-              <ion-item>
-                <ion-label
-                  >{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label
-                >
+              <ion-item *ngIf="answers[question.label]">
+                <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                 <div item-content>
                   <span>{{ answers[question.label] }}</span>
                 </div>
               </ion-item>
             </div>
 
-            <div
-              *ngFor="let question of questionsInfirmier['comportement_langage']"
-            >
-              <ion-item>
-                <ion-label
-                  >{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label
-                >
+            <div *ngFor="let question of questionsInfirmier['comportement_langage']">
+              <ion-item *ngIf="answers[question.label]">
+                <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                 <div item-content>
                   <span>{{ answers[question.label] }}</span>
                 </div>
@@ -704,10 +698,8 @@
             </div>
 
             <div *ngFor="let question of questionsInfirmier['anamnese']">
-              <ion-item>
-                <ion-label
-                  >{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label
-                >
+              <ion-item *ngIf="answers[question.label]">
+                <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                 <div item-content>
                   <span>{{ answers[question.label] }}</span>
                 </div>
@@ -723,11 +715,8 @@
                   </ion-label>
                 </ion-item-divider>
                 <div *ngFor="let question of questionsMedecin[type]">
-                  <ion-item>
-                    <ion-label
-                      >{{ ucfirst(question.label.replaceAll('_', ' '))
-                      }}</ion-label
-                    >
+                  <ion-item *ngIf="answers[question.label]">
+                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
                     <div item-content>
                       <span>{{ answers[question.label] }}</span>
                     </div>
@@ -738,12 +727,8 @@
             </div>
           </ion-item-group>
 
-          <ion-button
-            *ngIf="userRoles.includes('Medecin')"
-            expand="block"
-            color="primary"
-            (click)="setOpen(true)"
-            >Problèmes de stanté (<span *ngIf="suggestedProblems.length == 0"
+          <ion-button *ngIf="userRoles.includes('Medecin')" expand="block" color="primary" (click)="setOpen(true)"
+            >Problèmes de santé (<span *ngIf="suggestedProblems.length == 0"
               >{{evaluations.length}} confirmés</span
             >
             <span *ngIf="suggestedProblems.length > 0"
