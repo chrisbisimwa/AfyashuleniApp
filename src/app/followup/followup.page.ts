@@ -58,8 +58,9 @@ export class FollowupPage implements OnInit {
     private appStorage: Storage
   ) { }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.loadSchools();
+    this.problems = (await this.appStorage.get('problems')) || [];
   }
 
   ionViewWillEnter() {
@@ -93,6 +94,7 @@ export class FollowupPage implements OnInit {
 
   // Charger les élèves d'une classe ayant des problèmes identifiés
   async fetchStudents(event: any) {
+    
     const classeId = event.detail.value;
     this.selectedClasse = classeId;
     this.students = [];
@@ -104,13 +106,23 @@ export class FollowupPage implements OnInit {
     const result = await this.appStorage.get('students');
     if (result) {
       const stdnts = result.filter((student: any) => student.current_class_id == classeId && student.status != 'deleted');
+      // Filtrer les élèves ayant des problèmes identifiés
       this.students = stdnts.filter((student: any) => this.hasProblems(student));
+      this.filteredStudents = [...this.students]; // Initialiser la liste filtrée avec tous les
     }
   }
 
   // Vérifier si l'élève a des problèmes identifiés
-  hasProblems(student: any): boolean {
-    return student.exams?.some((exam: Examination) => exam.evaluations?.length > 0);
+  async hasProblems(student: any): Promise<boolean> {
+    // Vérifie localement si l'élève possède des examens avec au moins une évaluation
+    let exams = (await this.appStorage.get('exams')) || [];
+    exams = exams.filter((exam: Examination) => exam.student_id === student.id);
+    if (exams.length === 0) return false;
+    let evaluations = (await this.appStorage.get('evaluations')) || [];
+    evaluations = evaluations.filter((evaluation: Evaluation) => exams.some((exam: Examination) => exam.id === evaluation.examination_id));
+    
+    if (evaluations.length === 0) return false;
+    return true;
   }
 
   // Filtrer les élèves en fonction de la requête de recherche
@@ -139,29 +151,21 @@ export class FollowupPage implements OnInit {
     this.followUpStatuses = {};
 
     try {
-      const exams: Examination[] | null = await this.appStorage.get('exams');
-      if (exams) {
-        const stdExams = exams.filter((exam: Examination) => exam.student_id === Number(studentId));
-        let allEvaluations: (Evaluation & { examDate: string; problemName: string })[] = stdExams
-          .map((exam: Examination) =>
-            exam.evaluations.map((evaluation: Evaluation) => ({
-              ...evaluation,
-              examDate: exam.date,
-              problemName: this.getProblemName(evaluation.problem_id),
-            }))
-          )
-          .flat();
 
-        allEvaluations.sort((a, b) => new Date(b.examDate).getTime() - new Date(a.examDate).getTime());
-        const seenProblems = new Set<number>();
-        this.evaluations = allEvaluations.filter(evaluation => {
-          if (seenProblems.has(evaluation.problem_id)) return false;
-          seenProblems.add(evaluation.problem_id);
-          return true;
-        });
-      } else {
-        console.warn('Aucun examen trouvé dans le stockage.');
-      }
+        let stdExams = (await this.appStorage.get('exams')) || [];
+        stdExams = stdExams.filter((exam: Examination) => exam.student_id === Number(studentId));
+        let stdEvaluations =  (await this.appStorage.get('evaluations')) || [];
+
+        stdEvaluations = stdEvaluations.filter((evaluation: Evaluation) =>
+          stdExams.some((exam: Examination) => exam.id === evaluation.examination_id)
+        );
+        this.evaluations = stdEvaluations.map((evaluation: Evaluation) => ({
+          ...evaluation,
+          examDate: stdExams.find((exam: Examination) => exam.id === evaluation.examination_id)?.date || '',
+          problemName: this.getProblemName(evaluation.problem_id),
+        }));
+
+        
 
       const followUps: ProblemFollowUp[] | null = await this.appStorage.get('followUps');
       if (followUps) {

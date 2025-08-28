@@ -42,7 +42,7 @@
       <ion-list *ngIf="selectedClasse && filteredStudents.length > 0">
         <ion-item *ngFor="let student of filteredStudents" (click)="selectStudent(student)">
           <ion-label [class.selected]="selectedStudent?.id === student.id">
-            {{ student.first_name }} {{ student.last_name }}
+            {{ student.first_name }} {{ student.last_name }} {{student.surname}} 
           </ion-label>
         </ion-item>
       </ion-list>

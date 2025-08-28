@@ -70,7 +70,7 @@ export class SyncDataPage implements OnInit {
 
       } else {
         this.toastService.showError('Vous devez vous connecter pour accéder à cette page.');
-         this.router.navigate(['/login']);
+        this.router.navigate(['/login']);
         this.router.navigate(['/login']);
       }
     });
@@ -399,9 +399,12 @@ export class SyncDataPage implements OnInit {
             const data: any = await lastValueFrom(examObservable);
             if (data?.data) {
               console.log(`Examen créé avec succès pour l'étudiant ${exam.student_id}:`, data.data);
-              counter++;
-              await this.loadExamsFromAPI();
-              await this.refreshData();
+              // synchroniser les évaluations correspondantes
+              let lastExamId = exam.id
+              let newExamId = data.data.id;
+
+              await counter++;
+
             } else {
               console.warn('Échec de la création de l\'examen, aucune donnée valide:', data);
             }
@@ -439,9 +442,12 @@ export class SyncDataPage implements OnInit {
       // Attendre que toutes les opérations de synchronisation soient terminées
       await Promise.all(examSyncPromises);
 
+
       // Si tous les examens sont synchronisés, synchroniser les évaluations
       if (counter === this.examsToSync.length) {
         console.log('Tous les examens ont été synchronisés avec succès. Synchronisation des évaluations...');
+        await this.loadExamsFromAPI();
+        await this.refreshData();
         await this.loadExamsFromAPI();
 
         await this.syncEvaluation();
@@ -469,6 +475,8 @@ export class SyncDataPage implements OnInit {
         });
 
         await Promise.all(evalPromises);
+        await this.loadEvaluationsFromAPI();
+        await this.refreshData();
         console.log('Récupération des évaluations terminée.');
       } else {
         console.warn(`Seuls ${counter} examens sur ${this.examsToSync.length} ont été synchronisés.`);
@@ -483,6 +491,8 @@ export class SyncDataPage implements OnInit {
       }
     }
   }
+
+
 
   async syncEvaluation(): Promise<void> {
     try {
@@ -520,6 +530,7 @@ export class SyncDataPage implements OnInit {
       const syncPromises = evaluationsToSync.map(async (evaluation: any, index: number) => {
         try {
           const evaluationObservable = await this.apiService.postEvaluation(evaluation.examination_id, evaluation);
+          console.log(`Synchronisation de l'évaluation ${index} pour l'examen ${evaluation.examination_id}...`);
           const data: any = await lastValueFrom(evaluationObservable);
           if (data?.data) {
             console.log(`Évaluation synchronisée avec succès pour l'examen ${evaluation.examination_id}:`, data.data);
@@ -538,6 +549,8 @@ export class SyncDataPage implements OnInit {
       // Mettre à jour les évaluations dans appStorage
       await this.appStorage.set('evaluations', evaluations);
       console.log('Évaluations mises à jour dans le stockage:', evaluations);
+      await this.loadEvaluationsFromAPI();
+      await this.refreshData();
 
       console.log('Synchronisation des évaluations terminée avec succès.');
     } catch (error) {
@@ -672,7 +685,6 @@ export class SyncDataPage implements OnInit {
       if (!students || !Array.isArray(students) || students.length === 0) {
         console.warn('Aucun étudiant trouvé dans le stockage.');
         await this.dismissLoading(loading);
-        await this.loadEvaluationsFromAPI(); // Continuer même si aucun étudiant
         return;
       }
 
@@ -705,7 +717,7 @@ export class SyncDataPage implements OnInit {
       console.log('Examens sauvegardés avec succès:', exs);
 
       // Charger les évaluations après avoir sauvegardé les examens
-      await this.loadEvaluationsFromAPI();
+      /* await this.loadEvaluationsFromAPI(); */
     } catch (error) {
       console.error('Erreur lors du chargement des examens depuis le serveur:', error);
       // Afficher une notification à l'utilisateur (facultatif)
@@ -1017,7 +1029,6 @@ export class SyncDataPage implements OnInit {
       console.error('Erreur inattendue lors du rafraîchissement des données:', error);
       // Afficher une notification à l'utilisateur (facultatif)
     }
-
 
 
   }

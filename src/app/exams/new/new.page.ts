@@ -36,6 +36,9 @@ export class NewPage implements OnInit {
   suggestedEvaluations: { [key: number]: string } = {};
   /* selectedEvaluation: string = ""; */
   selectedEvaluation: string | null = null;
+  selectedTraitment: string | null = null;
+  selectedConseil: string | null = null;
+  selectedRaison: string | null = null;
 
   //nom du type d'examen infirmier et son ID
   /* examTypesInfimier: any[] = [{ 'exam': 'situation_familiale', 'temp_id': null }, { 'exam': 'calendrier_vaccinal', 'temp_id': null }, { 'exam': 'deparasitage', 'temp_id': null }, { 'exam': 'comportement_langage', 'temp_id': null }, { 'exam': 'anamnese', 'temp_id': null }]; */
@@ -71,8 +74,8 @@ export class NewPage implements OnInit {
       { label: 'Nombre_de_garçons', options: null, gender: 'both' },
       { label: 'L\'enfant_vit_bien_à_l\'école', options: ['Oui', 'Non'], gender: 'both' },
       { label: 'L\'enfant_vit_bien_à_la_maison', options: ['Oui', 'Non'], gender: 'both' },
-      { label: 'Si_non,_pourquoi_?', options: null, gender: 'both', parent: 'L\'enfant_vit_bien_à_l\'école', parentValue: 'Non' },
-      { label: 'Si_non,_pourquoi_?', options: null, gender: 'both', parent: 'L\'enfant_vit_bien_à_la_maison', parentValue: 'Non' },
+      { label: 'Si_enfant_ne_vit_pas_bien_à_l\'école,_pourquoi_?', options: null, gender: 'both', parent: 'L\'enfant_vit_bien_à_l\'école', parentValue: 'Non' },
+      { label: 'Si_enfant_ne_vit_pas_bien_à_la_maison,_pourquoi_?', options: null, gender: 'both', parent: 'L\'enfant_vit_bien_à_la_maison', parentValue: 'Non' },
 
     ],
     'calendrier_vaccinal': [
@@ -93,8 +96,8 @@ export class NewPage implements OnInit {
       { label: 'Si_autre_médicament_de_déparasitage,_préciser', options: null, gender: 'both', parent: 'Médicament_de_déparasitage', parentValue: 'Autres' },
     ],
     'comportement_langage': [
-      { label: 'Comportement', options: ['Calme', 'Agité', 'Distrait', 'Peureux', 'Curieux', 'Autres'], gender: 'both' },
-      { label: 'Si_autre_comportement,_préciser', options: null, gender: 'both', parent: 'Comportement', parentValue: 'Autres' },
+      { label: 'Comportement', options: ['Calme', 'Agité', 'Distrait', 'Peureux', 'Curieux', 'Pathologie'], gender: 'both' },
+      { label: 'Si_autre_comportement,_préciser', options: null, gender: 'both', parent: 'Comportement', parentValue: 'Pathologie' },
       { label: 'Langage', options: ['Cohérent', 'Incohérent', 'Autres'], gender: 'both' },
       { label: 'Si_autre_language,_préciser', options: null, gender: 'both', parent: 'Langage', parentValue: 'Autres' },
     ],
@@ -105,10 +108,10 @@ export class NewPage implements OnInit {
       { label: 'Préciser_sommeil', options: null, gender: 'both' },
       { label: 'Exercice_physique', options: ['Présent', 'Absent'], gender: 'both' },
       { label: 'Préciser_exercice_physique', options:null, gender: 'both' },
-      { label: 'Hygiènne_corporelle', options: ['Bonne', 'Pas bonne'], gender: 'both' },
-      { label: 'Préciser_hygiènne_corporelle', options: null, gender: 'both' },
-      { label: 'Hygiènne_vestimentaire', options: ['Bonne', 'Pas bonne'], gender: 'both' },
-      { label: 'Préciser_hygiènne_vestimentaire', options: null, gender: 'both' },
+      { label: 'Hygiène_corporelle', options: ['Bonne', 'Pas bonne'], gender: 'both' },
+      { label: 'Préciser_hygiène_corporelle', options: null, gender: 'both' },
+      { label: 'Hygiène_vestimentaire', options: ['Bonne', 'Pas bonne'], gender: 'both' },
+      { label: 'Préciser_hygiène_vestimentaire', options: null, gender: 'both' },
       { label: 'Antecedents_personnels', options: ['Aucun', 'Mineur', 'Majeur'], gender: 'both' },
       { label: 'Si_mineur,_préciser', options: null, gender: 'both', parent: 'Antecedents_personnels', parentValue: 'Mineur' },
       { label: 'Si_majeur,_préciser', options: null, gender: 'both', parent: 'Antecedents_personnels', parentValue: 'Majeur' },
@@ -148,7 +151,7 @@ export class NewPage implements OnInit {
       { label: 'Test_du_diapason_droite', options: ['Bon', 'Pas bon'], gender: 'both', parentValue: 'Oui', parent: 'Test_du_diapason' },
     ]
   };
-  examTypesMedecin: string[] = ["Anamnèse", "Aspect_gén./Dysmorphie", "Yeux_/_Conjoctives", "Bouche_/_Dents", "ORL_/_Cou", "Cardiorespiratoire", "Peau_/_Cheveux_/_Ongles", "Abdomen", "(Pré)puberté", "Appareil_locomoteur", "Examen neurologique", "Examen_clinique"];
+  examTypesMedecin: string[] = ["Anamnèse", "Aspect_gén./Dysmorphie", "Yeux_/_Conjoctives", "Bouche_/_Dents", "ORL_/_Cou", "Cardiorespiratoire", "Peau_/_Cheveux_/_Ongles", "Abdomen", "(Pré)puberté", "Appareil_locomoteur", "Examen neurologique","Examen_urinaire", "Examen_clinique"];
   questionsMedecin: Exam = {
     // ...
     'Anamnèse': [
@@ -182,7 +185,8 @@ export class NewPage implements OnInit {
       { label: "Dentiste", options: ['Oui', 'Non'], gender: 'both' },
       { label: "frequence_visite_dentiste", options: null, gender: 'both', parent: 'Dentiste', parentValue: 'Oui' },
       { label: "Carie", options: ['Oui', 'Non'], gender: 'both' },
-      { label: "Si_oui,_stade_carie", options: ['Stade 1', 'Stade 2', 'Stade 3', 'Stade 4'], gender: 'both', parent: 'Carie', parentValue: 'Oui' },
+      { label: "Nombre_de_dents_carieuses", options: null, gender: 'both', parent: 'Carie', parentValue: 'Oui' },
+      /* { label: "Si_oui,_stade_carie", options: ['Stade 1', 'Stade 2', 'Stade 3', 'Stade 4'], gender: 'both', parent: 'Carie', parentValue: 'Oui' }, */
       { label: "Débris_alimentaires", options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
       { label: 'Plaque', options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
       { label: 'Tartre', options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
@@ -214,11 +218,16 @@ export class NewPage implements OnInit {
     ],
     "Peau_/_Cheveux_/_Ongles": [
       { label: 'Peau', options: ['Normal', 'Mycose', 'Plaie', 'Gâle', 'Coupures', 'brûlures', 'Autres'], gender: 'both' },
-      { label: 'Si_peau_pathologique,_préciser', options: null, gender: 'both', parent: 'Peau', parentValue: 'Autres' },
+      { label: 'Si_peau_mycoseuse,_préciser', options: null, gender: 'both', parent: 'Peau', parentValue: 'Mycose' },
+      { label: 'Si_plaie_à_la_peau,_préciser', options: null, gender: 'both', parent: 'Peau', parentValue: 'Plaie' },
+      { label: 'Si_peau_gâleuse,_préciser', options: null, gender: 'both', parent: 'Peau', parentValue: 'Gâle' },
+      { label: 'Si_coupure_de_la_peau,_préciser', options: null, gender: 'both', parent: 'Peau', parentValue: 'Coupures' },
+      { label: 'Si_brûlure_de_la_peau,_préciser', options: null, gender: 'both', parent: 'Peau', parentValue: 'brûlures' },
+      { label: 'Si_autres_pathologie_de_la_peau,_préciser', options: null, gender: 'both', parent: 'Peau', parentValue: 'Autres' },
       { label: 'Cheveux', options: ['Normal', 'Pathologique'], gender: 'both' },
       { label: 'Si_cheveux_pathologique,_préciser', options: null, gender: 'both', parent: 'Cheveux', parentValue: 'Pathologique' },
-      { label: 'ongles', options: ['Normal', 'Pathologique'], gender: 'both' },
-      { label: 'Si_ongles_pathologique,_préciser', options: null, gender: 'both', parent: 'ongles', parentValue: 'Pathologique' },
+      { label: 'Ongles', options: ['Normal', 'Pathologique'], gender: 'both' },
+      { label: 'Si_ongles_pathologique,_préciser', options: null, gender: 'both', parent: 'Ongles', parentValue: 'Pathologique' },
       { label: 'Orteilles', options: ['Normal', 'Pathologique'], gender: 'both' },
       { label: 'Si_orteilles_pathologique,_préciser', options: null, gender: 'both', parent: 'Orteilles', parentValue: 'Pathologique' },
     ],
@@ -237,7 +246,11 @@ export class NewPage implements OnInit {
       { label: 'Nombre_de_jours', options: ['Moins de 10 jours', 'Plus de 10 jours'], gender: 'female', parent: 'Menarche', parentValue: 'Oui' },
       { label: 'Dysménorrhée', options: ['-', '±', '+', '++'], gender: 'female', parent: 'Menarche', parentValue: 'Oui' },
       { label: 'Testicule', options: ['Normal', 'Varicocelle', 'Hernie', 'Absente'], gender: 'male'},
-      { label: 'Score_de_Tanner', options: ['Normal', 'Pas normal'], gender: 'both' },
+      { label: 'Score_de_Tanner_(Poils)', options: ['1', '2', '3', '4', '5'], gender: 'male' },
+      { label: 'Score_de_Tanner_(Gonades)', options: ['1', '2', '3', '4', '5'], gender: 'male' },
+      { label: 'Score_de_Tanner_(P)', options: ['1', '2', '3', '4', '5'], gender: 'female' },
+      { label: 'Score_de_Tanner_(M)', options: ['1', '2', '3', '4', '5'], gender: 'female' },
+      { label: 'Interpretation', options: ['Normale', 'Pas normal'], gender: 'both' }
     ],
     "Appareil_locomoteur": [
       { label: 'Colonne_vertebrale', options: ['Normale', 'Pathologique'], gender: 'both' },
@@ -260,6 +273,8 @@ export class NewPage implements OnInit {
       { label: 'Si_pas_bonne_coordination_des_mouvements,_préciser', options: null, gender: 'both', parent: 'coordination_des_mouvemments', parentValue: 'Pas bonne' },
       { label: 'reflexe', options: ['Bon', 'Pas bon'], gender: 'both' },
       { label: 'Si_pas_bon_reflexe,_préciser', options: null, gender: 'both', parent: 'reflexe', parentValue: 'Pas bon' },
+    ],
+    "Examen_urinaire": [
 
       { label: 'Problème_urinaire', options: ['Oui', 'Non'], gender: 'both' },
       { label: "Aspect_de_l'urine", options: null, gender: 'both', parent: 'Problème_urinaire', parentValue: 'Oui' },
@@ -596,7 +611,10 @@ export class NewPage implements OnInit {
             examProblems.push({
               examination_id: ex.id,
               problem_id: evaluation.problem_id,
-              status: evaluation.evaluation
+              status: evaluation.evaluation,
+              traitement: evaluation.traitement,
+              conseil: evaluation.conseil,
+              raison: evaluation.raison
             });
           }
 
@@ -644,67 +662,42 @@ export class NewPage implements OnInit {
     };
 
     // 1. Vaccination non faite (BCG)
-    if (
-      age <= 7 &&
-      (this.answers['BCG_(tuberculose)'] === 'Non lisible' ||
-      this.answers['BCG_(tuberculose)'] === 'Douteux')
-    ) {
+    if (age <= 7 && this.answers['BCG_(tuberculose)'] === 'Non lisible') {
       addSuggestedProblem(1);
     }
 
     // 2. Vaccination non faite (VPO)
-    if (
-      age <= 7 &&
-      (this.answers['VPO_(poliomyélite)'] === 'Non fait' ||
-      this.answers['VPO_(poliomyélite)'] === 'Inconnu')
-    ) {
+    if (age <= 7 && this.answers['VPO_(poliomyélite)'] === 'Non fait') {
       addSuggestedProblem(2);
     }
     // 3. Vaccination non faite (DTCoq-Hép-B-Hib)
-    if (
-      age <= 7 &&
-      (this.answers['DTCoq-Hép-B-Hib'] === 'Non fait' ||
-      this.answers['DTCoq-Hép-B-Hib'] === 'Inconnu')
-    ) {
+    if (age <= 7 && this.answers['DTCoq-Hép-B-Hib'] === 'Non fait') {
       addSuggestedProblem(3);
     }
+
     // 4. Vaccination non faite (PCV-13_(pneumo))
-    if (
-      age <= 7 &&
-      (this.answers['PCV-13_(pneumo)'] === 'Non fait' ||
-      this.answers['PCV-13_(pneumo)'] === 'Inconnu')
-    ) {
+    if (age <= 7 && this.answers['PCV-13_(pneumo)'] === 'Non fait') {
       addSuggestedProblem(4);
     }
+
     // 5. Vaccination non faite (VAR_(rougeole))
-    if (
-      age <= 7 &&
-      (this.answers['VAR_(rougeole)'] === 'Non fait' ||
-      this.answers['VAR_(rougeole)'] === 'Inconnu')
-    ) {
+    if (age <= 7 && this.answers['VAR_(rougeole)'] === 'Non fait') {
       addSuggestedProblem(5);
     }
+
     // 6. Vaccination non faite (VAA_(fièvre jaune))
-    if (
-      age <= 7 &&
-      (this.answers['VAA_(fièvre jaune)'] === 'Non fait' ||
-      this.answers['VAA_(fièvre jaune)'] === 'Inconnu')
-    ) {
+    if (age <= 7 && this.answers['VAA_(fièvre jaune)'] === 'Non fait' ) {
       addSuggestedProblem(6);
     }
+
     // 7. Vaccination non faite (DTCoq_(diphtérie,_tétanos,_coqueluce))
-    if (
-      age > 7 &&
-      (this.answers['DTCoq_(diphtérie,_tétanos,_coqueluce)'] === 'Non fait' ||
-      this.answers['DTCoq_(diphtérie,_tétanos,_coqueluce)'] === 'Inconnu')
-    ) {
+    if (age > 7 && this.answers['DTCoq_(diphtérie,_tétanos,_coqueluce)'] === 'Non fait') {
       addSuggestedProblem(7);
     }
     //8. Déparasitage préventif insuffisant
     if (
       this.answers['Déparasité_?'] === 'Non' ||
-      (this.answers['Déparasité_?'] === 'Oui' && this.isDeparasitageOutdated()) ||
-      this.answers['Déparasité_?'] === 'Inconnu'
+      (this.answers['Déparasité_?'] === 'Oui' && this.isDeparasitageOutdated())
     ) {
       addSuggestedProblem(8);
     }
@@ -727,17 +720,17 @@ export class NewPage implements OnInit {
     if (imc > 30) addSuggestedProblem(13); // Obésité
 
     // 14. Problème d'acuité visuelle
-    const testE5m = parseFloat(this.answers['acuite_visuelle_de_loin_droite_sans_correction'] || 0);
-    const testE5p = parseFloat(this.answers['acuite_visuelle_de_loin_gauche_sans_correction'] || 0);
-    const testE4m = parseFloat(this.answers['acuite_visuelle_de_loin_droite_avec_lunettes'] || 0);
-    const testE4p = parseFloat(this.answers['acuite_visuelle_de_loin_gauche_avec_lunettes'] || 0);
+    const testE5d = parseFloat(this.answers['acuite_visuelle_de_loin_droite_sans_correction'] || 0);
+    const testE5g = parseFloat(this.answers['acuite_visuelle_de_loin_gauche_sans_correction'] || 0);
+    const testE4d = parseFloat(this.answers['acuite_visuelle_de_loin_droite_avec_lunettes'] || 0);
+    const testE4g = parseFloat(this.answers['acuite_visuelle_de_loin_gauche_avec_lunettes'] || 0);
     if (this.answers['Test_acuité_visuelle'] === "Avec lunettes") {
 
-      if (age < 7 && (testE4m <= 0.7 || testE4p <= 0.7)) addSuggestedProblem(14);
-      if (age >= 7 && (testE4m <= 0.8 || testE4p < 0.8)) addSuggestedProblem(14);
+      if (age < 7 && (testE4d <= 0.7 || testE4g <= 0.7)) addSuggestedProblem(14);
+      if (age >= 7 && (testE4d <= 0.8 || testE4g < 0.8)) addSuggestedProblem(14);
     } else if (this.answers['Test_acuité_visuelle'] === "Sans lunettes") {
-      if (age < 7 && (testE5m <= 0.7 || testE5p <= 0.7)) addSuggestedProblem(14);
-      if (age >= 7 && (testE5m <= 0.8 || testE5p < 0.8)) addSuggestedProblem(14);
+      if (age < 7 && (testE5d <= 0.7 || testE5g <= 0.7)) addSuggestedProblem(14);
+      if (age >= 7 && (testE5d <= 0.8 || testE5g < 0.8)) addSuggestedProblem(14);
     }
 
     // 15. Problème d'acuité auditive
@@ -821,7 +814,7 @@ export class NewPage implements OnInit {
     if(this.studentGender === 'male' && (this.answers['Testicule'] === 'Varicocelle' || this.answers['Testicule'] === 'Absente' )) addSuggestedProblem(32);
 
     //33. Problème de puberté
-    if(this.answers['Score_de_Tanner'] === 'Pas normal') addSuggestedProblem(33);
+    if(this.answers['Interpretation'] === 'Pas normal') addSuggestedProblem(33);
 
     //34. Problème de motricité
     if(this.answers['Demarche'] === 'Pathologique' || this.answers['Equilibre'] === 'Pathologique' || this.answers['Bassin'] === 'Pathologique' || this.answers['Membres_inferieurs'] === 'Pathologique' || this.answers['Membres_supérieurs'] === 'Pathologique') {
@@ -845,7 +838,7 @@ export class NewPage implements OnInit {
     }
 
     //37. Problème cardiaque
-    if(this.answers['Coeur'] === 'Pathologique' || this.answers['Rythme_cardiaque']=== 'Rythme irrégulier')
+    if(this.answers['Coeur'] === 'Pathologique' || this.answers['Rythme_cardiaque'] === 'Rythme irrégulier')
       addSuggestedProblem(37);
     if(this.answers['Tension_artérielle'] != 'Normal' )
       addSuggestedProblem(37);
@@ -853,7 +846,7 @@ export class NewPage implements OnInit {
       addSuggestedProblem(37);
 
     //38. Autres problèmes (troubles comportement/langage, dysmorphies, etc.)
-    if(this.answers['Comportement'] === 'Agité' || this.answers['Comportement'] === 'Distrait' || this.answers['Comportement'] === 'Peureux' || this.answers['Comportement'] === 'Curieux' || this.answers['Language'] === 'Incohérent' || this.answers['Dysmorphies'] === 'Oui') {
+    if(this.answers['Comportement'] === 'Pathologie'  || this.answers['Language'] === 'Incohérent' || this.answers['Dysmorphies'] === 'Oui') {
       addSuggestedProblem(38);
     }
 
@@ -1267,13 +1260,19 @@ export class NewPage implements OnInit {
       return {
         problem_id: problemId,
         problem_name: problem ? problem.name : 'Problème inconnu',
-        evaluation: this.selectedEvaluation
+        evaluation: this.selectedEvaluation,
+        traitment: this.selectedTraitment,
+        conseil: this.selectedConseil,
+        raison: this.selectedRaison
       };
     });
 
     this.evaluations.push(...newEvaluations);
     this.selectedProblems = []; // Réinitialise la sélection
     this.selectedEvaluation = null; // Réinitialise l'évaluation
+    this.selectedTraitment = null; // Réinitialise le traitement
+    this.selectedConseil = null; // Réinitialise le conseil
+    this.selectedRaison = null; // Réinitialise la raison
     this.updateSuggestedProblems();
   }
 
@@ -1295,7 +1294,10 @@ export class NewPage implements OnInit {
       this.evaluations.push({
         problem_id: problemId,
         problem_name: problem.name,
-        evaluation: evaluation
+        evaluation: evaluation,
+        traitment: this.selectedTraitment,
+        conseil: this.selectedConseil,
+        raison: this.selectedRaison
       });
       this.ignoreSuggestedProblem(problemId); // Retirer des suggestions après évaluation
     }

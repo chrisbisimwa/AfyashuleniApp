@@ -780,19 +780,36 @@
           </ion-item>
 
           <ion-item *ngIf="hasSelectedProblems()">
-            <ion-label position="stacked"
-              >Évaluer les problèmes sélectionnés</ion-label
-            >
-            <ion-select
-              [(ngModel)]="selectedEvaluation"
-              placeholder="Sélectionnez une évaluation"
-            >
+            <ion-label position="stacked">Évaluer les problèmes sélectionnés</ion-label>
+            <ion-select [(ngModel)]="selectedEvaluation" placeholder="Sélectionnez une évaluation">
               <ion-select-option value="to_follow">À suivre</ion-select-option>
-              <ion-select-option value="not_to_follow"
-                >À ne pas suivre</ion-select-option
-              >
+              <ion-select-option value="not_to_follow">À ne pas suivre</ion-select-option>
               <ion-select-option value="attention">Attention</ion-select-option>
             </ion-select>
+          </ion-item>
+          <ion-item *ngIf="selectedEvaluation === 'attention'">
+              <ion-label position="stacked">Conseils (optionnel)</ion-label>
+              <ion-textarea
+                [(ngModel)]="selectedConseil"
+                placeholder="Entrez un conseils"
+                rows="2"
+              ></ion-textarea>
+            </ion-item>
+            <ion-item *ngIf="selectedEvaluation === 'not_to_follow'">
+              <ion-label position="stacked">Raison (optionnel)</ion-label>
+              <ion-textarea
+                [(ngModel)]="selectedRaison"
+                placeholder="Entrez une raison"
+                rows="2"
+              ></ion-textarea>
+          </ion-item>
+          <ion-item *ngIf="selectedEvaluation === 'to_follow'">
+            <ion-label position="stacked">Traitement (optionnel)</ion-label>
+            <ion-textarea
+              [(ngModel)]="selectedTraitment"
+              placeholder="Entrez un traitement"
+              rows="2"
+            ></ion-textarea>
           </ion-item>
 
           <ion-button
@@ -833,32 +850,57 @@
               }})</ion-label
             >
           </ion-item-divider>
-          <ion-item *ngFor="let problemId of suggestedProblems">
+          <div *ngFor="let problemId of suggestedProblems">
+            <ion-item >
             <ion-label>{{ getProblemName(problemId) }}</ion-label>
             <ion-buttons slot="end">
-              <ion-button
-                color="warning"
-                (click)="ignoreSuggestedProblem(problemId)"
-              >
+              <ion-button color="warning" (click)="ignoreSuggestedProblem(problemId)">
                 Ignorer
               </ion-button>
-              <ion-select
-                [(ngModel)]="suggestedEvaluations[problemId]"
-                placeholder="Évaluer"
-                (ionChange)="evaluateSuggestedProblem(problemId)"
-              >
-                <ion-select-option value="to_follow"
-                  >À suivre</ion-select-option
-                >
-                <ion-select-option value="not_to_follow"
-                  >À ne pas suivre</ion-select-option
-                >
-                <ion-select-option value="attention"
-                  >Attention</ion-select-option
-                >
+              <ion-select [(ngModel)]="suggestedEvaluations[problemId]" placeholder="Évaluer">
+                <ion-select-option value="to_follow">À suivre</ion-select-option>
+                <ion-select-option value="not_to_follow">À ne pas suivre</ion-select-option>
+                <ion-select-option value="attention">Attention</ion-select-option>
+                
               </ion-select>
             </ion-buttons>
+            
+
+            
+            
           </ion-item>
+
+          <ion-item *ngIf="suggestedEvaluations[problemId] === 'attention'">
+              <ion-label position="stacked">Conseils (optionnel)</ion-label>
+              <ion-textarea
+                [(ngModel)]="selectedConseil"
+                placeholder="Entrez un conseils"
+                rows="2"
+              ></ion-textarea>
+            </ion-item>
+            <ion-item *ngIf="suggestedEvaluations[problemId] === 'not_to_follow'">
+              <ion-label position="stacked">Raison (optionnel)</ion-label>
+              <ion-textarea
+                [(ngModel)]="selectedRaison"
+                placeholder="Entrez une raison"
+                rows="2"
+              ></ion-textarea>
+            </ion-item>
+            <ion-item *ngIf="suggestedEvaluations[problemId] === 'to_follow'">
+              <ion-label position="stacked">Traitement (optionnel)</ion-label>
+              <ion-textarea
+                [(ngModel)]="selectedTraitment"
+                placeholder="Entrez un traitement"
+                rows="2"
+              ></ion-textarea>
+            </ion-item>
+            <ion-item *ngIf="suggestedEvaluations[problemId]" (click)="evaluateSuggestedProblem(problemId)">
+              <ion-button expand="block" color="primary" >
+                Ajouter ce problème
+              </ion-button>
+            </ion-item>
+          </div>
+          
         </ion-item-group>
       </ion-content>
     </ng-template>
