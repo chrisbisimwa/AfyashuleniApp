@@ -54,6 +54,10 @@ export class SyncDataPage implements OnInit {
     this.fetUser();
   }
 
+  ionViewWillEnter() {
+    this.refreshData();
+  }
+
 
 
   async checkLogin() {

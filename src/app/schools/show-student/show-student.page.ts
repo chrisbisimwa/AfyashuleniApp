@@ -66,6 +66,7 @@ export class ShowStudentPage implements OnInit {
       if (evaluation.length > 0) {
         for (let e of evaluation) {
           e.problem_name = this.getProblemNameById(e.problem_id);
+          e.localisations = JSON.parse(e.localisations);
           studentEvaluations.push(e);
         }
       }
@@ -149,6 +150,7 @@ export class ShowStudentPage implements OnInit {
   }
 
   setOpenEval(isOpen: boolean) {
+    console.log('setOpenEval', isOpen);
     this.isEvalModalOpen = isOpen;
   }
 
@@ -161,4 +163,19 @@ export class ShowStudentPage implements OnInit {
     this.navController.navigateForward('/tabs/exams/new/'+this.student.id);
   }
 
+  getProblemLocalisationByID(problem_id: number) {
+    const evalu = this.studentEvaluations.find((p: any) => p.id === problem_id);
+    if (!evalu) return null;
+
+    //formater les localisations en string, retirer les espaces en trop et les {}
+   let locs = Object.entries(evalu.localisations).map(([key, value]) => `${this.formatLabel(key)}: ${value}`).join(', ');
+
+
+   return locs;
+
+  }
+
+  formatLabel(label: string): string {
+    return label.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  }
 }

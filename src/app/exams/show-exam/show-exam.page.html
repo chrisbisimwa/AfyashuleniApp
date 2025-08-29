@@ -83,9 +83,19 @@
       
       </ion-item-group>
 
-      
+      <div *ngIf="exam.data.length === 0">
+        <ion-label>Aucune donnée d'examen disponible</ion-label>
+      </div>
 
+      <ion-item-divider>
+        <ion-label>
+          <h2>Problème de santé</h2>
+        </ion-label>
+      </ion-item-divider>
 
+      <ion-item-group >
+
+      </ion-item-group>
     </ion-list>
 
 
@@ -93,6 +103,10 @@
     <ion-button expand="block" color="primary" (click)="new()" *ngIf="isMedecin && !hasExamenClinique()">Examin clinique</ion-button>
     <!-- <ion-button expand="block" color="primary" (click)="open(exam)">Modifier l'examen</ion-button>
     <ion-button expand="block" color="danger" (click)="deleteModal(exam)">Supprimer l'examen</ion-button> -->
+
+    <div>
+
+    </div>
   </div>
 
 

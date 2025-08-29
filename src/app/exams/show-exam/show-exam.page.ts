@@ -13,6 +13,7 @@ export class ShowExamPage implements OnInit {
 
   exam: any = null;
   examDatas: any = null;
+  evaluations: any = null;
   exams: any = null;
   userRoles: String[] = [];
   user: any;
@@ -38,11 +39,14 @@ export class ShowExamPage implements OnInit {
     });
   }
 
-  ngOnInit() {
-    this.fetchExam().then(() => {
-      //this.fetchExamData();
-      //console.log(this.hasExamenClinique);
-    });
+  async ngOnInit() {
+    try {
+      await this.fetchExam();
+      await this.fetchEvaluations();
+    } catch (error) {
+      console.error('Error fetching exam:', error);
+    }
+    
   }
 
   async fetchExam() {
@@ -72,7 +76,18 @@ export class ShowExamPage implements OnInit {
 
   }
 
-  
+  async fetchEvaluations(){
+    try {
+      const result = await this.appStorage.get('evaluations');
+      if (result) {
+        this.evaluations = result.filter((eva: any) => eva.examination_id == this.route.snapshot.params['id']);
+
+        console.log('Evaluations:', this.evaluations);
+      }
+    } catch (error) {
+      console.error('Error fetching evaluations:', error);
+    }
+  }
 
   async getstudentNameById(id: any) {
     let students = await this.appStorage.get('students');
@@ -105,10 +120,8 @@ export class ShowExamPage implements OnInit {
   }
 
   hasExamenClinique() {
-    for (let item of this.exam.data) {
-      if (item.type === 'examen_clinique' && item.dt.length > 0) {
-        return true;
-      }
+    if (this.exam && this.exam.doctor_id) {
+      return true;
     }
     return false;
   }

@@ -136,7 +136,7 @@ export class ApiService {
 
   async deleteExamination(examId:number){
     const headers = await this.getHeaders();
-    return this.http.delete(`${this.apiUrl}/examinations/${examId}`, headers);
+    return this.http.get(`${this.apiUrl}/examinations/${examId}/delete`, headers);
   }
 
   async postExamData(examId:number,data: any) {

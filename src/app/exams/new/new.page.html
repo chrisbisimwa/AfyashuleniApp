@@ -599,7 +599,38 @@
                     </ion-select>
                   </div>
                 </ion-item>
-                <ion-item *ngIf="!question.parent">
+                <div *ngIf="!question.parent">
+                  <ion-item
+                    *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')"
+                  >
+                    <ion-textarea
+                      [autoGrow]="true"
+                      [(ngModel)]="answers[question.label]"
+                      label="{{ucfirst(question.label.replaceAll('_', ''))}}"
+                      labelPlacement="stacked"
+                    ></ion-textarea>
+                  </ion-item>
+                  <ion-item
+                    *ngIf="question.options && (question.gender===studentGender || question.gender==='both')"
+                  >
+                    <ion-label
+                      >{{ ucfirst(question.label.replaceAll('_', ' '))
+                      }}</ion-label
+                    >
+                    <ion-select
+                      [(ngModel)]="answers[question.label]"
+                      placeholder="Sélectionnez une option"
+                    >
+                      <ion-select-option
+                        *ngFor="let option of question.options"
+                        [value]="option"
+                      >
+                        {{ option }}
+                      </ion-select-option>
+                    </ion-select>
+                  </ion-item>
+                </div>
+                <!-- <ion-item *ngIf="!question.parent">
                   <div
                     *ngIf="!question.options &&  (question.gender===studentGender || question.gender==='both')"
                   >
@@ -630,12 +661,9 @@
                       </ion-select-option>
                     </ion-select>
                   </div>
-                </ion-item>
+                </ion-item> -->
               </div>
-
             </div>
-
-
           </div>
           <ion-button expand="block" color="primary" (click)="goToStep7()"
             >Suivant</ion-button
@@ -650,7 +678,7 @@
         <div *ngIf="step==7">
           <ion-item-group>
             <ion-item-divider>
-              <ion-label color="primary"> <b>Résumé de l'examen</b>  </ion-label>
+              <ion-label color="primary"> <b>Résumé de l'examen</b> </ion-label>
             </ion-item-divider>
 
             <div
@@ -681,16 +709,22 @@
 
             <div *ngFor="let question of questionsInfirmier['deparasitage']">
               <ion-item *ngIf="answers[question.label]">
-                <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
+                <ion-label
+                  >{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label
+                >
                 <div item-content>
                   <span>{{ answers[question.label] }}</span>
                 </div>
               </ion-item>
             </div>
 
-            <div *ngFor="let question of questionsInfirmier['comportement_langage']">
+            <div
+              *ngFor="let question of questionsInfirmier['comportement_langage']"
+            >
               <ion-item *ngIf="answers[question.label]">
-                <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
+                <ion-label
+                  >{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label
+                >
                 <div item-content>
                   <span>{{ answers[question.label] }}</span>
                 </div>
@@ -699,7 +733,9 @@
 
             <div *ngFor="let question of questionsInfirmier['anamnese']">
               <ion-item *ngIf="answers[question.label]">
-                <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
+                <ion-label
+                  >{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label
+                >
                 <div item-content>
                   <span>{{ answers[question.label] }}</span>
                 </div>
@@ -707,7 +743,6 @@
             </div>
 
             <div *ngIf="userRoles.includes('Medecin')">
-              
               <div *ngFor="let type of examTypesMedecin">
                 <ion-item-divider>
                   <ion-label color="primary">
@@ -716,18 +751,24 @@
                 </ion-item-divider>
                 <div *ngFor="let question of questionsMedecin[type]">
                   <ion-item *ngIf="answers[question.label]">
-                    <ion-label>{{ ucfirst(question.label.replaceAll('_', ' ')) }}</ion-label>
+                    <ion-label
+                      >{{ ucfirst(question.label.replaceAll('_', ' '))
+                      }}</ion-label
+                    >
                     <div item-content>
                       <span>{{ answers[question.label] }}</span>
                     </div>
                   </ion-item>
                 </div>
               </div>
-              
             </div>
           </ion-item-group>
 
-          <ion-button *ngIf="userRoles.includes('Medecin')" expand="block" color="primary" (click)="setOpen(true)"
+          <ion-button
+            *ngIf="userRoles.includes('Medecin')"
+            expand="block"
+            color="primary"
+            (click)="setOpen(true)"
             >Problèmes de santé (<span *ngIf="suggestedProblems.length == 0"
               >{{evaluations.length}} confirmés</span
             >
@@ -780,28 +821,35 @@
           </ion-item>
 
           <ion-item *ngIf="hasSelectedProblems()">
-            <ion-label position="stacked">Évaluer les problèmes sélectionnés</ion-label>
-            <ion-select [(ngModel)]="selectedEvaluation" placeholder="Sélectionnez une évaluation">
+            <ion-label position="stacked"
+              >Évaluer les problèmes sélectionnés</ion-label
+            >
+            <ion-select
+              [(ngModel)]="selectedEvaluation"
+              placeholder="Sélectionnez une évaluation"
+            >
               <ion-select-option value="to_follow">À suivre</ion-select-option>
-              <ion-select-option value="not_to_follow">À ne pas suivre</ion-select-option>
+              <ion-select-option value="not_to_follow"
+                >À ne pas suivre</ion-select-option
+              >
               <ion-select-option value="attention">Attention</ion-select-option>
             </ion-select>
           </ion-item>
           <ion-item *ngIf="selectedEvaluation === 'attention'">
-              <ion-label position="stacked">Conseils (optionnel)</ion-label>
-              <ion-textarea
-                [(ngModel)]="selectedConseil"
-                placeholder="Entrez un conseils"
-                rows="2"
-              ></ion-textarea>
-            </ion-item>
-            <ion-item *ngIf="selectedEvaluation === 'not_to_follow'">
-              <ion-label position="stacked">Raison (optionnel)</ion-label>
-              <ion-textarea
-                [(ngModel)]="selectedRaison"
-                placeholder="Entrez une raison"
-                rows="2"
-              ></ion-textarea>
+            <ion-label position="stacked">Conseils (optionnel)</ion-label>
+            <ion-textarea
+              [(ngModel)]="selectedConseil"
+              placeholder="Entrez un conseils"
+              rows="2"
+            ></ion-textarea>
+          </ion-item>
+          <ion-item *ngIf="selectedEvaluation === 'not_to_follow'">
+            <ion-label position="stacked">Raison (optionnel)</ion-label>
+            <ion-textarea
+              [(ngModel)]="selectedRaison"
+              placeholder="Entrez une raison"
+              rows="2"
+            ></ion-textarea>
           </ion-item>
           <ion-item *ngIf="selectedEvaluation === 'to_follow'">
             <ion-label position="stacked">Traitement (optionnel)</ion-label>
@@ -828,7 +876,11 @@
             <ion-label>Problèmes identifiés</ion-label>
           </ion-item-divider>
           <ion-item *ngFor="let eval of evaluations; let i = index">
-            <ion-label>{{ eval.problem_name }}</ion-label>
+            <ion-label>
+               <h4>{{ eval.problem_name }}</h4>
+              <ion-note >{{ getEvaluationLocalisation(eval.problem_id) }}</ion-note>
+
+            </ion-label>
             <div item-content>
               <span>{{ getEvaluationLabel(eval.evaluation) }}</span>
               <ion-button
@@ -850,27 +902,38 @@
               }})</ion-label
             >
           </ion-item-divider>
-          <div *ngFor="let problemId of suggestedProblems">
-            <ion-item >
-            <ion-label>{{ getProblemName(problemId) }}</ion-label>
-            <ion-buttons slot="end">
-              <ion-button color="warning" (click)="ignoreSuggestedProblem(problemId)">
-                Ignorer
-              </ion-button>
-              <ion-select [(ngModel)]="suggestedEvaluations[problemId]" placeholder="Évaluer">
-                <ion-select-option value="to_follow">À suivre</ion-select-option>
-                <ion-select-option value="not_to_follow">À ne pas suivre</ion-select-option>
-                <ion-select-option value="attention">Attention</ion-select-option>
-                
-              </ion-select>
-            </ion-buttons>
-            
+          <div *ngFor="let problem of suggestedProblems">
+            <ion-item>
+              <ion-label >
+                <h4>{{ getProblemName(problem.id) }}</h4>
+                <ion-note >{{ getProblemLocalisationByID(problem.id) }}</ion-note>
+              </ion-label>
 
-            
-            
-          </ion-item>
+              <ion-buttons slot="end">
+                <ion-button
+                  color="warning"
+                  (click)="ignoreSuggestedProblem(problem.id)"
+                >
+                  Ignorer
+                </ion-button>
+                <ion-select
+                  [(ngModel)]="suggestedEvaluations[problem.id]"
+                  placeholder="Évaluer"
+                >
+                  <ion-select-option value="to_follow"
+                    >À suivre</ion-select-option
+                  >
+                  <ion-select-option value="not_to_follow"
+                    >À ne pas suivre</ion-select-option
+                  >
+                  <ion-select-option value="attention"
+                    >Attention</ion-select-option
+                  >
+                </ion-select>
+              </ion-buttons>
+            </ion-item>
 
-          <ion-item *ngIf="suggestedEvaluations[problemId] === 'attention'">
+            <ion-item *ngIf="suggestedEvaluations[problem.id] === 'attention'">
               <ion-label position="stacked">Conseils (optionnel)</ion-label>
               <ion-textarea
                 [(ngModel)]="selectedConseil"
@@ -878,7 +941,9 @@
                 rows="2"
               ></ion-textarea>
             </ion-item>
-            <ion-item *ngIf="suggestedEvaluations[problemId] === 'not_to_follow'">
+            <ion-item
+              *ngIf="suggestedEvaluations[problem.id] === 'not_to_follow'"
+            >
               <ion-label position="stacked">Raison (optionnel)</ion-label>
               <ion-textarea
                 [(ngModel)]="selectedRaison"
@@ -886,7 +951,7 @@
                 rows="2"
               ></ion-textarea>
             </ion-item>
-            <ion-item *ngIf="suggestedEvaluations[problemId] === 'to_follow'">
+            <ion-item *ngIf="suggestedEvaluations[problem.id] === 'to_follow'">
               <ion-label position="stacked">Traitement (optionnel)</ion-label>
               <ion-textarea
                 [(ngModel)]="selectedTraitment"
@@ -894,13 +959,15 @@
                 rows="2"
               ></ion-textarea>
             </ion-item>
-            <ion-item *ngIf="suggestedEvaluations[problemId]" (click)="evaluateSuggestedProblem(problemId)">
-              <ion-button expand="block" color="primary" >
+            <ion-item
+              *ngIf="suggestedEvaluations[problem.id]"
+              (click)="evaluateSuggestedProblem(problem.id)"
+            >
+              <ion-button expand="block" color="primary">
                 Ajouter ce problème
               </ion-button>
             </ion-item>
           </div>
-          
         </ion-item-group>
       </ion-content>
     </ng-template>

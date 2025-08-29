@@ -32,7 +32,9 @@ export class NewPage implements OnInit {
   selectedExamType: string = '';
   selectedProblems: number[] = [];
   addedProblems: any[] = [];
-  suggestedProblems: number[] = [];
+  //suggestedProblems must be an array of problem id and localisation qui est un tableau de question-réponse
+  suggestedProblems: { id: number, localisations: { [key: string]: any } }[] = [];
+  //suggestedProblems: number[] = [];
   suggestedEvaluations: { [key: number]: string } = {};
   /* selectedEvaluation: string = ""; */
   selectedEvaluation: string | null = null;
@@ -151,7 +153,7 @@ export class NewPage implements OnInit {
       { label: 'Test_du_diapason_droite', options: ['Bon', 'Pas bon'], gender: 'both', parentValue: 'Oui', parent: 'Test_du_diapason' },
     ]
   };
-  examTypesMedecin: string[] = ["Anamnèse", "Aspect_gén./Dysmorphie", "Yeux_/_Conjoctives", "Bouche_/_Dents", "ORL_/_Cou", "Cardiorespiratoire", "Peau_/_Cheveux_/_Ongles", "Abdomen", "(Pré)puberté", "Appareil_locomoteur", "Examen neurologique","Examen_urinaire", "Examen_clinique"];
+  examTypesMedecin: string[] = ["Anamnèse", "Aspect_gén./Dysmorphie", "Yeux_/_Conjoctives", "Bouche_/_Dents", "ORL_/_Cou", "Cardiorespiratoire", "Peau_/_Cheveux_/_Ongles", "Abdomen", "(Pré)puberté", "Appareil_locomoteur", "Examen neurologique","Examen_urinaire"/* , "Examen_clinique" */];
   questionsMedecin: Exam = {
     // ...
     'Anamnèse': [
@@ -250,7 +252,7 @@ export class NewPage implements OnInit {
       { label: 'Score_de_Tanner_(Gonades)', options: ['1', '2', '3', '4', '5'], gender: 'male' },
       { label: 'Score_de_Tanner_(P)', options: ['1', '2', '3', '4', '5'], gender: 'female' },
       { label: 'Score_de_Tanner_(M)', options: ['1', '2', '3', '4', '5'], gender: 'female' },
-      { label: 'Interpretation', options: ['Normale', 'Pas normal'], gender: 'both' }
+      { label: 'Interpretation_score_de_tanner', options: ['Normale', 'Pas normal'], gender: 'both' }
     ],
     "Appareil_locomoteur": [
       { label: 'Colonne_vertebrale', options: ['Normale', 'Pathologique'], gender: 'both' },
@@ -288,12 +290,12 @@ export class NewPage implements OnInit {
       { label: "BIL", options: ['-', '+', '++', '+++', '++++'], gender: 'both', parent: 'Problème_urinaire', parentValue: 'Oui' },
       { label: "Glucose", options: ['-', '±', '+', '++', '+++', '++++'], gender: 'both', parent: 'Problème_urinaire', parentValue: 'Oui' },
     ],
-    "Examen_clinique": [
+    /* "Examen_clinique": [
       { label: 'Points_attention_et_conseils', options: null, gender: 'both' },
       { label: 'Diagnostic', options: null, gender: 'both' },
       { label: 'Traitement', options: null, gender: 'both' },
       { label: 'Examen_supplémentaire', options: null, gender: 'both' },
-    ],
+    ], */
   };
 
   classesToSync: any = [];
@@ -612,9 +614,11 @@ export class NewPage implements OnInit {
               examination_id: ex.id,
               problem_id: evaluation.problem_id,
               status: evaluation.evaluation,
-              traitement: evaluation.traitement,
+              traitement: evaluation.traitment,
               conseil: evaluation.conseil,
-              raison: evaluation.raison
+              raison: evaluation.raison,
+              //JSON encode localisation
+              localisations: JSON.stringify(evaluation.localisations)
             });
           }
 
@@ -655,69 +659,76 @@ export class NewPage implements OnInit {
 
     const age = await this.calculateAge();
     // Helper to add a problem only if not already present
-    const addSuggestedProblem = (id: number) => {
-      if (!this.suggestedProblems.includes(id)) {
-      this.suggestedProblems.push(id);
+    const addSuggestedProblem = (id: number, question: any, reponse: any) => {
+      if (!this.suggestedProblems.find(problem => problem.id === id)) {
+        this.suggestedProblems.push({ id, localisations: { [question]: reponse } });
+      }else{
+        //update localisation
+        const problem = this.suggestedProblems.find(problem => problem.id === id);
+        if (problem) {
+          problem.localisations[question] = reponse;
+        }
       }
     };
 
     // 1. Vaccination non faite (BCG)
     if (age <= 7 && this.answers['BCG_(tuberculose)'] === 'Non lisible') {
-      addSuggestedProblem(1);
+      addSuggestedProblem(1, 'BCG_(tuberculose)', this.answers['BCG_(tuberculose)']);
     }
 
     // 2. Vaccination non faite (VPO)
     if (age <= 7 && this.answers['VPO_(poliomyélite)'] === 'Non fait') {
-      addSuggestedProblem(2);
+      addSuggestedProblem(2, 'VPO_(poliomyélite)', this.answers['VPO_(poliomyélite)']);
     }
     // 3. Vaccination non faite (DTCoq-Hép-B-Hib)
     if (age <= 7 && this.answers['DTCoq-Hép-B-Hib'] === 'Non fait') {
-      addSuggestedProblem(3);
+      addSuggestedProblem(3, 'DTCoq-Hép-B-Hib', this.answers['DTCoq-Hép-B-Hib'] );
     }
 
     // 4. Vaccination non faite (PCV-13_(pneumo))
     if (age <= 7 && this.answers['PCV-13_(pneumo)'] === 'Non fait') {
-      addSuggestedProblem(4);
+      addSuggestedProblem(4, 'PCV-13_(pneumo)', this.answers['PCV-13_(pneumo)']);
     }
 
     // 5. Vaccination non faite (VAR_(rougeole))
     if (age <= 7 && this.answers['VAR_(rougeole)'] === 'Non fait') {
-      addSuggestedProblem(5);
+      addSuggestedProblem(5, 'VAR_(rougeole)', this.answers['VAR_(rougeole)']);
     }
 
     // 6. Vaccination non faite (VAA_(fièvre jaune))
     if (age <= 7 && this.answers['VAA_(fièvre jaune)'] === 'Non fait' ) {
-      addSuggestedProblem(6);
+      addSuggestedProblem(6, 'VAA_(fièvre jaune)', this.answers['VAA_(fièvre jaune)']);
     }
 
     // 7. Vaccination non faite (DTCoq_(diphtérie,_tétanos,_coqueluce))
     if (age > 7 && this.answers['DTCoq_(diphtérie,_tétanos,_coqueluce)'] === 'Non fait') {
-      addSuggestedProblem(7);
+      addSuggestedProblem(7, 'DTCoq_(diphtérie,_tétanos,_coqueluce)', this.answers['DTCoq_(diphtérie,_tétanos,_coqueluce)']);
     }
     //8. Déparasitage préventif insuffisant
     if (
       this.answers['Déparasité_?'] === 'Non' ||
       (this.answers['Déparasité_?'] === 'Oui' && this.isDeparasitageOutdated())
     ) {
-      addSuggestedProblem(8);
+      addSuggestedProblem(8, 'Déparasité_?', this.answers['Déparasité_?']);
     }
 
     
     const imcPercent = this.calculateIMCPercent();
     //9. DIP 1
-    if (imcPercent > 80 && imcPercent <= 90) addSuggestedProblem(9);
+    if (imcPercent > 80 && imcPercent <= 90) addSuggestedProblem(9, 'Pourcentage IMC', imcPercent);
 
     //10. DIP 2
-    if (imcPercent > 70 && imcPercent <= 80) addSuggestedProblem(10);
+    if (imcPercent > 70 && imcPercent <= 80) addSuggestedProblem(10, 'Pourcentage IMC', imcPercent);
     //11. DIP 3
-    if (imcPercent <= 70) addSuggestedProblem(11);
+    if (imcPercent <= 70) addSuggestedProblem(11, 'Pourcentage IMC', imcPercent);
 
     //12. Surcharge pondérale
     const imc = this.calculateIMC();
-    if (imcPercent >= 120 || (imc >= 25 && imc < 29.9)) addSuggestedProblem(12); // Surcharge pondérale
+    if (imcPercent >= 120 ) addSuggestedProblem(12, 'Pourcentage IMC', imcPercent ); // Surcharge pondérale
+    if(imc >= 25 && imc < 29.9) addSuggestedProblem(12, 'IMC', imc);
 
     //13. Obésité
-    if (imc > 30) addSuggestedProblem(13); // Obésité
+    if (imc > 30) addSuggestedProblem(13, 'IMC', imc); // Obésité
 
     // 14. Problème d'acuité visuelle
     const testE5d = parseFloat(this.answers['acuite_visuelle_de_loin_droite_sans_correction'] || 0);
@@ -726,134 +737,131 @@ export class NewPage implements OnInit {
     const testE4g = parseFloat(this.answers['acuite_visuelle_de_loin_gauche_avec_lunettes'] || 0);
     if (this.answers['Test_acuité_visuelle'] === "Avec lunettes") {
 
-      if (age < 7 && (testE4d <= 0.7 || testE4g <= 0.7)) addSuggestedProblem(14);
-      if (age >= 7 && (testE4d <= 0.8 || testE4g < 0.8)) addSuggestedProblem(14);
+      if (age < 7 && (testE4d <= 0.7 || testE4g <= 0.7)) addSuggestedProblem(14, 'Acuité visuelle', this.answers['acuite_visuelle_de_loin_droite_avec_lunettes']);
+      if (age >= 7 && (testE4d <= 0.8 || testE4g < 0.8)) addSuggestedProblem(14, 'Acuité visuelle', this.answers['acuite_visuelle_de_loin_droite_avec_lunettes']);
     } else if (this.answers['Test_acuité_visuelle'] === "Sans lunettes") {
-      if (age < 7 && (testE5d <= 0.7 || testE5g <= 0.7)) addSuggestedProblem(14);
-      if (age >= 7 && (testE5d <= 0.8 || testE5g < 0.8)) addSuggestedProblem(14);
+      if (age < 7 && (testE5d <= 0.7 || testE5g <= 0.7)) addSuggestedProblem(14, 'Acuité visuelle', this.answers['acuite_visuelle_de_loin_droite_sans_correction']);
+      if (age >= 7 && (testE5d <= 0.8 || testE5g < 0.8)) addSuggestedProblem(14, 'Acuité visuelle', this.answers['acuite_visuelle_de_loin_droite_sans_correction']);
     }
 
     // 15. Problème d'acuité auditive
-    if(this.answers['audiometrie_droite_500'] === 'Pas bon' || this.answers['audiometrie_gauche_500'] === 'Pas bon' ||
-      this.answers['audiometrie_droite_1000'] === 'Pas bon' || this.answers['audiometrie_gauche_1000'] === 'Pas bon' ||
-      this.answers['audiometrie_droite_2000'] === 'Pas bon' || this.answers['audiometrie_gauche_2000'] === 'Pas bon' ||
-      this.answers['audiometrie_droite_4000'] === 'Pas bon' || this.answers['audiometrie_gauche_4000'] === 'Pas bon') { 
-      addSuggestedProblem(15);
-    }
+    if(this.answers['audiometrie_droite_500'] === 'Pas bon') addSuggestedProblem(15, 'audiometrie_droite_500', this.answers['audiometrie_droite_500']);
+    if(this.answers['audiometrie_gauche_500'] === 'Pas bon') addSuggestedProblem(15, 'audiometrie_gauche_500', this.answers['audiometrie_gauche_500']);
+    if(this.answers['audiometrie_droite_1000'] === 'Pas bon') addSuggestedProblem(15, 'audiometrie_droite_1000', this.answers['audiometrie_droite_1000']);
+    if(this.answers['audiometrie_gauche_1000'] === 'Pas bon') addSuggestedProblem(15, 'audiometrie_gauche_1000', this.answers['audiometrie_gauche_1000']);
+    if(this.answers['audiometrie_droite_2000'] === 'Pas bon') addSuggestedProblem(15, 'audiometrie_droite_2000', this.answers['audiometrie_droite_2000']);
+    if(this.answers['audiometrie_gauche_2000'] === 'Pas bon') addSuggestedProblem(15, 'audiometrie_gauche_2000', this.answers['audiometrie_gauche_2000']);
+    if(this.answers['audiometrie_droite_4000'] === 'Pas bon') addSuggestedProblem(15, 'audiometrie_droite_4000', this.answers['audiometrie_droite_4000']);
+    if(this.answers['audiometrie_gauche_4000'] === 'Pas bon') addSuggestedProblem(15, 'audiometrie_gauche_4000', this.answers['audiometrie_gauche_4000']);
+    
 
     // 16. Problèmes dentaires mineurs (carie stade 1)
-    if ((this.answers['Plaque'] === '±' || this.answers['Plaque'] === '+') ||
-      this.answers['Tartre'] === '±' ||
-      (this.answers['Carie'] === 'Oui') && (this.answers['Si_oui,_stade_carie'] === 'Stade 1')) {
-      addSuggestedProblem(16);
-    }
+    if(this.answers['Plaque'] === '±' || this.answers['Plaque'] === '+') addSuggestedProblem(16, 'Plaque', this.answers['Plaque']);
+    if(this.answers['Tartre'] === '±' || this.answers['Tartre'] === '+') addSuggestedProblem(16, 'Tartre', this.answers['Tartre']);
 
     // 17. Problèmes dentaires majeurs
-    if (this.answers['Plaque'] === '2+' || this.answers['Plaque'] === '3+' ||
-      this.answers['Tartre'] === '2+' || this.answers['Tartre'] === '3+' || this.answers['Tartre'] === '+' ||
-      this.answers['Gingivite'] === '+') {
-      addSuggestedProblem(17);
-    }
+    if(this.answers['Plaque'] === '2+' || this.answers['Plaque'] === '3+') addSuggestedProblem(17, 'Plaque', this.answers['Plaque']);
+    if(this.answers['Tartre'] === '2+' || this.answers['Tartre'] === '3+') addSuggestedProblem(17, 'Tartre', this.answers['Tartre']);
+    if(this.answers['Gingivite'] === '+') addSuggestedProblem(17, 'Gingivite', this.answers['Gingivite']);
 
     // 18. Caries (Stade 2 à 4)
-    if (this.answers['Carie'] === 'Oui' && (this.answers['Si_oui,_stade_carie'] === 'Stade 2' || this.answers['Si_oui,_stade_carie'] === 'Stade 3' || this.answers['Si_oui,_stade_carie'] === 'Stade 4')) {
-      addSuggestedProblem(18);
-    }
+    if(this.answers['Carie'] === 'Oui' && (this.answers['Si_oui,_stade_carie'] === 'Stade 2' || this.answers['Si_oui,_stade_carie'] === 'Stade 3' || this.answers['Si_oui,_stade_carie'] === 'Stade 4')) addSuggestedProblem(18, 'Carie', this.answers['Si_oui,_stade_carie']);
 
     // 19. Bouchons de cérumen
-    if (this.answers['oreille_droite'] === 'Pathologique' || this.answers['oreille_gauche'] === 'Pathologique') addSuggestedProblem(19);
+    if(this.answers['oreille_droite'] === 'Pathologique') addSuggestedProblem(19, 'oreille_droite', this.answers['oreille_droite']);
+    if (this.answers['oreille_gauche'] === 'Pathologique') addSuggestedProblem(19, 'oreille_gauche', this.answers['oreille_gauche']);
 
     // 20. Infections uro-génitales (év. cfr bandelettes)
-    if (this.answers['Problème_urinaire'] === 'Oui') {
-      addSuggestedProblem(20);
-    }
+    if (this.answers['Problème_urinaire'] === 'Oui') addSuggestedProblem(20, 'Problème_urinaire', this.answers['Problème_urinaire']);
 
     //21. Mycoses (Peau glabre)
-    if ( this.answers['Peau'] === 'Mycose') addSuggestedProblem(21);
+    if ( this.answers['Peau'] === 'Mycose') addSuggestedProblem(21, 'Peau', this.answers['Peau']);
 
 
     //22. Mycoses (Cuir chevelu)
-    if (this.answers['Cheveux'] === 'Pathologique') addSuggestedProblem(22);
+    if (this.answers['Cheveux'] === 'Pathologique') addSuggestedProblem(22, 'Cheveux', this.answers['Cheveux']);
 
     // 23. Mycoses (Orteilles)
-    if (this.answers['Orteilles'] === 'Pathologique') addSuggestedProblem(23);
+    if (this.answers['Orteilles'] === 'Pathologique') addSuggestedProblem(23, 'Orteilles', this.answers['Orteilles']);
 
     // 24. Mycoses (Ongles)
-    if (this.answers['Ongles'] === 'Pathologique') addSuggestedProblem(24);
+    if (this.answers['Ongles'] === 'Pathologique') addSuggestedProblem(24, 'Ongles', this.answers['Ongles']);
 
     //25. Gâle
-    if(this.answers['Peau'] === 'Pathologique') addSuggestedProblem(25);
+    if(this.answers['Peau'] === 'Pathologique') addSuggestedProblem(25, 'Peau', this.answers['Peau']);
 
     // 26. Autres problèmes dermatologiques
     if (this.answers['Peau'] === 'Autres' || this.answers['Si_peau_pathologique,_préciser']) {
-      addSuggestedProblem(26);
+      addSuggestedProblem(26, 'Peau', this.answers['Peau']);
     }
 
     //27. Plaies (coupures, brûlures, etc.)
     if (this.answers['Peau'] === 'Plaie' || this.answers['Peau'] === 'Coupures' || this.answers['Peau'] === 'Brûlures') {
-      addSuggestedProblem(27);
+      addSuggestedProblem(27, 'Peau', this.answers['Peau']);
     }
 
     // 28. Allergies
-    if (this.answers['allergies'] === 'Présente') addSuggestedProblem(28);
+    if (this.answers['allergies'] === 'Présente') addSuggestedProblem(28, 'allergies', this.answers['allergies']);
 
     // 29. Infections respiratoires supérieures (exc. rhinite banale) / inf.
-    if ( this.answers['poumons'] === 'Pathologique') addSuggestedProblem(29);
+    if ( this.answers['poumons'] === 'Pathologique') addSuggestedProblem(29, 'poumons', this.answers['poumons']);
 
     //30. Hernies
     if ((this.studentGender === 'male' && this.answers['Testicule'] === 'Hernie') || this.answers['Palpation_de_abdomen'] === 'Hernie' || this.answers['region_inguinale'] === 'Hernie') {
-       addSuggestedProblem(30);
-    } 
+       addSuggestedProblem(30, 'Hernie', this.answers['Testicule'] === 'Hernie' ? this.answers['Testicule'] : this.answers['Palpation_de_abdomen'] === 'Hernie' ? this.answers['Palpation_de_abdomen'] : this.answers['region_inguinale']);
+    }
 
     //31. Glucosurie (cfr bandelettes)
     if (this.answers['Glucose'] === '+' || this.answers['Glucose'] === '++' || this.answers['Glucose'] === '+++') {
-      addSuggestedProblem(31);
+      addSuggestedProblem(31, 'Glucose', this.answers['Glucose']);
     }
 
     //32. Problème du système génital
-    if(this.studentGender === 'male' && (this.answers['Testicule'] === 'Varicocelle' || this.answers['Testicule'] === 'Absente' )) addSuggestedProblem(32);
+    if(this.studentGender === 'male' && (this.answers['Testicule'] === 'Varicocelle' || this.answers['Testicule'] === 'Absente' )) addSuggestedProblem(32, 'Testicule', this.answers['Testicule']);
 
     //33. Problème de puberté
-    if(this.answers['Interpretation'] === 'Pas normal') addSuggestedProblem(33);
+    if(this.answers['Interpretation_score_de_tanner'] === 'Pas normal') addSuggestedProblem(33, 'Interpretation_score_de_tanner', this.answers['Interpretation_score_de_tanner']);
 
     //34. Problème de motricité
-    if(this.answers['Demarche'] === 'Pathologique' || this.answers['Equilibre'] === 'Pathologique' || this.answers['Bassin'] === 'Pathologique' || this.answers['Membres_inferieurs'] === 'Pathologique' || this.answers['Membres_supérieurs'] === 'Pathologique') {
-      addSuggestedProblem(34);
-    }
+    if(this.answers['Demarche'] === 'Pathologique') addSuggestedProblem(34, 'Demarche', this.answers['Demarche']);
+    if(this.answers['Equilibre'] === 'Pathologique') addSuggestedProblem(34, 'Equilibre', this.answers['Equilibre']);
+    if(this.answers['Bassin'] === 'Pathologique') addSuggestedProblem(34, 'Bassin', this.answers['Bassin']);
+    if(this.answers['Membres_inferieurs'] === 'Pathologique') addSuggestedProblem(34, 'Membres_inferieurs', this.answers['Membres_inferieurs']);
+    if(this.answers['Membres_supérieurs'] === 'Pathologique') addSuggestedProblem(34, 'Membres_supérieurs', this.answers['Membres_supérieurs']);
 
     //35. Problème orthopédique
-    if(this.answers['Colonne_vertebrale'] === 'Pathologique' || this.answers['Bassin'] === 'Pathologique' || this.answers['Membres_inferieurs'] === 'Pathologique' || this.answers['Membres_supérieurs'] === 'Pathologique') {
-      addSuggestedProblem(35);
-    }
+    if(this.answers['Colonne_vertebrale'] === 'Pathologique') addSuggestedProblem(35, 'Colonne_vertebrale', this.answers['Colonne_vertebrale']);
+    if(this.answers['Bassin'] === 'Pathologique') addSuggestedProblem(35, 'Bassin', this.answers['Bassin']);
+    if(this.answers['Membres_inferieurs'] === 'Pathologique') addSuggestedProblem(35, 'Membres_inferieurs', this.answers['Membres_inferieurs']);
+    if(this.answers['Membres_supérieurs'] === 'Pathologique') addSuggestedProblem(35, 'Membres_supérieurs', this.answers['Membres_supérieurs']);
 
     //36. Problème neurologique
     if((age >= 3 && age <= 7) && this.answers['fine_motricite'] === 'Pas bonne') {
-      addSuggestedProblem(36);
+      addSuggestedProblem(36, 'fine_motricite', this.answers['fine_motricite']);
     }
     if((age >= 3 && age <= 7) && this.answers['coordination_des_mouvemments'] === 'Pas bonne') {
-      addSuggestedProblem(36);
+      addSuggestedProblem(36, 'coordination_des_mouvemments', this.answers['coordination_des_mouvemments']);
     }
     if((age >= 3 && age <= 7) && this.answers['reflexe'] === 'Pas bon') {
-      addSuggestedProblem(36);
+      addSuggestedProblem(36, 'reflexe', this.answers['reflexe']);
     }
 
     //37. Problème cardiaque
-    if(this.answers['Coeur'] === 'Pathologique' || this.answers['Rythme_cardiaque'] === 'Rythme irrégulier')
-      addSuggestedProblem(37);
-    if(this.answers['Tension_artérielle'] != 'Normal' )
-      addSuggestedProblem(37);
-    if(this.answers['Poumons'] != 'Pathologique'  )
-      addSuggestedProblem(37);
+    if(this.answers['Coeur'] === 'Pathologique') addSuggestedProblem(37, 'Coeur', this.answers['Coeur']);
+    if(this.answers['Rythme_cardiaque'] === 'Rythme irrégulier') addSuggestedProblem(37, 'Rythme_cardiaque', this.answers['Rythme_cardiaque']);
+    if(this.answers['Tension_artérielle'] != 'Normal' ) addSuggestedProblem(37, 'Tension_artérielle', this.answers['Tension_artérielle']);
+    if(this.answers['Poumons'] != 'Pathologique'  ) addSuggestedProblem(37, 'Poumons', this.answers['Poumons']);
 
     //38. Autres problèmes (troubles comportement/langage, dysmorphies, etc.)
-    if(this.answers['Comportement'] === 'Pathologie'  || this.answers['Language'] === 'Incohérent' || this.answers['Dysmorphies'] === 'Oui') {
-      addSuggestedProblem(38);
-    }
+    if(this.answers['Comportement'] === 'Pathologie') addSuggestedProblem(38, 'Comportement', this.answers['Comportement']);
+    if(this.answers['Language'] === 'Incohérent') addSuggestedProblem(38, 'Language', this.answers['Language']);
+    if(this.answers['Dysmorphies'] === 'Oui') addSuggestedProblem(38, 'Dysmorphies', this.answers['Dysmorphies']);
 
     //39. Problèmes psycho-sociaux graves
-    if(this.answers['L\'enfant_vit_bien_à_l\'école'] === 'Non' || this.answers['L\'enfant_vit_bien_à_l\'école'] === 'Non') {
-      addSuggestedProblem(39);
-    }
+    if(this.answers['L\'enfant_vit_bien_à_l\'école'] === 'Non') addSuggestedProblem(39, 'L\'enfant_vit_bien_à_l\'école', this.answers['L\'enfant_vit_bien_à_l\'école']);
+    if(this.answers['L\'enfant_vit_bien_à_la_maison'] === 'Non') addSuggestedProblem(39, 'L\'enfant_vit_bien_à_la_maison', this.answers['L\'enfant_vit_bien_à_la_maison']);
+
+   
 
     this.updateSuggestedProblems(); // Filtrer les suggestions déjà évaluées
 
@@ -888,7 +896,9 @@ export class NewPage implements OnInit {
 
     // Calcul du pourcentage par rapport au poids idéal
     const pourcentage = (poids / poidsIdeal) * 100;
-    return pourcentage;
+
+    
+    return Math.round(pourcentage * 100) / 100;
   }
 
   private async calculateAge(): Promise<number> {
@@ -913,7 +923,7 @@ export class NewPage implements OnInit {
     const taille = parseFloat(this.answers['Taille_(cm)'] || 0) / 100; // Convertir cm en m
     const imc = taille > 0 ? poids / (taille * taille) : 0;
 
-    return imc;
+    return Math.round(imc * 100) / 100;
   }
 
   private isDeparasitageOutdated(): boolean {
@@ -1140,6 +1150,34 @@ export class NewPage implements OnInit {
     return problem.name;
   }
 
+  getProblemLocalisationByID(problem_id: number) {
+    const problem = this.suggestedProblems.find(p => p.id === problem_id);
+    if (!problem) return null;
+
+    //formater les localisations en string, retirer les espaces en trop et les {}
+   let locs = Object.entries(problem.localisations).map(([key, value]) => `${this.formatLabel(key)}: ${value}`).join(', ');
+
+
+   return locs;
+
+  }
+
+  getProblemLocalisation(problem_id: number) {
+    const problem = this.suggestedProblems.find(p => p.id === problem_id);
+    if (!problem) return null;
+
+    return problem.localisations ;
+  }
+
+  getEvaluationLocalisation(evaluation_id: number) {
+    const evaluation = this.evaluations.find(e => e.id === evaluation_id);
+    if (!evaluation) return null;
+
+    let locs = Object.entries(evaluation.localisations).map(([key, value]) => `${this.formatLabel(key)}: ${value}`).join(', ');
+
+    return locs;
+  }
+
   /* generateExamId() {
 
     this.examId = Math.floor(Math.random() * 1000000000000000000);
@@ -1280,12 +1318,12 @@ export class NewPage implements OnInit {
 
   // Ignore un problème suggéré
   ignoreSuggestedProblem(problemId: number): void {
-    this.suggestedProblems = this.suggestedProblems.filter(id => id !== problemId);
+    this.suggestedProblems = this.suggestedProblems.filter(problem => problem.id !== problemId);
     delete this.suggestedEvaluations[problemId];
   }
 
   // Évalue un problème suggéré individuellement
-  evaluateSuggestedProblem(problemId: number): void {
+  evaluateSuggestedProblem(problemId: any): void {
     const evaluation = this.suggestedEvaluations[problemId];
     if (!evaluation) return;
 
@@ -1297,10 +1335,16 @@ export class NewPage implements OnInit {
         evaluation: evaluation,
         traitment: this.selectedTraitment,
         conseil: this.selectedConseil,
-        raison: this.selectedRaison
+        raison: this.selectedRaison,
+        localisations: this.getProblemLocalisation(problem.id)
       });
+
       this.ignoreSuggestedProblem(problemId); // Retirer des suggestions après évaluation
     }
+
+    this.selectedTraitment = null; // Réinitialise le traitement
+    this.selectedConseil = null; // Réinitialise le conseil
+    this.selectedRaison = null; // Réinitialise la raison
   }
 
   isInArray(problemId: number): boolean {
@@ -1313,12 +1357,12 @@ export class NewPage implements OnInit {
   }
 
   private updateSuggestedProblems(): void {
-    this.suggestedProblems = this.suggestedProblems.filter(id => !this.isInArray(id));
+    /* this.suggestedProblems = this.suggestedProblems.filter(id => !this.isInArray(id));
     Object.keys(this.suggestedEvaluations).forEach(id => {
       if (!this.suggestedProblems.includes(Number(id))) {
         delete this.suggestedEvaluations[Number(id)];
       }
-    });
+    }); */
   }
 
   getProblemName(problemId: number): string {

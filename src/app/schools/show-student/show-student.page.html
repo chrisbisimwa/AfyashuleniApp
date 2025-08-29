@@ -83,7 +83,11 @@
             <ion-label> Problèmes identifiés </ion-label>
           </ion-item-divider>
           <ion-item *ngFor="let eval of studentEvaluations">
-            <ion-label>{{eval.problem_name}}</ion-label>
+            <ion-label>
+               <h4>{{eval.problem_name}}</h4>
+              <ion-note >{{ getProblemLocalisationByID(eval.id) }}</ion-note>
+
+            </ion-label>
             <div item-content>
               <span *ngIf="eval.status==='to_follow'">A suivre</span>
               <span *ngIf="eval.status==='not_to_follow'">A ne pas suivre</span>
