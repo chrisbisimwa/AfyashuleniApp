@@ -736,7 +736,47 @@ export class SyncDataPage implements OnInit {
 
   }
 
-  async loadSchoolsFormAPI() {
+  async loadSchoolsFormAPI(){
+    let loading: HTMLIonLoadingElement | null = null;
+    try{
+      loading = await this.presentLoading('Chargement des écoles en cours...');
+
+      // Paralléliser les requêtes API initiales
+      const [schoolYearsData, schoolsData, usersData] = await Promise.all([
+        this.fetchSchoolYears(),
+        this.fetchSchools(),
+        this.fetchUsers(),
+      ]);
+
+      // Sauvegarder les données dans appStorage
+      if (schoolYearsData) {
+        await this.appStorage.set('schoolYears', schoolYearsData);
+        console.log('Années scolaires sauvegardées:', schoolYearsData);
+      }
+
+      if (schoolsData) {
+        const filteredSchools = schoolsData.filter((item: any) => item.group_id === this.user.group_id);
+        await this.appStorage.set('schools', filteredSchools);
+        console.log('Écoles sauvegardées:', filteredSchools);
+      }
+
+      if (usersData) {
+        await this.appStorage.set('users', usersData);
+        console.log('Utilisateurs sauvegardés:', usersData);
+      }
+    }catch (error) {
+      console.error('Erreur lors du chargement des écoles depuis l\'API:', error);
+      // Afficher une notification à l'utilisateur (facultatif)
+    } finally {
+      // S'assurer que l'indicateur de chargement est toujours fermé, même en cas d'erreur
+      if (loading) {
+        await this.dismissLoading(loading);
+      }
+    }
+
+  }
+
+  async loadAllDataFormAPI() {
     let loading: HTMLIonLoadingElement | null = null;
     try {
       loading = await this.presentLoading('Chargement des écoles en cours...');

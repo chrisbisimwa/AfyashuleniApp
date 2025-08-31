@@ -39,11 +39,10 @@ export class ShowClassePage implements OnInit {
     private appStorage: Storage
   ) { }
 
-  ngOnInit() {
-    this.fetchClasse();
-    this.fectSchoolYear();
-    this.studentCode = this.generateStudentCode();
-    this.saveSchoolYear();
+  async ngOnInit() {
+    await this.fetchClasse();
+    await this.fectSchoolYear();
+    this.studentCode = await this.generateStudentCode();
 
   }
 
@@ -55,58 +54,56 @@ export class ShowClassePage implements OnInit {
     this.modal.dismiss(this.studentName, 'Enregistrer');
   }
 
-  onWillDismiss(event: Event) {
-    const ev = event as CustomEvent<OverlayEventDetail<string>>;
-    if (ev.detail.role === 'Enregistrer') {
-      let students = [];
-      this.appStorage.get('students').then(async (data) => {
-        if (data) {
-          students = data;
-        } else {
-          students = [];
-        }
-
-        students.push(
-          {
-            id: await this.generateId(),
-            first_name: this.studentName,
-            last_name: this.studentPostName,
-            surname: this.studentSurname,
-            gender: this.gender,
-            date_of_birth: this.birthDate,
-            place_of_birth: this.birthPlace,
-            current_class_id: Number(this.route.snapshot.params['id']),
-          }
-        );
-
-
-        this.appStorage.set('students', students).then(() => {
-          this.fetchStudentsByClasse();
-          });
-
-
-
-        let studentHistory = [];
-        this.appStorage.get('student-history').then((data) => {
-          if (data) {
-            studentHistory = data;
-          } else {
-            studentHistory = [];
-          }
-          studentHistory.push({
-            student_id: this.studentId,
-            school_year_id: 1,
-            classe_id: Number(this.route.snapshot.params['id'])
-          });
-          this.appStorage.set('student-history', studentHistory);
-        }
-        );
-
-
-
-      })
-    }
+  async onWillDismiss(event: Event) {
+  const ev = event as CustomEvent<OverlayEventDetail<string>>;
+  if (ev.detail.role !== 'Enregistrer') {
+    return; // On sort si l'utilisateur n'a pas confirmé
   }
+
+  try {
+    // 1. Générer un nouvel ID pour l'élève
+    const newStudentId = await this.generateId();
+
+    // 2. Préparer le nouvel objet élève
+    const newStudent = {
+      id: newStudentId,
+      first_name: this.studentName,
+      last_name: this.studentPostName,
+      surname: this.studentSurname,
+      gender: this.gender,
+      date_of_birth: this.birthDate,
+      place_of_birth: this.birthPlace,
+      current_class_id: Number(this.route.snapshot.params['id']),
+      status: 'active' // C'est une bonne pratique d'ajouter un statut
+    };
+
+    // 3. Mettre à jour la liste des élèves
+    const students = await this.appStorage.get('students') || [];
+    students.push(newStudent);
+    await this.appStorage.set('students', students);
+
+    // 4. Mettre à jour l'historique de l'élève
+    const studentHistory = await this.appStorage.get('student-history') || [];
+    studentHistory.push({
+      student_id: newStudentId,
+      school_year_id: 1, // Idéalement, cet ID devrait être dynamique
+      classe_id: Number(this.route.snapshot.params['id'])
+    });
+    await this.appStorage.set('student-history', studentHistory);
+
+    // 5. Rafraîchir la liste affichée à l'écran
+    await this.fetchStudentsByClasse();
+
+    // 6. Vider les champs du formulaire pour la prochaine fois
+    this.studentName = '';
+    this.studentPostName = '';
+    // ... vider les autres champs
+    
+  } catch (error) {
+    console.error("Erreur lors de l'enregistrement de l'élève :", error);
+    // Optionnel : Afficher une alerte à l'utilisateur
+  }
+}
 
   async fectSchoolYear() {
     let schoolYears = await this.appStorage.get('schoolYears');
@@ -117,23 +114,12 @@ export class ShowClassePage implements OnInit {
     
   }
 
-  saveSchoolYear() {
-    let schoolYears = [];
-    this.appStorage.get('schoolYears').then((data) => {
-
-      schoolYears = [];
-
-
-      schoolYears.push({ id: 1, year: '2024-2025', start_date: '2024-09-01', end_date: '2025-06-30' });
-
-      this.appStorage.set('schoolYears', schoolYears);
-    });
-  }
+  
 
   async getLastSchoolYearId() {
     let schoolYears = await this.appStorage.get('schoolYears');
     if (schoolYears) {
-      let schoolYear = schoolYears.find((schoolYear: any) => schoolYear.year == "2024-2025");
+      let schoolYear = schoolYears.find((schoolYear: any) => schoolYear.active == true);
       if (schoolYear) {
         return schoolYear.id;
       }

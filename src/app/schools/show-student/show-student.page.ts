@@ -15,9 +15,9 @@ export class ShowStudentPage implements OnInit {
   studentExams: any = null;
   studentExamData:any = null;
   studentEvaluations: any = null;
-  isEvalModalOpen: boolean;
   problems: { id: number, name: string }[];
-  isExamModalOpen: boolean;
+  isEvalModalOpen: boolean = false; 
+  isExamModalOpen: boolean = false; 
 
   constructor(
     private navController: NavController,
@@ -26,81 +26,94 @@ export class ShowStudentPage implements OnInit {
     private appStorage: Storage
   ) { }
 
-  ngOnInit() {
-    this.fetchProblems();
-    this.fetchStudent().then(() => {
-      this.fetchExams().then(() => {
-        this.fetchEvaluation();
-        this.fetchExamData();
-      });
-    });
-    this.fectClasse().then(() => {
-      this.fetchSchool();
-    });
+  async ngOnInit() {
+    await Promise.all([
+      this.fetchProblems(),
+      this.fetchStudent()
+    ]);
+
+    if (this.student) {
+      await this.fetchExams();
+      await this.fetchEvaluation();
+      await this.fetchExamData();
+      await this.fetchClasse(); 
+      await this.fetchSchool();
+    }
 
   }
 
   async fetchProblems() {
-    const problems = await this.appStorage.get('problems');
-    this.problems = problems;
+    this.problems = await this.appStorage.get('problems') || [];
   }
 
   async fetchStudent() {
     const id = this.route.snapshot.params['id'];
-    const students = await this.appStorage.get('students');
-    const student = students.find((item: { id: any; }) => item.id == id);
-    this.student = student;
+    const students = await this.appStorage.get('students') || [];
+    this.student = students.find((item: { id: any; status?: string; }) => item.id == id && item.status != 'deleted');
   }
 
   async fetchExams() {
-    const exams = await this.appStorage.get('exams');
-    const studentExams = exams.filter((item: { student_id: any; }) => item.student_id == this.student.id);
-    this.studentExams = studentExams;
+    const exams = await this.appStorage.get('exams') || [];
+    this.studentExams = exams.filter((item: { student_id: any; }) => item.student_id == this.student.id);
   }
 
   async fetchEvaluation() {
-    const evaluations = await this.appStorage.get('evaluations');
+    if (!this.studentExams) return;
+    const evaluations = await this.appStorage.get('evaluations') || [];
     const studentEvaluations = [];
-    for (let exam of this.studentExams) {
+    for (const exam of this.studentExams) {
       const evaluation = evaluations.filter((item: { examination_id: any; }) => item.examination_id == exam.id);
       if (evaluation.length > 0) {
-        for (let e of evaluation) {
+        for (const e of evaluation) {
           e.problem_name = this.getProblemNameById(e.problem_id);
-          e.localisations = JSON.parse(e.localisations);
+          try {
+            e.localisations = JSON.parse(e.localisations);
+          } catch (error) {
+            e.localisations = {}; // Gérer le cas où le JSON est invalide
+          }
           studentEvaluations.push(e);
         }
       }
-
     }
     this.studentEvaluations = studentEvaluations;
   }
 
   async fetchExamData() {
-    const result = await this.appStorage.get('exams-data');
-    //filter examdata by examination_id for all student exams
-    for (let exam of this.studentExams) {
-      const studentExamData = result.filter((item: { examination_id: any; }) => item.examination_id == exam.id);
-      exam.data = studentExamData;
+    if (!this.studentExams) return;
+    const allExamData = [];
+    for (const exam of this.studentExams) {
+      try {
+        const xx = JSON.parse(exam.data);
+        const data = [];
+        for (const i in xx) {
+          const type = i;
+          const dt = xx[i];
+          const rs = [];
+          for (const j in dt) {
+            rs.push({ question: j, answer: dt[j] });
+          }
+          data.push({ type: type, dt: rs });
+        }
+        allExamData.push(...data); // Ajouter les données de chaque examen
+      } catch (error) {
+        console.error("Erreur de parsing JSON pour les données d'examen:", error);
+      }
     }
+    this.studentExamData = allExamData;
   }
 
-  async fectClasse() {
+  async fetchClasse() {
     if (this.student) {
-      const classes = await this.appStorage.get('classes');
-      const classe = classes.find((item: { id: any; }) => item.id == this.student.current_class_id);
-      this.studenClass = classe;
+      const classes = await this.appStorage.get('classes') || [];
+      this.studenClass = classes.find((item: { id: any; }) => item.id == this.student.current_class_id);
     }
-
   }
 
   async fetchSchool() {
     if (this.studenClass) {
-      const schools = await this.appStorage.get('schools');
-      const school = schools.find((item: { id: any; }) => item.id == this.studenClass.school_id);
-      this.studentSchool = school;
+      const schools = await this.appStorage.get('schools') || [];
+      this.studentSchool = schools.find((item: { id: any; }) => item.id == this.studenClass.school_id);
     }
-
-
   }
 
   editStudent() {
@@ -150,13 +163,15 @@ export class ShowStudentPage implements OnInit {
   }
 
   setOpenEval(isOpen: boolean) {
-    console.log('setOpenEval', isOpen);
     this.isEvalModalOpen = isOpen;
   }
 
   setOpenExam(isOpen: boolean) {
-    console.log('setOpenExam', isOpen);
     this.isExamModalOpen = isOpen;
+  }
+
+  previousState() {
+    this.navController.navigateBack('/tabs/schools/classe/'+this.student.current_class_id+'/view');
   }
 
   examiner(){

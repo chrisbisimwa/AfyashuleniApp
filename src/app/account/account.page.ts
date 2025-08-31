@@ -29,9 +29,25 @@ export class AccountPage implements OnInit {
     private loadingCtrl: LoadingController
   ) { }
 
-  ngOnInit() {
+  async ngOnInit() {
+    await this.loadUser();
   }
 
+  async loadUser (){
+    try {
+     
+      const user = await this.appStorage.get('user');
+      if (user) {
+        this.username = user.name;
+        this.email = user.email;
+        this.photo = user.photo;
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement de l\'utilisateur:', error);
+    } finally {
+      this.loading = null;
+    }
+  }
 
   syncData() {
     this.showLoading();
@@ -401,12 +417,12 @@ export class AccountPage implements OnInit {
     await this.appStorage.remove('authToken');
     await this.appStorage.remove('user');
     await this.appStorage.remove('roles');
-    await this.appStorage.remove('classes');
+    /* await this.appStorage.remove('classes');
     await this.appStorage.remove('students');
     await this.appStorage.remove('schools');
     await this.appStorage.remove('schoolYears');
     await this.appStorage.remove('exams');
-    await this.appStorage.remove('evaluations');
+    await this.appStorage.remove('evaluations'); */
 
     this.router.navigate(['/login'], { replaceUrl: true });
 

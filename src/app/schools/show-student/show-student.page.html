@@ -1,9 +1,14 @@
 <ion-header class="ion-no-border" mode="ios">
   <ion-toolbar style="--background: var(--ion-color-primary)">
-    <ion-buttons slot="start">
-      <ion-back-button color="light"></ion-back-button>
-    </ion-buttons>
-    <ion-title style="color: white;letter-spacing: 1px;font-family: 'semi-bold';">Elève</ion-title>
+   
+    <ion-button slot="start" (click)="previousState()">
+      <ion-icon name="chevron-back-outline"></ion-icon>
+      Back
+    </ion-button>
+    <ion-title
+      style="color: white; letter-spacing: 1px; font-family: 'semi-bold'"
+      >Elève</ion-title
+    >
   </ion-toolbar>
 </ion-header>
 
@@ -11,11 +16,13 @@
   <div class="main_content_div">
     <ion-label class="title_lbl">Details de l'élève</ion-label>
     <ion-list>
-     
       <ion-item>
         <ion-label>Nom</ion-label>
         <div item-content>
-          <span>{{student.first_name}} {{student.last_name}} {{student.surname}}</span>
+          <span
+            >{{student.first_name}} {{student.last_name}}
+            {{student.surname}}</span
+          >
         </div>
       </ion-item>
       <ion-item>
@@ -28,7 +35,7 @@
       <ion-item>
         <ion-label>Date de naissance</ion-label>
         <div item-content>
-          <span>{{student.date_of_birth | date :  "dd.MM.y"}}</span>
+          <span>{{student.date_of_birth | date : "dd.MM.y"}}</span>
         </div>
       </ion-item>
       <ion-item>
@@ -44,25 +51,40 @@
         </div>
       </ion-item>
       <ion-item *ngIf="studentSchool">
-        <ion-label>Classe</ion-label>
+        <ion-label>Ecole</ion-label>
         <div item-content>
           <span>{{studentSchool.name}}</span>
         </div>
       </ion-item>
-      
-
-     
-
     </ion-list>
 
-
-
-    <ion-button expand="block" color="medium" id="open-modal2" (click)="examiner()">Examiner</ion-button>
-    <ion-button expand="block" color="primary" (click)="editStudent()">Modifier</ion-button>
-    <ion-button expand="block" color="primary" (click)="setOpenEval(true)" *ngIf="studentEvaluations ">Problèmes de stanté ({{studentEvaluations.length}})</ion-button>
-    <ion-button expand="block" color="primary" (click)="setOpenExam(true)" *ngIf="studentExams ">Resumé des exmans</ion-button>
-    <ion-button expand="block" color="danger" (click)="deleteModal()">Supprimer</ion-button>
-    
+    <ion-button
+      expand="block"
+      color="medium"
+      id="open-modal2"
+      (click)="examiner()"
+      >Examiner</ion-button
+    >
+    <ion-button expand="block" color="primary" (click)="editStudent()"
+      >Modifier</ion-button
+    >
+    <ion-button
+      expand="block"
+      color="primary"
+      (click)="setOpenEval(true)"
+      *ngIf="studentEvaluations "
+      >Problèmes de stanté ({{studentEvaluations.length}})</ion-button
+    >
+    <ion-button
+      expand="block"
+      color="primary"
+      (click)="setOpenExam(true)"
+      *ngIf="studentExams "
+      >Resumé des exmans</ion-button
+    >
+    <ion-button expand="block" color="danger" (click)="deleteModal()"
+      >Supprimer</ion-button
+    >
   </div>
 
   <ion-modal [isOpen]="isEvalModalOpen">
@@ -76,30 +98,36 @@
         </ion-toolbar>
       </ion-header>
       <ion-content>
-       
-
         <ion-item-group *ngIf="studentEvaluations.length>0">
           <ion-item-divider>
             <ion-label> Problèmes identifiés </ion-label>
           </ion-item-divider>
-          <ion-item *ngFor="let eval of studentEvaluations">
-            <ion-label>
-               <h4>{{eval.problem_name}}</h4>
-              <ion-note >{{ getProblemLocalisationByID(eval.id) }}</ion-note>
-
-            </ion-label>
-            <div item-content>
-              <span *ngIf="eval.status==='to_follow'">A suivre</span>
-              <span *ngIf="eval.status==='not_to_follow'">A ne pas suivre</span>
-              <span *ngIf="eval.status==='attention'">Pt d'attention</span>
-            </div>
-          </ion-item>
+          <div *ngFor="let eval of studentEvaluations">
+            <ion-item>
+              <ion-label>
+                <h4>{{eval.problem_name}}</h4>
+                <ion-note>{{ getProblemLocalisationByID(eval.id) }}</ion-note>
+              </ion-label>
+              <div item-content>
+                <span *ngIf="eval.status==='to_follow'">A suivre</span>
+                <span *ngIf="eval.status==='not_to_follow'"
+                  >A ne pas suivre</span
+                >
+                <span *ngIf="eval.status==='attention'">Pt d'attention</span>
+              </div>
+            </ion-item>
+            <ion-item *ngIf="eval.status === 'attention'">
+              <ion-note position="stacked">{{ eval.conseil }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="eval.status==='to_follow'">
+              <ion-note position="stacked">{{ eval.traitement }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="eval.status==='not_to_follow'">
+              <ion-note position="stacked">{{ eval.raison }}</ion-note>
+            </ion-item>
+          </div>
         </ion-item-group>
-
-
       </ion-content>
-
-
     </ng-template>
   </ion-modal>
 
@@ -114,31 +142,35 @@
         </ion-toolbar>
       </ion-header>
       <ion-content *ngIf="studentExams">
-       
-        <div *ngFor="let exam of studentExams">
+        <div *ngFor="let ex of studentExamData">
           <ion-item-divider>
-            <ion-label>{{exam.type}}</ion-label>
+            <ion-label>
+              <h2>
+                Données de l'examen ( {{ex.type.replaceAll("_", "
+                ").charAt(0).toUpperCase() + ex.type.replaceAll("_", "
+                ").slice(1)}})
+              </h2>
+            </ion-label>
           </ion-item-divider>
-          <div *ngIf="exam.data">
-            <ion-item *ngFor="let data of exam.data">
-              <ion-label>{{data.question}}</ion-label>
+
+          <ion-item-sliding button detail="true" *ngFor="let dx of ex.dt" #slidingItem>
+            <ion-item>
+              <ion-label
+                >{{dx.question.replaceAll("_", " ").charAt(0).toUpperCase() +
+                dx.question.replaceAll("_", " ").slice(1)}}</ion-label
+              >
               <div item-content>
-                <span>{{data.answer}}</span>
+                <span>{{dx.answer}}</span>
               </div>
             </ion-item>
-          </div>
-         
-          
-          
+
+            <ion-item-options side="end">
+              <!-- <ion-item-option color="primary" > Modifier la classe</ion-item-option>
+              <ion-item-option color="danger" > Supprimer la classe</ion-item-option> -->
+            </ion-item-options>
+          </ion-item-sliding>
         </div>
-
-
-
       </ion-content>
-
-
     </ng-template>
   </ion-modal>
-
-
 </ion-content>

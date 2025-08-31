@@ -14,36 +14,48 @@ export class DashboardPage {
   @ViewChild('lineCanvas') lineCanvas: any;
   lineChart: any;
   user: any = {};
+  roles: String[] = [];
 
-  
-  
+
+
   constructor(
     private appStorage: Storage
   ) {
-    
+
   }
 
-  async fetchUser(){
+  async ngOnInit() {
+    await this.fetchUser();
+    await this.fetchRoles();
+    await this.createLineChart();
+  }
+
+  async fetchUser() {
     this.appStorage.get('user').then((val) => {
-      this.user=val;
+      this.user = val;
     });
   }
 
-  ionViewDidEnter() {
-    this.fetchUser().then(()=>{
-      this.createLineChart();
-    });
-    
+  async fetchRoles() {
+    this.roles = await this.appStorage.get('roles');
   }
 
-  new(){
+  async ionViewDidEnter() {
+    await this.fetchUser();
+    await this.fetchRoles();
+    await this.createLineChart();
+
+
+  }
+
+  new() {
     console.log('new');
   }
 
   async createLineChart() {
-    
+
     const exams = await this.appStorage.get('exams');
-    
+
     let labels = [];
     let data = [];
 
@@ -62,14 +74,23 @@ export class DashboardPage {
 
     for (let mt of months) {
       let f = 0;
-      let g = 0;
       for (let exam of exams) {
-        if (exam.examiner_id== this.user.id) {
-          
-          if (mt === new Date(exam.date).toLocaleString('en-fr',{month:'short'})) {
-            f++;
+        if (this.roles.includes('infirmier')) {
+          if (exam.examiner_id == this.user.id) {
+
+            if (mt === new Date(exam.date).toLocaleString('en-fr', { month: 'short' })) {
+              f++;
+            }
           }
-       }
+        }
+        if (this.roles.includes('Medecin')) {
+          if (exam.doctor_id == this.user.id) {
+
+            if (mt === new Date(exam.date).toLocaleString('en-fr', { month: 'short' })) {
+              f++;
+            }
+          }
+        }
       }
 
       if (labels.indexOf(mt) >= 0) {
@@ -79,7 +100,7 @@ export class DashboardPage {
     }
 
     //count user examinations by month name
- 
+
     /* for (let month of months) {
       let count = 0;
       for (let exam of exams) {
@@ -93,7 +114,7 @@ export class DashboardPage {
       data.push(count);
     } */
 
-    
+
 
 
     this.lineChart = new Chart(this.lineCanvas.nativeElement, {
@@ -114,8 +135,8 @@ export class DashboardPage {
   }
 
 
-  loadChartData(){
-    
+  loadChartData() {
+
   }
 
 }
