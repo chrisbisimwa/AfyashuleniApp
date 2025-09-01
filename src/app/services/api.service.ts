@@ -96,6 +96,11 @@ export class ApiService {
     return this.http.get(`${this.apiUrl}/students/${studentId}/examinations`, headers);
   }
 
+  async getFollowUps(problemId: number) {
+    const headers = await this.getHeaders();
+    return this.http.get(`${this.apiUrl}/problems/${problemId}/problem-followups`, headers);
+  }
+
   async getUserRoles(userId: number) {
     const headers = await this.getHeaders();
     return this.http.get(`${this.apiUrl}/users/${userId}/roles`, headers);
@@ -139,6 +144,7 @@ export class ApiService {
     return this.http.get(`${this.apiUrl}/examinations/${examId}/delete`, headers);
   }
 
+
   async postExamData(examId:number,data: any) {
     const headers = await this.getHeaders();
     return this.http.post(`${this.apiUrl}/examinations/${examId}/all-examination-data`, data, headers);
@@ -148,6 +154,11 @@ export class ApiService {
   async postEvaluation(examId:number,data: any) {
     const headers = await this.getHeaders();
     return this.http.post(`${this.apiUrl}/examinations/${examId}/evaluations`, data, headers);
+  }
+
+  async postFollowUp(followUpId: number, data:any){
+    const headers= await this.getHeaders();
+    return this.http.post(`${this.apiUrl}/problems/${followUpId}/problem-followups`, data, headers);
   }
 
   async getExams() {

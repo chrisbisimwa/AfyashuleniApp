@@ -21,10 +21,13 @@ export class SyncDataPage implements OnInit {
   schoolToSync: any = [];
   students: any = null;
   studentsToSync: any = [];
+  studentsHistoryToSync: any = [];
   evaluations: any = null;
   evaluationsToSync: any = [];
   exams: any = null;
   examsToSync: any = [];
+  followUps: any = null;
+  followUpsToSync: any = [];
   schools: any = [];
   user: any = null;
 
@@ -170,6 +173,20 @@ export class SyncDataPage implements OnInit {
       for (let evaluation of this.evaluations) {
         if (!evaluation.created_at || evaluation.status === 'updated' || evaluation.status === 'deleted') {
           this.evaluationsToSync.push(evaluation);
+        }
+      }
+
+    });
+  }
+
+  loadFollowUpsFromStorage(){
+    this.followUpsToSync = [];
+    this.appStorage.get('followUps').then((data) => {
+      this.followUps = data || [];
+
+      for (let followUp of this.followUps) {
+        if (!followUp.created_at || followUp.status === 'updated' || followUp.status === 'deleted') {
+          this.followUpsToSync.push(followUp);
         }
       }
 
@@ -562,6 +579,69 @@ export class SyncDataPage implements OnInit {
     }
   }
 
+  async syncFollowUps(): Promise<void> {
+    try{
+      // Vérifier l'état du réseau
+      this.networkStatus = await Network.getStatus();
+      if (!this.networkStatus.connected) {
+        console.warn('Aucune connexion réseau disponible. Synchronisation des suivis annulée.');
+        return;
+      }
+
+      // Récupérer les suivis depuis appStorage
+      const followUps = (await this.appStorage.get('followUps')) || [];
+      if (!Array.isArray(followUps)) {
+        console.warn('Les suivis ne sont pas un tableau valide:', followUps);
+        await this.appStorage.set('followUps', []); // Réinitialiser par sécurité
+        return;
+      }
+
+      if (followUps.length === 0) {
+        console.log('Aucun suivi à synchroniser.');
+        return;
+      }
+
+      // Filtrer les suivis à synchroniser
+      const followUpsToSync = followUps.filter(
+        (followUp: any) => !followUp.created_at
+      );
+
+      if (followUpsToSync.length === 0) {
+        console.log('Aucun suivi à synchroniser.');
+        return;
+      }
+
+      // Paralléliser les requêtes API pour chaque suivi
+      const syncPromises = followUpsToSync.map(async (followUp: any, index: number) => {
+        try {
+          const followUpObservable = await this.apiService.postFollowUp(followUp.problem_id, followUp);
+          console.log(`Synchronisation du suivi ${index} pour le problème ${followUp.problem_id}...`);
+          const data: any = await lastValueFrom(followUpObservable);
+          if (data?.data) {
+            console.log(`Suivi synchronisé avec succès pour le problème ${followUp.problem_id}:`, data.data);
+            // Marquer le suivi comme synchronisé
+          } else {
+            console.warn(`Échec de la synchronisation du suivi ${index}, réponse invalide:`, data);
+          }
+        } catch (error) {
+          console.error(`Erreur lors de la synchronisation du suivi ${index}:`, error);
+        }
+      });
+
+      // Attendre que toutes les opérations de synchronisation soient terminées
+      await Promise.all(syncPromises);
+
+      // Mettre à jour les suivis dans appStorage
+      await this.appStorage.set('followUps', followUps);
+      console.log('Suivis mis à jour dans le stockage:', followUps);
+      await this.loadFollowUpsFromAPI();
+      await this.refreshData();
+
+      console.log('Synchronisation des suivis terminée avec succès.');
+    } catch (error) {
+      console.error('Erreur inattendue lors de la synchronisation des suivis:', error);
+    }
+  }
 
 
   async loadClassesFromAPI() {
@@ -800,6 +880,8 @@ export class SyncDataPage implements OnInit {
         console.log('Écoles sauvegardées:', filteredSchools);
       }
 
+      
+
       if (usersData) {
         await this.appStorage.set('users', usersData);
         console.log('Utilisateurs sauvegardés:', usersData);
@@ -819,6 +901,11 @@ export class SyncDataPage implements OnInit {
       // Charger les étudiants depuis l'API si aucun étudiant à synchroniser
       if (this.studentsToSync.length === 0) {
         await this.loadStudentsFromAPI();
+      }
+
+      //charger les historique des élèves depuis l'API si aucune historique à synchroniser
+      if(this.studentsHistoryToSync.length === 0) {
+        await this.loadStudentsHistoryFromAPI();
       }
 
       // Charger les examens à synchroniser
@@ -852,6 +939,22 @@ export class SyncDataPage implements OnInit {
       }
     }
 
+  }
+
+  async storeAllDataToAPI(){
+
+    const [ schoolsData, classesData, examData, evaluationData, followUpData ] = await Promise.all([
+      this.appStorage.get('schools'),
+      this.appStorage.get('classes'),
+      this.appStorage.get('exams'),
+      this.appStorage.get('evaluations'),
+      this.appStorage.get('followUps'),
+    ]);
+
+
+    if(schoolsData){
+
+    }
   }
 
   async fetchSchools(): Promise<any> {
@@ -913,6 +1016,18 @@ export class SyncDataPage implements OnInit {
       }
     }
     console.log('Examens à synchroniser:', this.examsToSync);
+  }
+
+  async loadFollowUpsToSync(): Promise<void> {
+    this.followUpsToSync = [];
+    this.followUps = (await this.appStorage.get('followUps')) || [];
+
+    for (const followUp of this.followUps) {
+      if (!followUp.created_at || followUp.status === 'updated' || followUp.status === 'deleted') {
+        this.followUpsToSync.push(followUp);
+      }
+    }
+    console.log('Suivis à synchroniser:', this.followUpsToSync);
   }
 
   // Charger les évaluations à synchroniser
@@ -992,6 +1107,60 @@ export class SyncDataPage implements OnInit {
 
   }
 
+  async loadFollowUpsFromAPI(){
+    let loading: HTMLIonLoadingElement | null = null;
+    try {
+      // Afficher l'indicateur de chargement
+      loading = await this.presentLoading('Chargement des suivis en cours...');
+
+      // Récupérer les suivis depuis le stockage
+      const problems = await this.appStorage.get('problems');
+      if (!problems || !Array.isArray(problems) || problems.length === 0) {
+        console.warn('Aucun problème trouvé dans le stockage.');
+        return; // Sortir de la fonction si aucun problème
+      }
+
+      // Paralléliser les requêtes API pour tous les suivis
+      const followUpPromises = problems.map(async (problem: any) => {
+        try {
+          const followUpObservable = await this.apiService.getFollowUps(problem.id);
+          const data: any = await lastValueFrom(followUpObservable);
+          if (data?.data && Array.isArray(data.data) && data.data.length > 0) {
+            console.log(`Suivis récupérés pour le problème ${problem.id}:`, data.data);
+            return data.data; // Retourner les suivis
+          } else {
+            console.warn(`Aucun suivi trouvé pour le problème ${problem.id}`);
+            return [];
+          }
+        } catch (error) {
+          console.error(`Erreur lors de la récupération des suivis pour le problème ${problem.id}:`, error);
+          return []; // Retourner un tableau vide en cas d'erreur
+        }
+      });
+
+      // Attendre que toutes les requêtes soient terminées
+      const followUpArrays = await Promise.all(followUpPromises);
+
+      // Aplatir les tableaux de suivis en une seule liste
+      const followUps: any[] = followUpArrays.flat();
+
+      // Sauvegarder les suivis dans le stockage
+      await this.appStorage.set('followUps', followUps);
+      console.log('Suivis sauvegardés avec succès:', followUps);
+    } catch (error) {
+      console.error('Erreur lors du chargement des suivis depuis l\'API:', error);
+      // Sauvegarder un tableau vide en cas d'erreur pour éviter des problèmes ultérieurs
+      await this.appStorage.set('followUps', []);
+      // Afficher une notification à l'utilisateur (facultatif)
+    } finally {
+      // S'assurer que l'indicateur de chargement est toujours fermé, même en cas d'erreur
+      if (loading) {
+        await this.dismissLoading(loading);
+      }
+    }
+
+  }
+
   async loadProblemsFromAPI() {
     let loading: HTMLIonLoadingElement | null = null;
     try {
@@ -1015,6 +1184,51 @@ export class SyncDataPage implements OnInit {
       console.error('Erreur lors du chargement des problèmes depuis l\'API:', error);
       // Sauvegarder un tableau vide en cas d'erreur pour éviter des problèmes ultérieurs
       await this.appStorage.set('problems', []);
+      // Afficher une notification à l'utilisateur (facultatif)
+    } finally {
+      // S'assurer que l'indicateur de chargement est toujours fermé, même en cas d'erreur
+      if (loading) {
+        await this.dismissLoading(loading);
+      }
+    }
+  }
+
+  async loadStudentsHistoryFromAPI(){
+    let loading: HTMLIonLoadingElement | null = null;
+    try {
+      // Afficher l'indicateur de chargement
+      loading = await this.presentLoading('Chargement de l\'historique des élèves en cours...');
+
+      // Récupérer les écoles depuis l'API
+      const schoolYears = await this.appStorage.get('schoolYears');
+      if (!schoolYears || !Array.isArray(schoolYears) || schoolYears.length === 0) {
+        console.warn('Aucune année scolaire trouvée dans le stockage.');
+        await this.appStorage.set('studentsHistory', []);
+        return;
+      }
+
+      // Paralléliser les requêtes API pour tous les historiques
+      const studentsHistoryPromises = schoolYears.map(async (schoolYear: any) => {
+        try {
+          const studentsHistoryObservable = await this.apiService.getStudentHistory(schoolYear.id);
+          const data: any= await lastValueFrom(studentsHistoryObservable);
+          if(data?.data && Array.isArray(data.data) && data.data.length > 0){
+            console.log(`Historique des élèves récupéré pour l'année scolaire ${schoolYear.id}:`, data.data);
+            return data.data;
+          }else{
+            console.warn(`Aucun historique des élèves trouvé pour l'année scolaire ${schoolYear.id}.`);
+            return [];
+          }
+        } catch (error) {
+          console.error(`Erreur lors du chargement de l'historique des élèves pour l'année scolaire ${schoolYear.id}:`, error);
+          return [];
+        }
+      });
+
+    } catch (error) {
+      console.error('Erreur lors du chargement de l\'historique des élèves depuis l\'API:', error);
+      // Sauvegarder un tableau vide en cas d'erreur pour éviter des problèmes ultérieurs
+      await this.appStorage.set('studentsHistory', []);
       // Afficher une notification à l'utilisateur (facultatif)
     } finally {
       // S'assurer que l'indicateur de chargement est toujours fermé, même en cas d'erreur
@@ -1063,6 +1277,14 @@ export class SyncDataPage implements OnInit {
         await this.loadEvaluationsFromStorage();
       } catch (error) {
         console.error('Échec du chargement des évaluations:', error);
+        // Continuer malgré l'erreur
+      }
+
+      //charger les suivi depuis le stockage
+      try{
+        await this.loadFollowUpsFromStorage();
+      } catch (error) {
+        console.error('Échec du chargement des suivis:', error);
         // Continuer malgré l'erreur
       }
 

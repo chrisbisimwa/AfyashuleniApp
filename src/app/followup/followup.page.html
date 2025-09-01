@@ -1,19 +1,24 @@
-<ion-header>
-  <ion-toolbar style="--background: #3880ff; --color: white;">
-    <!-- <ion-buttons slot="start">
-      <ion-back-button defaultHref="/"></ion-back-button>
-    </ion-buttons> -->
-    <ion-title>Suivi des examens</ion-title>
+
+<ion-header class="ion-no-border" mode="ios">
+  <ion-toolbar style="--background: var(--ion-color-primary)">
+    <ion-title style="color: white; letter-spacing: 1px; font-family: 'semi-bold';">Suivi des examens</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <div class="main_content_div">
-    <h1>Suivi des élèves</h1>
+    <ion-label class="title_lbl">Suivi des élèves</ion-label>
 
     <!-- Sélection de l'école -->
     <ion-list>
       <ion-item>
+        <ion-label position="stacked">Type de suivi</ion-label>
+        <ion-select [(ngModel)]="followUpsType" placeholder="Sélectionnez un type de suivi">
+          <ion-select-option value="first_followup">Premier suivi</ion-select-option>
+          <ion-select-option value="second_followup">Deuxième suivi</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-item *ngIf="followUpsType">
         <ion-label position="stacked">École</ion-label>
         <ion-select [(ngModel)]="selectedSchool" (ionChange)="fetchClasses($event)" placeholder="Sélectionnez une école">
           <ion-select-option *ngFor="let school of schools" [value]="school.id">

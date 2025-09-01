@@ -28,6 +28,16 @@ export class ToastService {
     await toast.present();
   }
 
+  async showWarning(message: string, duration: number = 3500) {
+    const toast = await this.toastController.create({
+      message,
+      duration,
+      color: 'warning',
+      position: 'bottom',
+    });
+    await toast.present();
+  }
+
   async showInfo(message: string, duration: number = 2500) {
     const toast = await this.toastController.create({
       message,

@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { IonItemSliding, NavController, Platform, ToastController } from '@ionic/angular';
 import { Storage } from '@ionic/storage-angular';
+import { ToastService } from '../services/toast.service';
+
+
 interface Evaluation {
   id: number;
   problem_id: number;
@@ -50,16 +53,22 @@ export class FollowupPage implements OnInit {
   followUps: ProblemFollowUp[] = [];
   followUpStatuses: { [key: number]: 'fully_solved' | 'partially_solved' | 'not_solved' | null } = {};
   doctorId: number = 1; // ID du médecin connecté (à remplacer par une vraie valeur)
+  followUpsType: string ="";
+  user: any = null;
+  followUpId: any = null;
 
   constructor(
     private navController: NavController,
     public plt: Platform,
     private toastController: ToastController,
-    private appStorage: Storage
+    private appStorage: Storage,
+    private toastService: ToastService
   ) { }
 
   async ngOnInit() {
-    this.loadSchools();
+    await this.loadUser()
+    await this.loadSchools();
+    this.followUpId= await this.generateId();
     this.problems = (await this.appStorage.get('problems')) || [];
   }
 
@@ -73,6 +82,14 @@ export class FollowupPage implements OnInit {
     
     if (result) {
       this.schools = result.filter((item:any) => item.status !== 'deleted');
+    }
+  }
+
+  async loadUser(){
+    const result = await this.appStorage.get("user");
+    if (result) {
+      this.user = result;
+      this.doctorId = this.user.id;
     }
   }
 
@@ -175,7 +192,8 @@ export class FollowupPage implements OnInit {
           this.followUpStatuses[index] = existingFollowUp?.followup_status || null;
         });
       } else {
-        console.warn('Aucun suivi trouvé dans le stockage.');
+        this.toastService.showWarning('Aucun suivi trouvé pour cet élève.');
+        //console.warn('Aucun suivi trouvé dans le stockage.');
       }
     } catch (error) {
       console.error('Erreur lors du chargement des données de suivi :', error);
@@ -261,12 +279,13 @@ export class FollowupPage implements OnInit {
     const followUpsToSave: ProblemFollowUp[] = this.evaluations.map((evaluation, index) => {
       const existingFollowUp = this.followUps.find(f => f.problem_id === evaluation.problem_id);
       return {
-        id: existingFollowUp?.id || 0,
+        id: this.followUpId,
         student_id: this.selectedStudent.id,
         date: new Date().toISOString(),
         doctor_id: this.doctorId,
         problem_id: evaluation.problem_id,
         followup_status: this.followUpStatuses[index],
+        followup_type: this.followUpsType
       };
     });
 
@@ -311,6 +330,26 @@ export class FollowupPage implements OnInit {
     this.evaluations = [];
     this.followUps = [];
     this.followUpStatuses = {};
+    this.followUpsType="";
+  }
+
+  async generateId(): Promise<number> {
+    // Générer un ID basé sur le timestamp + une partie aléatoire
+    const timestamp = Date.now(); // Timestamp en millisecondes (unique à chaque milliseconde)
+    const randomPart = Math.floor(Math.random() * 10000); // Partie aléatoire (0 à 9999)
+    let followUpId = Number(`${timestamp}${randomPart}`); // Concaténer et convertir en nombre
+
+    // Vérifier si l'ID existe déjà dans le stockage
+    const result = await this.appStorage.get('followUps');
+    if (result) {
+      const followUp = result.find((sdt: any) => sdt.id === followUpId);
+      if (followUp) {
+        // Si l'ID existe déjà, générer un nouvel ID
+        return await this.generateId(); // Récursion jusqu'à obtenir un ID unique
+      }
+    }
+
+    return followUpId; // Retourner l'ID unique
   }
 
   getProblemName(problemId: number): string {
