@@ -133,10 +133,35 @@ export class ShowSchoolPage implements OnInit {
     this.schoolYears = schoolYears;
   }
 
-  deleteClasse(item: any) {
-    this.classes = this.classes.filter((classs: any) => classs.id !== item.id);
+  async deleteClasse(item: any) {
+    const alert = await this.alertController.create({
+      header: 'Confirmer la suppression ?',
+      buttons: [
+        {
+          text: 'Annuler',
+          role: 'cancel',
+          cssClass: 'secondary',
+        },
+        {
+          text: 'Supprimer',
+          handler: async () => {
+            const result = await this.appStorage.get('classes');
 
-    this.appStorage.set('classes', this.classes);
+            let classe = result.find((classs: any) => classs.id == item.id);
+            if (classe) {
+              result.splice(result.indexOf(classe), 1);
+              classe.status = "deleted"
+
+              result.push(classe);
+
+              this.appStorage.set('classes', result);
+
+            }
+          },
+        },
+      ],
+    });
+    await alert.present();
   }
 
   editClasses(item: IonItemSliding, classe: any) {
@@ -214,7 +239,7 @@ export class ShowSchoolPage implements OnInit {
   async fetchClassesBySchool(refresher: any) {
     const result = await this.appStorage.get('classes');
     if (result) {
-      this.classes = result.filter((classs: any) => classs.school_id == this.school.id);
+      this.classes = result.filter((classs: any) => classs.school_id == this.school.id && classs.status !== 'deleted');
     }
 
 

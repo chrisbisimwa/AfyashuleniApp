@@ -943,17 +943,47 @@ export class SyncDataPage implements OnInit {
 
   async storeAllDataToAPI(){
 
-    const [ schoolsData, classesData, examData, evaluationData, followUpData ] = await Promise.all([
-      this.appStorage.get('schools'),
+    const [ classesData, studentsData, examData, followUpData ] = await Promise.all([
+
       this.appStorage.get('classes'),
+      this.appStorage.get('students'),
       this.appStorage.get('exams'),
-      this.appStorage.get('evaluations'),
       this.appStorage.get('followUps'),
     ]);
 
 
-    if(schoolsData){
+    if(classesData){
 
+      this.classesToSync = classesData.filter((classe: any) => !classe.created_at || classe.status === 'updated' || classe.status === 'deleted');
+      if(this.classesToSync.length > 0){
+        await this.syncClasses();
+      }
+    }
+
+    if(studentsData){
+
+      this.studentsToSync = studentsData.filter((student: any) => !student.created_at || student.status === 'updated' || student.status === 'deleted');
+      if(this.studentsToSync.length > 0){
+        await this.syncStudents();
+      }
+    }
+
+    if(examData){
+
+      this.examsToSync = examData.filter((exam: any) => !exam.created_at || exam.status === 'updated' || exam.status === 'deleted');
+      if(this.examsToSync.length > 0){
+        await this.syncExams();
+      }
+    }
+
+   
+
+    if(followUpData){
+
+      this.followUpsToSync = followUpData.filter((followUp: any) => !followUp.created_at || followUp.status === 'updated' || followUp.status === 'deleted');
+      if(this.followUpsToSync.length > 0){
+        await this.syncFollowUps();
+      }
     }
   }
 

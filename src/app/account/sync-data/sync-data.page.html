@@ -52,14 +52,14 @@
         <ion-button shape="round" *ngIf="examsToSync.length==0" (click)="loadExamsFromAPI()"><ion-icon slot="icon-only" name="reload-circle-outline"></ion-icon></ion-button>
       </ion-col>
     </ion-row>
-    <ion-row>
+    <!-- <ion-row>
       <ion-col><ion-item>Problèmes de santé</ion-item></ion-col>
       <ion-col size="2"><ion-item>{{evaluationsToSync.length}}</ion-item></ion-col>
       <ion-col size="2">
         <ion-button shape="round" *ngIf="evaluationsToSync.length>0" (click)="syncEvaluation()"><ion-icon slot="icon-only" name="save-outline"></ion-icon></ion-button>
         <ion-button shape="round" *ngIf="evaluationsToSync.length==0" (click)="loadEvaluationsFromAPI()"><ion-icon slot="icon-only" name="reload-circle-outline"></ion-icon></ion-button>
       </ion-col>
-    </ion-row>
+    </ion-row> -->
     <ion-row>
       <ion-col><ion-item>Suivi de problèmes</ion-item></ion-col>
       <ion-col size="2"><ion-item>{{followUpsToSync.length}}</ion-item></ion-col>

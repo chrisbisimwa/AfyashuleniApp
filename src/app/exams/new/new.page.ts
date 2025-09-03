@@ -713,7 +713,7 @@ export class NewPage implements OnInit {
     }
 
     
-    const imcPercent = this.calculateIMCPercent();
+    const imcPercent = await this.calculateIMCPercent();
     //9. DIP 1
     if (imcPercent > 80 && imcPercent <= 90) addSuggestedProblem(9, 'Pourcentage IMC', imcPercent);
 
@@ -871,34 +871,15 @@ export class NewPage implements OnInit {
   }
 
   // Méthodes utilitaires
-  private calculateIMCPercent(): number {
-    console.log(this.answers);
+  private async calculateIMCPercent(): Promise<number> {
     const poids = parseFloat(this.answers['Poids_(kg)'] || 0);
     const taille = parseFloat(this.answers['Taille_(cm)'] || 0); // Taille en cm
 
-    if (poids <= 0 || taille <= 0) {
-      return 0; // Retourne 0 si les données sont invalides
-    }
+    // poid divisé par le poid ideal * 100
+    const poidsIdeal = await this.getPoidIdeal(taille, this.studentGender);
+    if (!poidsIdeal) return 0;
 
-    // Calcul du poids idéal avec la formule de Devine
-    let poidsIdeal = 0;
-    if (this.studentGender === 'male') {
-      poidsIdeal = 50 + 2.3 * ((taille - 152.4) / 2.54);
-    } else if (this.studentGender === 'female') {
-      poidsIdeal = 45.5 + 2.3 * ((taille - 152.4) / 2.54);
-    } else {
-      return 0; // Retourne 0 si le sexe n'est pas défini
-    }
-
-    if (poidsIdeal <= 0) {
-      return 0; // Retourne 0 si le poids idéal est invalide
-    }
-
-    // Calcul du pourcentage par rapport au poids idéal
-    const pourcentage = (poids / poidsIdeal) * 100;
-
-    
-    return Math.round(pourcentage * 100) / 100;
+    return (poids / poidsIdeal) * 100;
   }
 
   private async calculateAge(): Promise<number> {
@@ -1387,7 +1368,7 @@ export class NewPage implements OnInit {
     this.navController.navigateForward('/tabs/exams');
   }
 
-  runTimeChange(event: any) {
+  async runTimeChange(event: any) {
 
     if (event.target.name === 'Taille_(cm)' || event.target.name === 'Poids_(kg)') {
       const tailleStr = this.answers['Taille_(cm)'];
@@ -1412,61 +1393,12 @@ export class NewPage implements OnInit {
         const imc = poids / (tailleM * tailleM);
         this.answers['IMC'] = imc.toFixed(2);
 
-        // Calcul du poids idéal
-        let poidsIdeal = 0;
+        let poidsIdeal = await this.getPoidIdeal(taille, this.studentGender);
 
-        // Option 1 : Formule de Lorentz avec âge
-        /* const age = this.studentAge ? parseInt(this.studentAge) : null;
-        if (age === null) {
-          const alert = this.alertController.create({
-            header: 'Âge non spécifié',
-            message: 'Veuillez spécifier l\'âge pour le calcul avec Lorentz ajusté.',
-            buttons: [{ text: 'Fermer', role: 'cancel', cssClass: 'secondary' }]
-          });
-          alert.then((al) => al.present());
-          return;
-        }
-
-        if (this.studentGender === 'male') {
-          poidsIdeal = (taille - 100) - ((taille - 150) / 4) + (age - 20) * 0.1;
-        } else if (this.studentGender === 'female') {
-          poidsIdeal = (taille - 100) - ((taille - 150) / 2.5) + (age - 20) * 0.1;
-        } else {
-          const alert = this.alertController.create({
-            header: 'Genre non spécifié',
-            message: 'Veuillez spécifier le genre pour calculer le poids idéal.',
-            buttons: [{ text: 'Fermer', role: 'cancel', cssClass: 'secondary' }]
-          });
-          alert.then((al) => al.present());
-          return;
-        } */
-
-        // Option 2 : Formule de Devine (commentée, décommentez pour l'utiliser)
-
-        if (this.studentGender === 'male') {
-          poidsIdeal = 50 + 2.3 * ((taille - 152.4) / 2.54);
-        } else if (this.studentGender === 'female') {
-          poidsIdeal = 45.5 + 2.3 * ((taille - 152.4) / 2.54);
-        } else {
-          const alert = this.alertController.create({
-            header: 'Genre non spécifié',
-            message: 'Veuillez spécifier le genre pour calculer le poids idéal.',
-            buttons: [{ text: 'Fermer', role: 'cancel', cssClass: 'secondary' }]
-          });
-          alert.then((al) => al.present());
-          return;
-        }
+        
 
 
-        if (poidsIdeal <= 0) {
-          const alert = this.alertController.create({
-            header: 'Erreur de calcul',
-            message: 'Le poids idéal calculé est invalide.',
-            buttons: [{ text: 'Fermer', role: 'cancel', cssClass: 'secondary' }]
-          });
-          alert.then((al) => al.present());
-          return;
-        }
+        
 
         const pourcentage = (poids / poidsIdeal) * 100;
         this.answers['Pourcentage'] = pourcentage.toFixed(2);
@@ -1668,6 +1600,45 @@ export class NewPage implements OnInit {
       }
     }
 
+  }
+
+  async getPoidIdeal(taille: number, gender: string): Promise<number> {
+    // Tables associatives pour le poids idéal
+    const poidIdealFemale: Record<number, number> = {
+      110: 19, 111: 19, 112: 20, 113: 20, 114: 20, 115: 20, 116: 21, 117: 21, 118: 22, 119: 22,
+      120: 23, 121: 23, 122: 24, 123: 24, 124: 25, 125: 25, 126: 25, 127: 25, 128: 26, 129: 26,
+      130: 27, 131: 27, 132: 29, 133: 29, 134: 30, 135: 30, 136: 31, 137: 31, 138: 32, 139: 32,
+      140: 33, 141: 33, 142: 34, 143: 34, 144: 35, 145: 35, 146: 37, 147: 37, 148: 38, 149: 38,
+      150: 39, 151: 39, 152: 40, 153: 40, 154: 42, 155: 42, 156: 44, 157: 44, 158: 46, 159: 46,
+      160: 50, 161: 50, 162: 53, 163: 53
+    };
+
+    const poidIdealMale: Record<number, number> = {
+      112: 20, 113: 20, 114: 21, 115: 21, 116: 21, 117: 21, 118: 22, 119: 22, 120: 23, 121: 23,
+      122: 24, 123: 24, 124: 25, 125: 25, 126: 25, 127: 25, 128: 26, 129: 26, 130: 27, 131: 27,
+      132: 28, 133: 28, 134: 29, 135: 29, 136: 30, 137: 30, 138: 31, 139: 31, 140: 33, 141: 33,
+      142: 34, 143: 34, 144: 35, 145: 35, 146: 36, 147: 36, 148: 37, 149: 37, 150: 39, 151: 39,
+      152: 40, 153: 40, 154: 41, 155: 41, 156: 43, 157: 43, 158: 45, 159: 45, 160: 47, 161: 47,
+      162: 48, 163: 48, 164: 50, 165: 50, 166: 53, 167: 53, 168: 55, 169: 55, 170: 57, 171: 57,
+      172: 59, 173: 59, 174: 62, 175: 62
+    };
+
+    const poidIdealEnfant: Record<number, number> = {
+      85: 12, 86: 12.2, 87: 12.4, 88: 12.6, 89: 12.9, 90: 13.1, 91: 13.3, 92: 13.6, 93: 13.8, 94: 14,
+      95: 14.3, 96: 14.5, 97: 14.8, 98: 15, 99: 15.3, 100: 15.6, 101: 15.8, 102: 16.1, 103: 16.4,
+      104: 16.7, 105: 16.9, 106: 17.2, 107: 17.5, 108: 17.8, 109: 18.1, 110: 18.4
+    };
+
+    let pd = 0;
+    if (gender === 'female' && taille > 110) {
+      pd = poidIdealFemale[taille] ?? 0;
+    } else if (gender === 'male' && taille > 110) {
+      pd = poidIdealMale[taille] ?? 0;
+    } else {
+      pd = poidIdealEnfant[taille] ?? 0;
+    }
+
+    return pd;
   }
 
 
