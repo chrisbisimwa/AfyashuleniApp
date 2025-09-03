@@ -359,4 +359,15 @@ export class ShowSchoolPage implements OnInit {
 
   }
 
+  async isClasseSynchronized(classeId: number){
+    let synced = false;
+
+    const classe = this.classes.find((cls: any) => cls.id === classeId);
+    if(classe && !classe.created_at){
+      return false;
+    }
+  
+    return true;
+  }
+
 }

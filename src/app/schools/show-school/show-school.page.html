@@ -60,6 +60,8 @@
               <ion-label>
                 {{classe.name}}
               </ion-label>
+              <ion-icon aria-hidden="true" name="thumbs-up" size="small" color="success" slot="end" *ngIf="isClasseSynchronized(classe.id)"></ion-icon>
+              <ion-icon aria-hidden="true" name="thumbs-down" size="small" color="danger" slot="end" *ngIf="!isClasseSynchronized(classe.id)"></ion-icon>
             </ion-item>
             <ion-item-options side="end">
               <ion-item-option color="primary" (click)="editClasses(slidingItem, school)"> Modifier la classe</ion-item-option>
