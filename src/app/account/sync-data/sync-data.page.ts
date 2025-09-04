@@ -57,9 +57,9 @@ export class SyncDataPage implements OnInit {
     this.fetUser();
   }
 
-  ionViewWillEnter() {
+  /* ionViewWillEnter() {
     this.refreshData();
-  }
+  } */
 
 
 
@@ -214,7 +214,8 @@ export class SyncDataPage implements OnInit {
       await this.showToast('Synchronisation des classes terminée avec succès.', 'success');
     } catch (error) {
       console.error('Erreur inattendue lors de la synchronisation des classes:', error);
-      await this.showToast('Erreur lors de la synchronisation des classes.', 'danger');
+      
+      await this.showToast('Erreur lors de la synchronisation des classes. ', 'danger');
     } finally {
       if (loading) {
         await this.dismissLoading(loading);
@@ -241,7 +242,7 @@ export class SyncDataPage implements OnInit {
       }
 
       if (classe.status === 'deleted') {
-        (await this.apiService.deleteSchool(classe.id)).subscribe((data: any) => {
+        (await this.apiService.deleteClass(classe.id)).subscribe((data: any) => {
           if (data) {
             console.log(data);
           }

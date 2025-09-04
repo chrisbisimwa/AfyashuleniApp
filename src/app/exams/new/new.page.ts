@@ -192,7 +192,7 @@ export class NewPage implements OnInit {
       { label: "Débris_alimentaires", options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
       { label: 'Plaque', options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
       { label: 'Tartre', options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
-      { label: 'Gingivite', options: ['-', '+'], gender: 'both' },
+      { label: 'Gingivite', options: ['-', '+', '±', '++', '+++', '++++'], gender: 'both' },
     ],
     "ORL_/_Cou": [
       { label: 'gorge', options: ['Saine', 'Pathologique'], gender: 'both' },
@@ -236,10 +236,10 @@ export class NewPage implements OnInit {
     "Abdomen": [
       { label: 'Inspection_de_l\'abdomen', options: ['Normal', 'Pathologique'], gender: 'both' },
       { label: 'Si_abdomen_pathologique,_préciser', options: null, gender: 'both', parent: 'Inspection_de_l\'abdomen', parentValue: 'Pathologique' },
-      { label: 'Palpation_de_abdomen', options: ['Normal','Hernie', 'ballonné', 'Autre'], gender: 'both' },
-      { label: 'Si_abdomen_palpation_autre,_préciser', options: null, gender: 'both', parent: 'Palpation_de_abdomen', parentValue: 'Autre' },
-      { label: 'region_inguinale', options: ['Normal','Hernie', 'Pathologique'], gender: 'both' },
-      { label: 'Si_region_inguinale_pathologique,_préciser', options: null, gender: 'both', parent: 'region_inguinale', parentValue: 'Pathologique' },
+      { label: 'Palpation_de_abdomen', options: ['Normal','Pathologique'], gender: 'both' },
+      { label: 'Si_abdomen_palpation_Pathologique,_préciser', options: null, gender: 'both', parent: 'Palpation_de_abdomen', parentValue: 'Pathologique' },
+      { label: 'region_inguinale', options: ['Normal','Hernie', 'Autre pathologie'], gender: 'both' },
+      { label: 'Si_region_inguinale_pathologique,_préciser', options: null, gender: 'both', parent: 'region_inguinale', parentValue: 'Autre pathologie' },
     ],
     "(Pré)puberté": [
       { label: 'Menarche', options: ['Oui', 'Non'], gender: 'female' },
@@ -247,7 +247,8 @@ export class NewPage implements OnInit {
       { label: 'Fréquence', options: ['Régulier', 'Irrégulier'], gender: 'female', parent: 'Menarche', parentValue: 'Oui' },
       { label: 'Nombre_de_jours', options: ['Moins de 10 jours', 'Plus de 10 jours'], gender: 'female', parent: 'Menarche', parentValue: 'Oui' },
       { label: 'Dysménorrhée', options: ['-', '±', '+', '++'], gender: 'female', parent: 'Menarche', parentValue: 'Oui' },
-      { label: 'Testicule', options: ['Normal', 'Varicocelle', 'Hernie', 'Absente'], gender: 'male'},
+      { label: 'Testicule', options: ['Normal', 'Varicocelle', 'Hernie', 'Absente', "Autre pathologie"], gender: 'male'},
+      { label: 'Si_testicule_pathologique,_préciser', options: null, gender: 'male', parent: 'Testicule', parentValue: 'Autre pathologie' },
       { label: 'Score_de_Tanner_(Poils)', options: ['1', '2', '3', '4', '5'], gender: 'male' },
       { label: 'Score_de_Tanner_(Gonades)', options: ['1', '2', '3', '4', '5'], gender: 'male' },
       { label: 'Score_de_Tanner_(P)', options: ['1', '2', '3', '4', '5'], gender: 'female' },

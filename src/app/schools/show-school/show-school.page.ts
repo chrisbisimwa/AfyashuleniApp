@@ -134,8 +134,9 @@ export class ShowSchoolPage implements OnInit {
   }
 
   async deleteClasse(item: any) {
+    console.log(item.id);
     const alert = await this.alertController.create({
-      header: 'Confirmer la suppression ?',
+      header: 'Confirmer la suppression de la classe ?',
       buttons: [
         {
           text: 'Annuler',
@@ -148,13 +149,19 @@ export class ShowSchoolPage implements OnInit {
             const result = await this.appStorage.get('classes');
 
             let classe = result.find((classs: any) => classs.id == item.id);
-            if (classe) {
-              result.splice(result.indexOf(classe), 1);
-              classe.status = "deleted"
+            if (classe && classe.created_at) {
+              await result.splice(result.indexOf(classe), 1);
+              await (classe.status = "deleted");
 
-              result.push(classe);
+              await result.push(classe);
 
-              this.appStorage.set('classes', result);
+              await this.appStorage.set('classes', result);
+              await this.fetchClassesBySchool(null);
+
+            }else if(classe && !classe.created_at){
+              await result.splice(result.indexOf(classe), 1);
+              await this.appStorage.set("classes", result);
+              await this.fetchClassesBySchool(null);
 
             }
           },
@@ -306,6 +313,7 @@ export class ShowSchoolPage implements OnInit {
   }
 
 
+  
 
 
   back() {
@@ -359,15 +367,19 @@ export class ShowSchoolPage implements OnInit {
 
   }
 
-  async isClasseSynchronized(classeId: number){
+  isClasseSynchronized(classeId: number) {
     let synced = false;
 
-    const classe = this.classes.find((cls: any) => cls.id === classeId);
-    if(classe && !classe.created_at){
-      return false;
+    if (this.classes && Array.isArray(this.classes)) {
+      const classe = this.classes.find((cls: any) => cls.id === classeId);
+      if (classe && classe.created_at) {
+        synced = true;
+      } else if (classe && !classe.created_at) {
+        synced = false;
+      }
     }
-  
-    return true;
+
+    return synced;
   }
 
 }

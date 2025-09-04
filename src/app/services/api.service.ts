@@ -115,7 +115,7 @@ export class ApiService {
 
   async deleteClass(classId:number){
     const headers = await this.getHeaders();
-    return this.http.delete(`${this.apiUrl}/schools/classes/${classId}`, headers);
+    return this.http.get(`${this.apiUrl}/schools/classes/${classId}`, headers);
   }
 
   async deleteStudent(studentId:number){
