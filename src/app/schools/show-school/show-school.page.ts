@@ -313,7 +313,10 @@ export class ShowSchoolPage implements OnInit {
   }
 
 
-  
+  editClasse(item: any) {
+
+    this.navController.navigateForward('/tabs/schools/classe/' + item.id + '/edit');
+  }
 
 
   back() {
