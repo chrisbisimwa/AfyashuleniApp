@@ -1160,20 +1160,7 @@ export class NewPage implements OnInit {
     return locs;
   }
 
-  /* generateExamId() {
-
-    this.examId = Math.floor(Math.random() * 1000000000000000000);
-    this.appStorage.get('exams').then((result) => {
-      if (result) {
-        let exam = result.find((sch: any) => sch.id == this.examId);
-        if (exam) {
-          this.generateExamId();
-        }
-      }
-    });
-
-    return this.examId;
-  } */
+ 
 
   async generateExamId(): Promise<number> {
     // Générer un ID basé sur le timestamp + une partie aléatoire
