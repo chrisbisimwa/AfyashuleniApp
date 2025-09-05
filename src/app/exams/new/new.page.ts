@@ -74,9 +74,10 @@ export class NewPage implements OnInit {
       { label: 'Rang_dans_la_fratrie', options: null, gender: 'both' },
       { label: 'Nombre_de_filles', options: null, gender: 'both' },
       { label: 'Nombre_de_garçons', options: null, gender: 'both' },
+      { label: 'Nombre_d\'enfants_décédés', options: null, gender: 'both' },
       { label: 'L\'enfant_vit_bien_à_l\'école', options: ['Oui', 'Non'], gender: 'both' },
-      { label: 'L\'enfant_vit_bien_à_la_maison', options: ['Oui', 'Non'], gender: 'both' },
       { label: 'Si_enfant_ne_vit_pas_bien_à_l\'école,_pourquoi_?', options: null, gender: 'both', parent: 'L\'enfant_vit_bien_à_l\'école', parentValue: 'Non' },
+      { label: 'L\'enfant_vit_bien_à_la_maison', options: ['Oui', 'Non'], gender: 'both' },
       { label: 'Si_enfant_ne_vit_pas_bien_à_la_maison,_pourquoi_?', options: null, gender: 'both', parent: 'L\'enfant_vit_bien_à_la_maison', parentValue: 'Non' },
 
     ],
@@ -99,9 +100,9 @@ export class NewPage implements OnInit {
     ],
     'comportement_langage': [
       { label: 'Comportement', options: ['Calme', 'Agité', 'Distrait', 'Peureux', 'Curieux', 'Pathologie'], gender: 'both' },
-      { label: 'Si_autre_comportement,_préciser', options: null, gender: 'both', parent: 'Comportement', parentValue: 'Pathologie' },
+      { label: 'Si_comportenement_pathologique,_préciser', options: null, gender: 'both', parent: 'Comportement', parentValue: 'Pathologie' },
       { label: 'Langage', options: ['Cohérent', 'Incohérent', 'Autres'], gender: 'both' },
-      { label: 'Si_autre_language,_préciser', options: null, gender: 'both', parent: 'Langage', parentValue: 'Autres' },
+      { label: 'Si_autre_langage,_préciser', options: null, gender: 'both', parent: 'Langage', parentValue: 'Autres' },
     ],
     'anamnese': [
       { label: 'Nutrition', options: ['Insuffisante', 'Bonne'], gender: 'both' },
@@ -188,6 +189,7 @@ export class NewPage implements OnInit {
       { label: "frequence_visite_dentiste", options: null, gender: 'both', parent: 'Dentiste', parentValue: 'Oui' },
       { label: "Carie", options: ['Oui', 'Non'], gender: 'both' },
       { label: "Nombre_de_dents_carieuses", options: null, gender: 'both', parent: 'Carie', parentValue: 'Oui' },
+      { label: "Localisation_des_dents_carieuses", options: null, gender: 'both', parent: 'Carie', parentValue: 'Oui' },
       /* { label: "Si_oui,_stade_carie", options: ['Stade 1', 'Stade 2', 'Stade 3', 'Stade 4'], gender: 'both', parent: 'Carie', parentValue: 'Oui' }, */
       { label: "Débris_alimentaires", options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
       { label: 'Plaque', options: ['-', '±', '+', '2+', '3+', '4+'], gender: 'both' },
@@ -571,7 +573,7 @@ export class NewPage implements OnInit {
         } else {
           this.alertController.create({
             header: 'Erreur',
-            message: 'L\'infimier n\'a pas encore exmaniné cet élève ! Voulez-vous continuer ?',
+            message: 'L\'infimière n\'a pas encore exmaniné cet élève ! Voulez-vous continuer ?',
             buttons: [
               {
                 text: 'Oui',
@@ -732,17 +734,19 @@ export class NewPage implements OnInit {
     if (imc > 30) addSuggestedProblem(13, 'IMC', imc); // Obésité
 
     // 14. Problème d'acuité visuelle
-    const testE5d = parseFloat(this.answers['acuite_visuelle_de_loin_droite_sans_correction'] || 0);
-    const testE5g = parseFloat(this.answers['acuite_visuelle_de_loin_gauche_sans_correction'] || 0);
-    const testE4d = parseFloat(this.answers['acuite_visuelle_de_loin_droite_avec_lunettes'] || 0);
-    const testE4g = parseFloat(this.answers['acuite_visuelle_de_loin_gauche_avec_lunettes'] || 0);
+    const testE5d = parseFloat(this.answers['acuite_visuelle_oeil_droite_sans_correction'] || 0);
+    const testE5g = parseFloat(this.answers['acuite_visuelle_oeil_gauche_sans_correction'] || 0);
+
+    //avec lunettes
+    const testE4d = parseFloat(this.answers['acuite_visuelle_oeil_droite_avec_lunettes'] || 0);
+    const testE4g = parseFloat(this.answers['acuite_visuelle_oeil_gauche_avec_lunettes'] || 0);
     if (this.answers['Test_acuité_visuelle'] === "Avec lunettes") {
 
-      if (age < 7 && (testE4d <= 0.7 || testE4g <= 0.7)) addSuggestedProblem(14, 'Acuité visuelle', this.answers['acuite_visuelle_de_loin_droite_avec_lunettes']);
-      if (age >= 7 && (testE4d <= 0.8 || testE4g < 0.8)) addSuggestedProblem(14, 'Acuité visuelle', this.answers['acuite_visuelle_de_loin_droite_avec_lunettes']);
+      if (age < 7 && (testE4d <= 0.7 || testE4g <= 0.7)) addSuggestedProblem(14, 'Acuité visuelle', this.answers['acuite_visuelle_oeil_droite_avec_lunettes']);
+      if (age >= 7 && (testE4d <= 0.8 || testE4g < 0.8)) addSuggestedProblem(14, 'Acuité visuelle', this.answers['acuite_visuelle_oeil_droite_avec_lunettes']);
     } else if (this.answers['Test_acuité_visuelle'] === "Sans lunettes") {
-      if (age < 7 && (testE5d <= 0.7 || testE5g <= 0.7)) addSuggestedProblem(14, 'Acuité visuelle', this.answers['acuite_visuelle_de_loin_droite_sans_correction']);
-      if (age >= 7 && (testE5d <= 0.8 || testE5g < 0.8)) addSuggestedProblem(14, 'Acuité visuelle', this.answers['acuite_visuelle_de_loin_droite_sans_correction']);
+      if (age < 7 && (testE5d <= 0.7 || testE5g <= 0.7)) addSuggestedProblem(14, 'Acuité visuelle', this.answers['acuite_visuelle_oeil_droite_sans_correction']);
+      if (age >= 7 && (testE5d <= 0.8 || testE5g < 0.8)) addSuggestedProblem(14, 'Acuité visuelle', this.answers['acuite_visuelle_oeil_droite_sans_correction']);
     }
 
     // 15. Problème d'acuité auditive
@@ -769,43 +773,44 @@ export class NewPage implements OnInit {
     if(this.answers['Carie'] === 'Oui' && (this.answers['Si_oui,_stade_carie'] === 'Stade 2' || this.answers['Si_oui,_stade_carie'] === 'Stade 3' || this.answers['Si_oui,_stade_carie'] === 'Stade 4')) addSuggestedProblem(18, 'Carie', this.answers['Si_oui,_stade_carie']);
 
     // 19. Bouchons de cérumen
-    if(this.answers['oreille_droite'] === 'Pathologique') addSuggestedProblem(19, 'oreille_droite', this.answers['oreille_droite']);
-    if (this.answers['oreille_gauche'] === 'Pathologique') addSuggestedProblem(19, 'oreille_gauche', this.answers['oreille_gauche']);
+    if(this.answers['oreille_droite'] === 'Pathologique') addSuggestedProblem(19, 'oreille_droite', this.answers['Si_oreille_droite_pathologique,_préciser']);
+    if (this.answers['oreille_gauche'] === 'Pathologique') addSuggestedProblem(19, 'oreille_gauche', this.answers['Si_oreille_gauche_pathologique,_préciser']);
 
     // 20. Infections uro-génitales (év. cfr bandelettes)
-    if (this.answers['Problème_urinaire'] === 'Oui') addSuggestedProblem(20, 'Problème_urinaire', this.answers['Problème_urinaire']);
+    if (this.answers['Problème_urinaire'] === 'Oui') addSuggestedProblem(20, 'Problème_urinaire', this.answers['Aspect_de_l\'urine']);
 
     //21. Mycoses (Peau glabre)
-    if ( this.answers['Peau'] === 'Mycose') addSuggestedProblem(21, 'Peau', this.answers['Peau']);
+    if ( this.answers['Peau'] === 'Mycose') addSuggestedProblem(21, 'Peau', this.answers['Si_peau_mycoseuse,_préciser']);
 
 
     //22. Mycoses (Cuir chevelu)
-    if (this.answers['Cheveux'] === 'Pathologique') addSuggestedProblem(22, 'Cheveux', this.answers['Cheveux']);
+    if (this.answers['Cheveux'] === 'Pathologique') addSuggestedProblem(22, 'Cheveux', this.answers['Si_cheveux_pathologique,_préciser']);
 
     // 23. Mycoses (Orteilles)
-    if (this.answers['Orteilles'] === 'Pathologique') addSuggestedProblem(23, 'Orteilles', this.answers['Orteilles']);
+    if (this.answers['Orteilles'] === 'Pathologique') addSuggestedProblem(23, 'Orteilles', this.answers['Si_orteilles_pathologique,_préciser']);
 
     // 24. Mycoses (Ongles)
-    if (this.answers['Ongles'] === 'Pathologique') addSuggestedProblem(24, 'Ongles', this.answers['Ongles']);
+    if (this.answers['Ongles'] === 'Pathologique') addSuggestedProblem(24, 'Ongles', this.answers['Si_ongles_pathologique,_préciser']);
 
     //25. Gâle
     if(this.answers['Peau'] === 'Pathologique') addSuggestedProblem(25, 'Peau', this.answers['Peau']);
 
     // 26. Autres problèmes dermatologiques
     if (this.answers['Peau'] === 'Autres' || this.answers['Si_peau_pathologique,_préciser']) {
-      addSuggestedProblem(26, 'Peau', this.answers['Peau']);
+      addSuggestedProblem(26, 'Peau', this.answers['Si_autres_pathologie_de_la_peau,_préciser']);
     }
 
     //27. Plaies (coupures, brûlures, etc.)
-    if (this.answers['Peau'] === 'Plaie' || this.answers['Peau'] === 'Coupures' || this.answers['Peau'] === 'Brûlures') {
-      addSuggestedProblem(27, 'Peau', this.answers['Peau']);
-    }
+    if (this.answers['Peau'] === 'Plaie' ) addSuggestedProblem(27, 'Peau', this.answers['Si_plaie_à_la_peau,_préciser']);
+    if (this.answers['Peau'] === 'Coupures') addSuggestedProblem(27, 'Peau', this.answers['Si_coupure_de_la_peau,_préciser']);
+    if (this.answers['Peau'] === 'Brûlures') addSuggestedProblem(27, 'Peau', this.answers['Si_brûlure_de_la_peau,_préciser']);
+    
 
     // 28. Allergies
-    if (this.answers['allergies'] === 'Présente') addSuggestedProblem(28, 'allergies', this.answers['allergies']);
+    if (this.answers['allergies'] === 'Présente') addSuggestedProblem(28, 'allergies', this.answers['Si_allergie_présente,_préciser']);
 
     // 29. Infections respiratoires supérieures (exc. rhinite banale) / inf.
-    if ( this.answers['poumons'] === 'Pathologique') addSuggestedProblem(29, 'poumons', this.answers['poumons']);
+    if ( this.answers['Poumons'] === 'Pathologique') addSuggestedProblem(29, 'Poumons', this.answers['Si_poumons_pathologique,_préciser']);
 
     //30. Hernies
     if ((this.studentGender === 'male' && this.answers['Testicule'] === 'Hernie') || this.answers['Palpation_de_abdomen'] === 'Hernie' || this.answers['region_inguinale'] === 'Hernie') {
@@ -824,43 +829,43 @@ export class NewPage implements OnInit {
     if(this.answers['Interpretation_score_de_tanner'] === 'Pas normal') addSuggestedProblem(33, 'Interpretation_score_de_tanner', this.answers['Interpretation_score_de_tanner']);
 
     //34. Problème de motricité
-    if(this.answers['Demarche'] === 'Pathologique') addSuggestedProblem(34, 'Demarche', this.answers['Demarche']);
-    if(this.answers['Equilibre'] === 'Pathologique') addSuggestedProblem(34, 'Equilibre', this.answers['Equilibre']);
-    if(this.answers['Bassin'] === 'Pathologique') addSuggestedProblem(34, 'Bassin', this.answers['Bassin']);
-    if(this.answers['Membres_inferieurs'] === 'Pathologique') addSuggestedProblem(34, 'Membres_inferieurs', this.answers['Membres_inferieurs']);
-    if(this.answers['Membres_supérieurs'] === 'Pathologique') addSuggestedProblem(34, 'Membres_supérieurs', this.answers['Membres_supérieurs']);
+    if(this.answers['Demarche'] === 'Pathologique') addSuggestedProblem(34, 'Demarche', this.answers['Si_démarche_pathologique,_préciser']);
+    if(this.answers['Equilibre'] === 'Pathologique') addSuggestedProblem(34, 'Equilibre', this.answers['Si_equilibre_pathologique,_préciser']);
+    if(this.answers['Bassin'] === 'Pathologique') addSuggestedProblem(34, 'Bassin', this.answers['Si_bassin_pathologique,_préciser']);
+    if(this.answers['Membres_inferieurs'] === 'Pathologique') addSuggestedProblem(34, 'Membres_inferieurs', this.answers['Si_membres_inferieurs_pathologique,_préciser']);
+    if(this.answers['Membres_supérieurs'] === 'Pathologique') addSuggestedProblem(34, 'Membres_supérieurs', this.answers['Si_membres_supérieurs_pathologique,_préciser']);
 
     //35. Problème orthopédique
     if(this.answers['Colonne_vertebrale'] === 'Pathologique') addSuggestedProblem(35, 'Colonne_vertebrale', this.answers['Colonne_vertebrale']);
-    if(this.answers['Bassin'] === 'Pathologique') addSuggestedProblem(35, 'Bassin', this.answers['Bassin']);
-    if(this.answers['Membres_inferieurs'] === 'Pathologique') addSuggestedProblem(35, 'Membres_inferieurs', this.answers['Membres_inferieurs']);
-    if(this.answers['Membres_supérieurs'] === 'Pathologique') addSuggestedProblem(35, 'Membres_supérieurs', this.answers['Membres_supérieurs']);
+    if(this.answers['Bassin'] === 'Pathologique') addSuggestedProblem(35, 'Bassin', this.answers['Si_bassin_pathologique,_préciser']);
+    if(this.answers['Membres_inferieurs'] === 'Pathologique') addSuggestedProblem(35, 'Membres_inferieurs', this.answers['Si_membres_inferieurs_pathologique,_préciser']);
+    if(this.answers['Membres_supérieurs'] === 'Pathologique') addSuggestedProblem(35, 'Membres_supérieurs', this.answers['Si_membres_supérieurs_pathologique,_préciser']);
 
     //36. Problème neurologique
     if((age >= 3 && age <= 7) && this.answers['fine_motricite'] === 'Pas bonne') {
-      addSuggestedProblem(36, 'fine_motricite', this.answers['fine_motricite']);
+      addSuggestedProblem(36, 'fine_motricite', this.answers['motricité_pathologique,_préciser']);
     }
     if((age >= 3 && age <= 7) && this.answers['coordination_des_mouvemments'] === 'Pas bonne') {
-      addSuggestedProblem(36, 'coordination_des_mouvemments', this.answers['coordination_des_mouvemments']);
+      addSuggestedProblem(36, 'coordination_des_mouvemments', this.answers['Si_pas_bonne_coordination_des_mouvements,_préciser']);
     }
     if((age >= 3 && age <= 7) && this.answers['reflexe'] === 'Pas bon') {
-      addSuggestedProblem(36, 'reflexe', this.answers['reflexe']);
+      addSuggestedProblem(36, 'reflexe', this.answers['Si_pas_bon_reflexe,_préciser']);
     }
 
     //37. Problème cardiaque
-    if(this.answers['Coeur'] === 'Pathologique') addSuggestedProblem(37, 'Coeur', this.answers['Coeur']);
-    if(this.answers['Rythme_cardiaque'] === 'Rythme irrégulier') addSuggestedProblem(37, 'Rythme_cardiaque', this.answers['Rythme_cardiaque']);
-    if(this.answers['Tension_artérielle'] != 'Normal' ) addSuggestedProblem(37, 'Tension_artérielle', this.answers['Tension_artérielle']);
-    if(this.answers['Poumons'] != 'Pathologique'  ) addSuggestedProblem(37, 'Poumons', this.answers['Poumons']);
+    if(this.answers['Coeur'] === 'Pathologique') addSuggestedProblem(37, 'Coeur', this.answers['Si_coeur_pathologique,_préciser']);
+    if(this.answers['Rythme_cardiaque'] === 'Rythme irrégulier') addSuggestedProblem(37, 'Rythme_cardiaque', this.answers['Fréquence_cardiaque_(bpm)']);
+    if(this.answers['Tension_arthérielle'] != 'Normal' ) addSuggestedProblem(37, 'Tension_arthérielle', this.answers['Tension (mmHg)']);
+    if(this.answers['Poumons'] === 'Pathologique'  ) addSuggestedProblem(37, 'Poumons', this.answers['Si_poumons_pathologique,_préciser']);
 
     //38. Autres problèmes (troubles comportement/langage, dysmorphies, etc.)
-    if(this.answers['Comportement'] === 'Pathologie') addSuggestedProblem(38, 'Comportement', this.answers['Comportement']);
+    if(this.answers['Comportement'] === 'Pathologie') addSuggestedProblem(38, 'Comportement', this.answers['Si_comportenement_pathologique,_préciser']);
     if(this.answers['Language'] === 'Incohérent') addSuggestedProblem(38, 'Language', this.answers['Language']);
     if(this.answers['Dysmorphies'] === 'Oui') addSuggestedProblem(38, 'Dysmorphies', this.answers['Dysmorphies']);
 
     //39. Problèmes psycho-sociaux graves
-    if(this.answers['L\'enfant_vit_bien_à_l\'école'] === 'Non') addSuggestedProblem(39, 'L\'enfant_vit_bien_à_l\'école', this.answers['L\'enfant_vit_bien_à_l\'école']);
-    if(this.answers['L\'enfant_vit_bien_à_la_maison'] === 'Non') addSuggestedProblem(39, 'L\'enfant_vit_bien_à_la_maison', this.answers['L\'enfant_vit_bien_à_la_maison']);
+    if(this.answers['L\'enfant_vit_bien_à_l\'école'] === 'Non') addSuggestedProblem(39, 'L\'enfant ne vit bien à l\'école', this.answers['Si_enfant_ne_vit_pas_bien_à_l\'école,_pourquoi_?']);
+    if(this.answers['L\'enfant_vit_bien_à_la_maison'] === 'Non') addSuggestedProblem(39, 'L\'enfant ne vit bien à la maison', this.answers['Si_enfant_ne_vit_pas_bien_à_la_maison,_pourquoi_?']);
 
    
 
@@ -1414,9 +1419,10 @@ export class NewPage implements OnInit {
       const nbFilles = this.answers['Nombre_de_filles'] !== undefined ? parseInt(this.answers['Nombre_de_filles']) : null;
       const nbGarcons = this.answers['Nombre_de_garçons'] !== undefined ? parseInt(this.answers['Nombre_de_garçons']) : null;
       const nbEnfantsFratrie = this.answers['Nombre_enfants_fratrie'] !== undefined ? parseInt(this.answers['Nombre_enfants_fratrie']) : null;
+      const nbEnfantsDecedes = this.answers['Nombre_d\'enfants_décédés'] !== undefined ? parseInt(this.answers['Nombre_d\'enfants_décédés']) : 0;
 
       // Vérification uniquement si les deux champs ont été remplis (peuvent être 0)
-      if (nbFilles !== null && nbGarcons !== null && nbEnfantsFratrie !== null) {
+      if (nbFilles !== null && nbGarcons !== null && nbEnfantsFratrie !== null ) {
         const totalEnfantsSaisi = nbFilles + nbGarcons;
 
         if (totalEnfantsSaisi !== nbEnfantsFratrie) {

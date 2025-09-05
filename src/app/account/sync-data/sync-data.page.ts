@@ -57,8 +57,16 @@ export class SyncDataPage implements OnInit {
     this.fetUser();
   }
 
-  ionViewWillEnter() {
-    this.refreshData();
+
+  async ionViewWillEnter() {
+    this.schoolToSync=[];
+    this.classesToSync=[];
+    this.studentsToSync=[];
+    this.evaluationsToSync= [];
+    this.studentsHistoryToSync=[];
+    this.examsToSync=[];
+    this.followUpsToSync=[];
+    await this.refreshData();
   }
 
 
@@ -1270,13 +1278,7 @@ export class SyncDataPage implements OnInit {
   }
 
   async refreshData() {
-    this.schoolToSync=[];
-    this.classesToSync=[];
-    this.studentsToSync=[];
-    this.evaluationsToSync= [];
-    this.studentsHistoryToSync=[];
-    this.examsToSync=[];
-    this.followUpsToSync=[];
+    
     try {
       // Charger les écoles depuis le stockage
       try {

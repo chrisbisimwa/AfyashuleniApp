@@ -49,6 +49,13 @@ export class ShowClassePage implements OnInit {
 
   }
 
+  async ionViewWillEnter(){
+    await this.fetchUser(); 
+    await this.fetchClasse();
+    await this.fectSchoolYear();
+    this.studentCode = await this.generateStudentCode();
+  }
+
   cancel() {
     this.modal.dismiss(null, 'Annuler');
   }
@@ -105,7 +112,13 @@ export class ShowClassePage implements OnInit {
       // 6. Vider les champs du formulaire pour la prochaine fois
       this.studentName = '';
       this.studentPostName = '';
-      // ... vider les autres champs
+      this.studentSurname = '';
+      this.gender = '';
+      this.birthDate = '';
+      this.birthPlace = '';
+      this.studentCode = '';
+      this.placeInClasse = '';
+      this.studentId = 0;
 
     } catch (error) {
       console.error("Erreur lors de l'enregistrement de l'élève :", error);

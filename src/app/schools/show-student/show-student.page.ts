@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, NavController } from '@ionic/angular';
 import { Storage } from '@ionic/storage-angular';
 
@@ -23,7 +23,8 @@ export class ShowStudentPage implements OnInit {
     private navController: NavController,
     private alertController: AlertController,
     private route: ActivatedRoute,
-    private appStorage: Storage
+    private appStorage: Storage,
+    private router: Router
   ) { }
 
   async ngOnInit() {
@@ -157,7 +158,7 @@ export class ShowStudentPage implements OnInit {
               }
 
               this.appStorage.set('students', students);
-              this.navController.navigateBack('/tabs/schools/classe/' + this.student.current_class_id + '/view');
+              this.navController.navigateForward('/tabs/schools/classe/' + student.current_class_id + '/view');
             }
           }
         }
