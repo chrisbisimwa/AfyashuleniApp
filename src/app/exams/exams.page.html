@@ -38,9 +38,8 @@
             <h3>
               {{ exam.studentName }}
               <ion-badge
-                [color]="getPriorityColor(exam.priority)"
+                [color]="getPriorityColor(exam)"
                 class="priority-badge"
-                *ngIf="!exam.resolved"
               >
                 {{ exam.priority }}
               </ion-badge>

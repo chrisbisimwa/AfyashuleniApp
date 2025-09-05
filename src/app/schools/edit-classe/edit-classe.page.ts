@@ -44,40 +44,31 @@ export class EditClassePage implements OnInit {
       if (classe.created_at) {
         classe.status = 'updated';
         cls.status = 'updated';
-        cls.id = this.classeId
-        cls.name = this.name ?? "";
-        cls.nbr_fille = this.nbr_fille;
-        cls.nbr_garcon = this.nbr_garcon;
-        cls.nbr_redoublant = this.nbr_redoublant;
-        cls.nbr_redoublant_fille = this.nbr_redoublant_fille;
-        cls.school_id = this.school_id;
-        cls.schoolYear_id = this.schoolYear_id;
-        cls.created_at = this.created_at;
-        cls.updated_at = this.updated_at;
-      }else{
-        cls.id = this.classeId
-        cls.name = this.name ?? "";
-        cls.nbr_fille = this.nbr_fille;
-        cls.nbr_garcon = this.nbr_garcon;
-        cls.nbr_redoublant = this.nbr_redoublant;
-        cls.nbr_redoublant_fille = this.nbr_redoublant_fille;
-        cls.school_id = this.school_id;
-        cls.schoolYear_id = this.schoolYear_id;
-        cls.created_at = this.created_at;
-        cls.updated_at = this.updated_at;
-        
       }
+      cls.id = this.classeId
+      cls.name = this.name ?? "";
+      cls.nbr_fille = this.nbr_fille;
+      cls.nbr_garcon = this.nbr_garcon;
+      cls.nbr_redoublant = this.nbr_redoublant;
+      cls.nbr_redoublant_fille = this.nbr_redoublant_fille;
+      cls.school_id = this.school_id;
+      cls.schoolYear_id = this.schoolYear_id;
+      cls.created_at = this.created_at;
+      cls.updated_at = this.updated_at;
 
-      classes.push(cls);
-      this.appStorage.set('classes', classes);
-      this.router.navigate(['/tabs/schools/' + this.school_id + '/view'])
+      await classes.push(cls);
+      await this.appStorage.set('classes', classes);
     }
 
 
-
-
-
+    this.router.navigate(['/tabs/schools/' + this.school_id + '/view'])
   }
+
+
+
+
+
+
   async fetchClasse() {
     const result = await this.appStorage.get('classes');
     if (result) {
@@ -89,7 +80,7 @@ export class EditClassePage implements OnInit {
         this.nbr_fille = this.classe.nbr_fille;
         this.nbr_garcon = this.classe.nbr_garcon;
         this.nbr_redoublant = this.classe.nbr_redoublant;
-        this.nbr_redoublant_fille= this.classe.nbr_redoublant_fille;
+        this.nbr_redoublant_fille = this.classe.nbr_redoublant_fille;
         this.schoolYear_id = this.classe.schoolYear_id;
         this.school_id = this.classe.school_id;
         this.created_at = this.classe.created_at;

@@ -51,12 +51,11 @@ export class ShowSchoolPage implements OnInit {
     private router: Router
   ) { }
 
-  ngOnInit() {
-    this.fetchSchool();
-    this.fectSchoolYear();
-    this.fetchUser().then(() => {
-      this.fetchRoles();
-    });
+  async ngOnInit() {
+    await this.fetchSchool();
+    await this.fectSchoolYear();
+    await this.fetchUser();
+    await this.fetchRoles();
   }
 
   cancel() {
@@ -81,8 +80,8 @@ export class ShowSchoolPage implements OnInit {
 
         
 
-        classes.push({
-          id: await this.generateId(),
+        await classes.push({
+          id: await this.generateClasseId(),
           name: ev.detail.data,
           nbr_fille: this.nbr_fille,
           nbr_garcon: this.nbr_garcon,
@@ -101,10 +100,10 @@ export class ShowSchoolPage implements OnInit {
         });
 
 
-        this.appStorage.set('classes', classes).then(() => {
-          this.fetchClassesBySchool(null);
-          this.dismissLoading();
-        });
+        await this. appStorage.set('classes', classes);
+        await this.fetchClassesBySchool(null);
+        await this.dismissLoading();
+        
 
       });
 
@@ -293,11 +292,11 @@ export class ShowSchoolPage implements OnInit {
   }
 
 
-  async generateId(): Promise<number> {
+  async generateClasseId(): Promise<number> {
     // Générer un ID basé sur le timestamp + une partie aléatoire
     const timestamp = Date.now(); // Timestamp en millisecondes (unique à chaque milliseconde)
     const randomPart = Math.floor(Math.random() * 10000); // Partie aléatoire (0 à 9999)
-    this.classeId = Number(`${timestamp}${randomPart}`); // Concaténer et convertir en nombre
+    this.classeId = Number(`${timestamp}${randomPart}${this.user.id}`); // Concaténer et convertir en nombre
 
     // Vérifier si l'ID existe déjà dans le stockage
     const result = await this.appStorage.get('classes');
@@ -305,7 +304,7 @@ export class ShowSchoolPage implements OnInit {
       const classe = result.find((sch: any) => sch.id === this.classeId);
       if (classe) {
         // Si l'ID existe déjà, générer un nouvel ID
-        return await this.generateId(); // Récursion jusqu'à obtenir un ID unique
+        return await this.generateClasseId(); // Récursion jusqu'à obtenir un ID unique
       }
     }
 

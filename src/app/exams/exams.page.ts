@@ -148,17 +148,30 @@ export class ExamsPage {
     }
   }
 
-  getPriorityColor(priority: string): string {
-    switch (priority) {
-      case 'LOW':
-        return 'success'; // Vert
-      case 'MEDIUM':
-        return 'warning'; // Orange
-      case 'HIGH':
-        return 'danger'; // Rouge
-      default:
-        return 'medium'; // Gris par défaut
-    }
+  getPriorityColor(exam: any): string {
+    /*  switch (priority) {
+          case 'LOW':
+            return 'success'; // Vert
+          case 'MEDIUM':
+            return 'warning'; // Orange
+          case 'HIGH':
+            return 'danger'; // Rouge
+          default:
+            return 'medium'; // Gris par défaut
+        }*/
+       
+     let color = '';
+
+
+      if (exam && exam.created_at) {
+        color = 'success';
+      } else if (exam && !exam.created_at) {
+        color = 'medium';
+      }
+    
+
+    return color;
+      
   }
 
   async resolve(item: IonItemSliding, exam: any) {
@@ -211,24 +224,28 @@ export class ExamsPage {
   deleteExam(examId: any) {
     this.appStrorage.get('exams').then((exams) => {
       let exam = exams.filter((item: any) => item.id == examId)[0];
+      if (exam) {
+        if (exam.created_at) {
+          exams.splice(exams.indexOf(exam), 1);
 
+          exams.push({
+            id: exam.id,
+            code: exam.code,
+            student_id: exam.student_id,
+            examiner_id: exam.examiner_id,
+            date: exam.date,
+            latitude: exam.latitude,
+            longitude: exam.longitude,
+            data: exam.data,
+            status: "deleted",
+            created_at: exam.created_at,
+            updated_at: exam.updated_at
+          });
+        }else{
+          exams.splice(exams.indexOf(exam), 1);
 
-      exams.splice(exams.indexOf(exam), 1);
-
-      exams.push({
-        id: exam.id,
-        code: exam.code,
-        student_id: exam.student_id,
-        examiner_id: exam.examiner_id,
-        date: exam.date,
-        latitude: exam.latitude,
-        longitude: exam.longitude,
-        data: exam.data,
-        status: "deleted",
-        created_at: exam.created_at,
-        updated_at: exam.updated_at
-      });
-
+        }
+      }
 
       this.appStrorage.set('exams', exams).then(() => {
         this.fetchExams(null);
@@ -263,7 +280,7 @@ export class ExamsPage {
     return false;
   }
 
-  async loadExamProblems(exam: any) : Promise<any[]>{
+  async loadExamProblems(exam: any): Promise<any[]> {
     // Vérifie si 'exam' et 'exam.id' existent pour éviter les erreurs
     if (!exam || !exam.id) {
       console.error('Exam or Exam ID is undefined');

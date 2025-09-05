@@ -1179,7 +1179,7 @@ export class NewPage implements OnInit {
     // Générer un ID basé sur le timestamp + une partie aléatoire
     const timestamp = Date.now(); // Timestamp en millisecondes (unique à chaque milliseconde)
     const randomPart = Math.floor(Math.random() * 10000); // Partie aléatoire (0 à 9999)
-    let examId = Number(`${timestamp}${randomPart}`); // Concaténer et convertir en nombre
+    let examId = Number(`${timestamp}${randomPart}${this.user.id}`); // Concaténer et convertir en nombre
 
     // Vérifier si l'ID existe déjà dans le stockage
     const result = await this.appStorage.get('exams');

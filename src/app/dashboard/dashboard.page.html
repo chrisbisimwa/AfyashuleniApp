@@ -40,20 +40,33 @@
         </div>
         <div class="content_div">
           <ion-label class="name">Effectif total</ion-label>
-          <ion-label class="date">0 Resolved</ion-label>
+          <ion-label class="date">{{totalStudents}} Elèves</ion-label>
         </div>
         
         
       </div>
 
-       <!-- <div class="shopping_div">
+       <div class="shopping_div">
         <div class="color_box" [ngStyle]="{'backgroundColor' : '#d1e7eb'}">
           <img src="assets/imgs/notification.png">
         </div>
         <div class="content_div">
-          <ion-label class="date">17 Monday June</ion-label>
+          <ion-label class="name">Total redoublants</ion-label>
+          <ion-label class="date">{{totalRedoublants}} Elèves</ion-label>
         </div>
-        <ion-label class="resolved">0 Resolved</ion-label>
+        
+        
+      </div>
+
+       <div class="shopping_div">
+        <div class="color_box" [ngStyle]="{'backgroundColor' : '#d1e7eb'}">
+          <img src="assets/imgs/notification.png">
+        </div>
+        <div class="content_div">
+          <ion-label class="name">Total à examiner </ion-label>
+          <ion-label class="date">{{totalToExamine}} Elèves</ion-label>
+        </div>
+        
         
       </div>
 
@@ -62,11 +75,12 @@
           <img src="assets/imgs/notification.png">
         </div>
         <div class="content_div">
-          <ion-label class="date">17 Monday June</ion-label>
+          <ion-label class="name">Total examiné </ion-label>
+          <ion-label class="date">{{totalExaminations}} Elèves</ion-label>
         </div>
-        <ion-label class="resolved">0 Resolved</ion-label>
         
-      </div> -->
+        
+      </div>
 
     </div>
     <div>

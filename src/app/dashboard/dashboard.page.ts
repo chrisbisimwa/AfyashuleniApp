@@ -15,6 +15,10 @@ export class DashboardPage {
   lineChart: any;
   user: any = {};
   roles: String[] = [];
+  totalStudents: number = 0;
+  totalRedoublants: number = 0;
+  totalToExamine: number = 0;
+  totalExaminations: number = 0;
 
 
 
@@ -28,6 +32,9 @@ export class DashboardPage {
     await this.fetchUser();
     await this.fetchRoles();
     await this.createLineChart();
+    await this.calculateTotalStudents();
+    this.totalToExamine = await this.totalStudents-this.totalRedoublants;
+    await this.calculateTotalExaminations();
   }
 
   async fetchUser() {
@@ -137,6 +144,20 @@ export class DashboardPage {
 
   loadChartData() {
 
+  }
+
+  async calculateTotalStudents(){
+    const classes = await this.appStorage.get('classes');
+    let total=0;
+    for(let cls of classes){
+      total += cls.nbr_fille + cls.nbr_garcon;
+    }
+    this.totalStudents = total;
+  }
+
+  async calculateTotalExaminations(){
+    const exams = await this.appStorage.get('exams');
+    this.totalExaminations = exams.length;
   }
 
 }

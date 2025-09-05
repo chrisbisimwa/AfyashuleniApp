@@ -30,6 +30,10 @@ const routes: Routes = [
   {
     path: 'classe/:id/edit',
     loadChildren: () => import('./edit-classe/edit-classe.module').then( m => m.EditClassePageModule)
+  },
+  {
+    path: 'classe/student/:id/edit',
+    loadChildren: () => import('./edit-student/edit-student.module').then( m => m.EditStudentPageModule)
   }
 ];
 

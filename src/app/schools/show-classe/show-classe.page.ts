@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute,Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, IonModal, NavController } from '@ionic/angular';
 import { OverlayEventDetail } from '@ionic/core/components';
 import { Storage } from '@ionic/storage-angular';
@@ -15,6 +15,8 @@ export class ShowClassePage implements OnInit {
   classe: any = null;
   students: any = null;
   shcoolName: any = null;
+  user: any = null;
+  roles: any[] = [];
 
   name!: any;
 
@@ -40,6 +42,7 @@ export class ShowClassePage implements OnInit {
   ) { }
 
   async ngOnInit() {
+    await this.fetchUser(); 
     await this.fetchClasse();
     await this.fectSchoolYear();
     this.studentCode = await this.generateStudentCode();
@@ -54,67 +57,72 @@ export class ShowClassePage implements OnInit {
     this.modal.dismiss(this.studentName, 'Enregistrer');
   }
 
+  async fetchUser() {
+    this.user = await this.appStorage.get('user');
+    this.roles = await this.appStorage.get('roles');
+  }
+
   async onWillDismiss(event: Event) {
-  const ev = event as CustomEvent<OverlayEventDetail<string>>;
-  if (ev.detail.role !== 'Enregistrer') {
-    return; // On sort si l'utilisateur n'a pas confirmé
+    const ev = event as CustomEvent<OverlayEventDetail<string>>;
+    if (ev.detail.role !== 'Enregistrer') {
+      return; // On sort si l'utilisateur n'a pas confirmé
+    }
+
+    try {
+      // 1. Générer un nouvel ID pour l'élève
+      const newStudentId = await this.generateId();
+
+      // 2. Préparer le nouvel objet élève
+      const newStudent = {
+        id: newStudentId,
+        first_name: this.studentName,
+        last_name: this.studentPostName,
+        surname: this.studentSurname,
+        gender: this.gender,
+        date_of_birth: this.birthDate,
+        place_of_birth: this.birthPlace,
+        current_class_id: Number(this.route.snapshot.params['id']),
+        status: 'active' // C'est une bonne pratique d'ajouter un statut
+      };
+
+      // 3. Mettre à jour la liste des élèves
+      const students = await this.appStorage.get('students') || [];
+      students.push(newStudent);
+      await this.appStorage.set('students', students);
+
+      // 4. Mettre à jour l'historique de l'élève
+      const studentHistory = await this.appStorage.get('student-history') || [];
+      studentHistory.push({
+        student_id: newStudentId,
+        school_year_id: 1, // Idéalement, cet ID devrait être dynamique
+        classe_id: Number(this.route.snapshot.params['id'])
+      });
+      await this.appStorage.set('student-history', studentHistory);
+
+      // 5. Rafraîchir la liste affichée à l'écran
+      await this.fetchStudentsByClasse();
+
+      // 6. Vider les champs du formulaire pour la prochaine fois
+      this.studentName = '';
+      this.studentPostName = '';
+      // ... vider les autres champs
+
+    } catch (error) {
+      console.error("Erreur lors de l'enregistrement de l'élève :", error);
+      // Optionnel : Afficher une alerte à l'utilisateur
+    }
   }
-
-  try {
-    // 1. Générer un nouvel ID pour l'élève
-    const newStudentId = await this.generateId();
-
-    // 2. Préparer le nouvel objet élève
-    const newStudent = {
-      id: newStudentId,
-      first_name: this.studentName,
-      last_name: this.studentPostName,
-      surname: this.studentSurname,
-      gender: this.gender,
-      date_of_birth: this.birthDate,
-      place_of_birth: this.birthPlace,
-      current_class_id: Number(this.route.snapshot.params['id']),
-      status: 'active' // C'est une bonne pratique d'ajouter un statut
-    };
-
-    // 3. Mettre à jour la liste des élèves
-    const students = await this.appStorage.get('students') || [];
-    students.push(newStudent);
-    await this.appStorage.set('students', students);
-
-    // 4. Mettre à jour l'historique de l'élève
-    const studentHistory = await this.appStorage.get('student-history') || [];
-    studentHistory.push({
-      student_id: newStudentId,
-      school_year_id: 1, // Idéalement, cet ID devrait être dynamique
-      classe_id: Number(this.route.snapshot.params['id'])
-    });
-    await this.appStorage.set('student-history', studentHistory);
-
-    // 5. Rafraîchir la liste affichée à l'écran
-    await this.fetchStudentsByClasse();
-
-    // 6. Vider les champs du formulaire pour la prochaine fois
-    this.studentName = '';
-    this.studentPostName = '';
-    // ... vider les autres champs
-    
-  } catch (error) {
-    console.error("Erreur lors de l'enregistrement de l'élève :", error);
-    // Optionnel : Afficher une alerte à l'utilisateur
-  }
-}
 
   async fectSchoolYear() {
     let schoolYears = await this.appStorage.get('schoolYears');
-    if(schoolYears){
+    if (schoolYears) {
       this.schoolYears = schoolYears;
     }
 
-    
+
   }
 
-  
+
 
   async getLastSchoolYearId() {
     let schoolYears = await this.appStorage.get('schoolYears');
@@ -151,21 +159,21 @@ export class ShowClassePage implements OnInit {
     }
   }
 
-  async getSchoolName(schoolId:any) {
+  async getSchoolName(schoolId: any) {
     const result = await this.appStorage.get('schools');
     if (result) {
       const school = result.find((school: any) => school.id == schoolId);
-      
 
-      if(school){
+
+      if (school) {
         this.shcoolName = school.name;
-      }else{
+      } else {
         this.shcoolName = "Ecole non trouvée";
       }
-      
+
     }
 
-    
+
 
     return this.shcoolName;
   }
@@ -194,12 +202,12 @@ export class ShowClassePage implements OnInit {
           text: 'Delete',
           handler: async () => {
             const result = await this.appStorage.get('classes');
-            
+
             let classe = result.find((sch: any) => sch.id == item.id);
-            if(classe){
+            if (classe) {
               result.splice(result.indexOf(classe), 1);
 
-              classe.status="deleted"
+              classe.status = "deleted"
 
               result.push(classe);
 
@@ -215,13 +223,13 @@ export class ShowClassePage implements OnInit {
 
 
 
-  
+
 
   async generateId(): Promise<number> {
     // Générer un ID basé sur le timestamp + une partie aléatoire
     const timestamp = Date.now(); // Timestamp en millisecondes (unique à chaque milliseconde)
     const randomPart = Math.floor(Math.random() * 10000); // Partie aléatoire (0 à 9999)
-    this.studentId = Number(`${timestamp}${randomPart}`); // Concaténer et convertir en nombre
+    this.studentId = Number(`${timestamp}${randomPart}${this.user.id}`); // Concaténer et convertir en nombre
 
     // Vérifier si l'ID existe déjà dans le stockage
     const result = await this.appStorage.get('students');
@@ -240,8 +248,8 @@ export class ShowClassePage implements OnInit {
 
 
 
-  previousState(){
-    this.router.navigate(['/tabs/schools/'+this.classe.school_id+'/view']);
+  previousState() {
+    this.router.navigate(['/tabs/schools/' + this.classe.school_id + '/view']);
   }
 
   showStudent(item: any) {
@@ -261,13 +269,13 @@ export class ShowClassePage implements OnInit {
       let result: any[] = this.students.filter((item: any) =>
         Object.keys(item).some((k: string) => item[k] != null &&
           item[k].toString().toLowerCase()
-        .includes(query.toLowerCase()))
+            .includes(query.toLowerCase()))
       );
       this.students = result;
     }
 
   }
 
- 
+
 
 }

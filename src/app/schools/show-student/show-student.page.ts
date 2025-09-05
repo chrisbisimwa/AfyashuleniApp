@@ -13,11 +13,11 @@ export class ShowStudentPage implements OnInit {
   studenClass: any = null;
   studentSchool: any = null;
   studentExams: any = null;
-  studentExamData:any = null;
+  studentExamData: any = null;
   studentEvaluations: any = null;
   problems: { id: number, name: string }[];
-  isEvalModalOpen: boolean = false; 
-  isExamModalOpen: boolean = false; 
+  isEvalModalOpen: boolean = false;
+  isExamModalOpen: boolean = false;
 
   constructor(
     private navController: NavController,
@@ -36,7 +36,7 @@ export class ShowStudentPage implements OnInit {
       await this.fetchExams();
       await this.fetchEvaluation();
       await this.fetchExamData();
-      await this.fetchClasse(); 
+      await this.fetchClasse();
       await this.fetchSchool();
     }
 
@@ -117,7 +117,7 @@ export class ShowStudentPage implements OnInit {
   }
 
   editStudent() {
-    this.navController.navigateForward(`/edit-student/${this.student.id}`);
+    this.navController.navigateForward(`/tabs/schools/classe/student/${this.student.id}/edit`);
   }
 
   getProblemNameById(problem_id: number) {
@@ -125,7 +125,7 @@ export class ShowStudentPage implements OnInit {
       const problem = this.problems.find(p => p.id === problem_id);
 
       return problem ? problem.name : 'Unknown';
-    }else{
+    } else {
       return 'Unkown'
     }
 
@@ -133,7 +133,7 @@ export class ShowStudentPage implements OnInit {
 
   async deleteModal() {
     console.log('delete');
-    const alert =  await this.alertController.create({
+    const alert = await this.alertController.create({
       header: 'Confirmation',
       message: 'Voulez-vous vraiment supprimer cet élève?',
       buttons: [
@@ -148,11 +148,16 @@ export class ShowStudentPage implements OnInit {
             const students = await this.appStorage.get('students');
             const student = students.find((item: { id: any; }) => item.id == this.student.id);
             if (student) {
-              students.splice(students.indexOf(student), 1);
-              student.status = 'deleted';
-              students.push(student);
+              if (student.created_at) {
+                students.splice(students.indexOf(student), 1);
+                student.status = 'deleted';
+                students.push(student);
+              } else {
+                students.splice(students.indexOf(student), 1);
+              }
+
               this.appStorage.set('students', students);
-              this.navController.navigateBack('/tabs/schools/classe/'+this.student.current_class_id+'/view');
+              this.navController.navigateBack('/tabs/schools/classe/' + this.student.current_class_id + '/view');
             }
           }
         }
@@ -171,11 +176,11 @@ export class ShowStudentPage implements OnInit {
   }
 
   previousState() {
-    this.navController.navigateBack('/tabs/schools/classe/'+this.student.current_class_id+'/view');
+    this.navController.navigateBack('/tabs/schools/classe/' + this.student.current_class_id + '/view');
   }
 
-  examiner(){
-    this.navController.navigateForward('/tabs/exams/new/'+this.student.id);
+  examiner() {
+    this.navController.navigateForward('/tabs/exams/new/' + this.student.id);
   }
 
   getProblemLocalisationByID(problem_id: number) {
@@ -183,10 +188,10 @@ export class ShowStudentPage implements OnInit {
     if (!evalu) return null;
 
     //formater les localisations en string, retirer les espaces en trop et les {}
-   let locs = Object.entries(evalu.localisations).map(([key, value]) => `${this.formatLabel(key)}: ${value}`).join(', ');
+    let locs = Object.entries(evalu.localisations).map(([key, value]) => `${this.formatLabel(key)}: ${value}`).join(', ');
 
 
-   return locs;
+    return locs;
 
   }
 
